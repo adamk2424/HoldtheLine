@@ -106,9 +106,24 @@ func setup(p_target: Node, p_damage: float, p_armor_pierce: float = 0.0, p_sourc
 	if target and is_instance_valid(target):
 		_target_last_pos = target.global_position
 	
-	# Play muzzle flash at source if available
+	# Enhanced weapon-specific VFX
 	if source and is_instance_valid(source):
-		VfxPool.play_muzzle_flash(source.global_position)
+		var weapon_type := _get_weapon_type_from_source(source)
+		var direction := (global_position.direction_to(_target_last_pos) if target else Vector3.FORWARD)
+		
+		# Enhanced muzzle flash
+		ProjectileVfxEnhanced.create_weapon_muzzle_flash(source.global_position, weapon_type, direction)
+		
+		# Create projectile trail VFX
+		var travel_time := global_position.distance_to(_target_last_pos) / speed
+		ProjectileVfxEnhanced.create_projectile_vfx(
+			source.global_position,
+			_target_last_pos,
+			weapon_type,
+			travel_time,
+			homing,
+			target
+		)
 
 
 func _process(delta: float) -> void:
@@ -136,8 +151,18 @@ func _process(delta: float) -> void:
 
 
 func _hit() -> void:
-	# Play impact VFX
-	VfxPool.play_impact_spark(global_position, Vector3.UP)
+	# Enhanced impact VFX
+	var weapon_type := _get_weapon_type_from_source(source)
+	var target_type := _get_target_type(target)
+	var normal := Vector3.UP  # TODO: Calculate actual surface normal
+	
+	ProjectileVfxEnhanced.create_projectile_impact(
+		global_position,
+		weapon_type,
+		target_type,
+		normal,
+		damage
+	)
 	
 	if target and is_instance_valid(target):
 		var health: HealthComponent = null
@@ -160,3 +185,53 @@ func _hit() -> void:
 
 	GameBus.audio_play_3d.emit("projectile.impact", global_position)
 	release()
+
+
+## Get weapon type from source entity for VFX purposes
+func _get_weapon_type_from_source(p_source: Node) -> String:
+	if not is_instance_valid(p_source):
+		return "generic"
+	
+	if p_source.has_method("get_entity_id"):
+		return p_source.get_entity_id()
+	elif p_source.has_meta("weapon_type"):
+		return p_source.get_meta("weapon_type")
+	elif p_source.name.contains("autocannon"):
+		return "autocannon"
+	elif p_source.name.contains("missile"):
+		return "missile_battery"
+	elif p_source.name.contains("rail"):
+		return "rail_gun"
+	elif p_source.name.contains("plasma"):
+		return "plasma_mortar"
+	elif p_source.name.contains("tesla"):
+		return "tesla_coil"
+	elif p_source.name.contains("inferno"):
+		return "inferno_tower"
+	else:
+		return "generic"
+
+
+## Get target type for impact VFX
+func _get_target_type(p_target: Node) -> String:
+	if not is_instance_valid(p_target):
+		return "generic"
+	
+	if p_target.has_method("get_entity_type"):
+		var entity_type: String = p_target.get_entity_type()
+		if entity_type == "enemy":
+			return "organic"
+		elif entity_type == "tower":
+			return "armor"
+		elif entity_type == "building":
+			return "concrete"
+		else:
+			return entity_type
+	elif p_target.is_in_group("enemy"):
+		return "organic"
+	elif p_target.is_in_group("tower"):
+		return "armor"
+	elif p_target.is_in_group("building"):
+		return "concrete"
+	else:
+		return "generic"
