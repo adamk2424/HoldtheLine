@@ -220,6 +220,9 @@ func _complete_build() -> void:
 	# Cache muzzle flash nodes and animation components
 	_cache_muzzle_nodes()
 	_cache_animation_components()
+	
+	# Initialize enhanced turret animation system from Task 1B
+	VisualGenerator.setup_turret_animations(self)
 
 	# Remove invulnerability
 	if health_component:
@@ -418,7 +421,7 @@ func _animate_turret_to_target(target: Node) -> void:
 	var target_pos: Vector3 = target.global_position
 	
 	# Use enhanced turret tracking from Task 1B
-	VisualGenerator.animate_turret_advanced_tracking(visual_node, target_pos, 120.0)
+	VisualGenerator.animate_turret_tracking(self, target_pos)
 	
 	# Legacy fallback for compatibility
 	var turret_pos: Vector3 = global_position
@@ -831,11 +834,15 @@ func _create_electrical_arc(end_position: Vector3) -> void:
 
 func _process_idle_animations(delta: float) -> void:
 	## Handles idle scanning and ambient animations when not in combat
-	## Based on design: "Idle animation: turret slowly scans left-right searching for targets"
+	## Enhanced with Task 1B system for realistic movement patterns
 	
 	if not supports_rotation or not turret_body_node:
 		return
 	
+	# Use enhanced idle scanning from Task 1B system
+	VisualGenerator.animate_turret_enhanced_idle_scan(self, 60.0, 25.0)
+	
+	# Legacy fallback for fine-tuned control
 	_idle_scan_timer += delta
 	
 	# Enhanced scanning behavior - realistic search pattern
@@ -964,6 +971,9 @@ func _on_attack_fired(target: Node) -> void:
 	## Called when tower fires at target - triggers muzzle flash and animations
 	_trigger_muzzle_flash(target)
 	
+	# Enhanced firing animations using Task 1B system
+	VisualGenerator.animate_turret_firing_sequence(self, entity_id)
+	
 	# Tower-specific animations based on design descriptions
 	match entity_id:
 		"autocannon":
@@ -1035,3 +1045,92 @@ func _drain_energy(amount: float) -> void:
 	## Drain energy from game state (used by overclocker item)
 	if is_built and not is_building and GameState.energy > amount:
 		GameState.energy -= amount
+
+
+func _trigger_tesla_discharge_effects() -> void:
+	## Tesla coil electrical discharge animation
+	if not visual_node:
+		return
+	
+	# Create electrical arc effects
+	for i in range(6):
+		var delay := i * 0.08
+		get_tree().create_timer(delay).timeout.connect(
+			func(): _create_tesla_arc_at_top(visual_node)
+		)
+
+
+func _trigger_inferno_beam_effects(target: Node) -> void:
+	## Inferno tower continuous beam animation
+	if not visual_node or not target:
+		return
+	
+	# Create flame stream toward target
+	var beam_duration := 1.0
+	for i in range(8):
+		var delay := i * 0.05
+		get_tree().create_timer(delay).timeout.connect(
+			func(): _create_flame_beam_segment(visual_node, target.global_position, i)
+		)
+
+
+func _create_tesla_arc_at_top(parent: Node3D) -> void:
+	## Creates electrical arc effect at tesla coil top
+	var arc := MeshInstance3D.new()
+	arc.name = "ElectricArc"
+	
+	var arc_mesh := CylinderMesh.new()
+	arc_mesh.top_radius = 0.015
+	arc_mesh.bottom_radius = 0.015
+	arc_mesh.height = randf_range(0.4, 0.8)
+	
+	var arc_mat := StandardMaterial3D.new()
+	arc_mat.albedo_color = Color(0.5, 0.8, 1.0)
+	arc_mat.emission_enabled = true
+	arc_mat.emission = Color(0.7, 0.9, 1.0)
+	arc_mat.emission_energy_multiplier = 6.0
+	arc_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	
+	arc_mesh.material = arc_mat
+	arc.mesh = arc_mesh
+	arc.position = Vector3(randf_range(-0.3, 0.3), 2.0, randf_range(-0.3, 0.3))
+	
+	parent.add_child(arc)
+	
+	# Quick electrical discharge
+	var arc_tween := create_tween()
+	arc_tween.tween_property(arc, "modulate:a", 0.0, 0.15)
+	arc_tween.tween_callback(arc.queue_free)
+
+
+func _create_flame_beam_segment(parent: Node3D, target_pos: Vector3, segment: int) -> void:
+	## Creates flame beam segment for inferno tower
+	var flame := MeshInstance3D.new()
+	flame.name = "FlameSegment"
+	
+	var flame_mesh := SphereMesh.new()
+	flame_mesh.radius = 0.06 * (1.0 - segment * 0.08)  # Smaller as it extends
+	
+	var flame_mat := StandardMaterial3D.new()
+	flame_mat.albedo_color = Color(1.0, 0.5, 0.1, 0.8)
+	flame_mat.emission_enabled = true
+	flame_mat.emission = Color(1.0, 0.4, 0.1)
+	flame_mat.emission_energy_multiplier = 4.0 - segment * 0.3
+	flame_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	flame_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	
+	flame_mesh.material = flame_mat
+	flame.mesh = flame_mesh
+	
+	var start_pos := Vector3(0, 1.3, 0.5)  # Inferno nozzle position
+	var direction := (target_pos - parent.global_position).normalized()
+	flame.position = start_pos + direction * segment * 0.4
+	
+	parent.add_child(flame)
+	
+	# Flame flickers and dissipates
+	var flame_tween := create_tween()
+	flame_tween.set_parallel(true)
+	flame_tween.tween_property(flame, "scale", flame.scale * 1.5, 0.3)
+	flame_tween.tween_property(flame, "modulate:a", 0.0, 0.3)
+	flame_tween.tween_callback(flame.queue_free)
