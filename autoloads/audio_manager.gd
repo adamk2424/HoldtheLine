@@ -7,13 +7,6 @@ const MAX_CONCURRENT_SFX_2D: int = 8
 const MAX_CONCURRENT_SFX_3D: int = 32
 const MAX_VOICES_PER_CUE: int = 3
 
-# 3D attenuation settings (shared across all world SFX players)
-const ATTEN_MODEL := AudioStreamPlayer3D.ATTENUATION_INVERSE_SQUARE_DISTANCE
-const ATTEN_UNIT_SIZE: float = 15.0
-const ATTEN_MAX_DISTANCE: float = 120.0
-const ATTEN_FILTER_CUTOFF_HZ: float = 10000.0
-const ATTEN_FILTER_DB: float = -18.0
-const ATTEN_PANNING_STRENGTH: float = 0.8
 
 const MUSIC_TRACKS: Array[String] = [
 	"res://audio/music/Starcraft Protoss Theme 1.mp3",
@@ -57,6 +50,8 @@ var _audio_cache: Dictionary = {}
 var _current_track_index: int = 0
 var _music_active: bool = false
 var _sfx_assignments: Dictionary = {}
+var _attenuation_presets: Dictionary = {}
+var _entity_attenuation: Dictionary = {}  # entity_id -> preset_name
 
 # Voice limiting: cue_key -> Array of AudioStreamPlayer3D currently playing that cue
 var _active_voices: Dictionary = {}
@@ -68,6 +63,8 @@ var _sfx_3d_anchor: Node3D = null
 func _ready() -> void:
 	_setup_audio_buses()
 	_load_sfx_assignments()
+	_load_attenuation_presets()
+	_load_entity_attenuation()
 
 	# Create audio player pools
 	_music_player = AudioStreamPlayer.new()
@@ -109,13 +106,15 @@ func _ready() -> void:
 	get_tree().node_added.connect(_on_node_added_ui)
 
 
-func _configure_3d_player(player: AudioStreamPlayer3D) -> void:
-	player.attenuation_model = ATTEN_MODEL
-	player.unit_size = ATTEN_UNIT_SIZE
-	player.max_distance = ATTEN_MAX_DISTANCE
-	player.attenuation_filter_cutoff_hz = ATTEN_FILTER_CUTOFF_HZ
-	player.attenuation_filter_db = ATTEN_FILTER_DB
-	player.panning_strength = ATTEN_PANNING_STRENGTH
+func _configure_3d_player(player: AudioStreamPlayer3D, preset: Dictionary = {}) -> void:
+	if preset.is_empty() and _attenuation_presets.has("default"):
+		preset = _attenuation_presets["default"]
+	player.attenuation_model = _atten_model_from_string(preset.get("model", "inverse_square"))
+	player.unit_size = preset.get("unit_size", 15.0)
+	player.max_distance = preset.get("max_distance", 120.0)
+	player.attenuation_filter_cutoff_hz = preset.get("filter_cutoff_hz", 10000.0)
+	player.attenuation_filter_db = preset.get("filter_db", -18.0)
+	player.panning_strength = preset.get("panning_strength", 0.8)
 	player.max_polyphony = 1
 
 
@@ -213,6 +212,57 @@ func _load_sfx_assignments() -> void:
 		print("[AudioManager] Loaded SFX assignments for %d entities" % _sfx_assignments.size())
 
 
+func _load_attenuation_presets() -> void:
+	var path := "res://data/attenuation_presets.json"
+	if not FileAccess.file_exists(path):
+		return
+	var file := FileAccess.open(path, FileAccess.READ)
+	if not file:
+		return
+	var json := JSON.new()
+	if json.parse(file.get_as_text()) == OK:
+		_attenuation_presets = json.data
+		print("[AudioManager] Loaded %d attenuation presets" % _attenuation_presets.size())
+
+
+func _load_entity_attenuation() -> void:
+	var path := "res://data/entity_attenuation.json"
+	if not FileAccess.file_exists(path):
+		return
+	var file := FileAccess.open(path, FileAccess.READ)
+	if not file:
+		return
+	var json := JSON.new()
+	if json.parse(file.get_as_text()) == OK:
+		_entity_attenuation = json.data
+		print("[AudioManager] Loaded attenuation assignments for %d entities" % _entity_attenuation.size())
+
+
+func _get_attenuation_for_entity(entity_id: String) -> Dictionary:
+	var preset_name: String = _entity_attenuation.get(entity_id, "default")
+	if _attenuation_presets.has(preset_name):
+		return _attenuation_presets[preset_name]
+	if _attenuation_presets.has("default"):
+		return _attenuation_presets["default"]
+	return {
+		"model": "inverse_square",
+		"unit_size": 15.0,
+		"max_distance": 120.0,
+		"filter_cutoff_hz": 10000.0,
+		"filter_db": -18.0,
+		"panning_strength": 0.8,
+	}
+
+
+static func _atten_model_from_string(model_name: String) -> AudioStreamPlayer3D.AttenuationModel:
+	match model_name:
+		"inverse_distance": return AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
+		"inverse_square": return AudioStreamPlayer3D.ATTENUATION_INVERSE_SQUARE_DISTANCE
+		"logarithmic": return AudioStreamPlayer3D.ATTENUATION_LOGARITHMIC
+		"disabled": return AudioStreamPlayer3D.ATTENUATION_DISABLED
+	return AudioStreamPlayer3D.ATTENUATION_INVERSE_SQUARE_DISTANCE
+
+
 ## Play a sound cue from the SFX assignment system directly (non-positional).
 func play_entity_sfx(entity_id: String, cue: String) -> bool:
 	if not _sfx_assignments.has(entity_id):
@@ -294,7 +344,7 @@ func _play_cue_data_2d(cue_data: Dictionary) -> bool:
 	return true
 
 
-func _play_cue_data_3d(cue_data: Dictionary, world_pos: Vector3, cue_key: String) -> bool:
+func _play_cue_data_3d(cue_data: Dictionary, world_pos: Vector3, cue_key: String, entity_id: String = "") -> bool:
 	var stream := _resolve_cue_stream(cue_data)
 	if not stream:
 		return false
@@ -304,6 +354,9 @@ func _play_cue_data_3d(cue_data: Dictionary, world_pos: Vector3, cue_key: String
 	if not player:
 		return false
 
+	# Apply entity-specific attenuation preset
+	if not entity_id.is_empty():
+		_configure_3d_player(player, _get_attenuation_for_entity(entity_id))
 	player.stream = stream
 	player.global_position = world_pos
 	_apply_cue_params_3d(player, cue_data)
@@ -385,12 +438,12 @@ func _try_sfx_assignment_3d(hook_id: String, world_pos: Vector3) -> bool:
 	var cue_key: String = entity_id + "." + action
 
 	if entity_cues.has(action) and _cue_has_files(entity_cues[action]):
-		return _play_cue_data_3d(entity_cues[action], world_pos, cue_key)
+		return _play_cue_data_3d(entity_cues[action], world_pos, cue_key, entity_id)
 
 	var cue: String = ACTION_TO_CUE.get(action, "")
 	if not cue.is_empty() and entity_cues.has(cue) and _cue_has_files(entity_cues[cue]):
 		cue_key = entity_id + "." + cue
-		return _play_cue_data_3d(entity_cues[cue], world_pos, cue_key)
+		return _play_cue_data_3d(entity_cues[cue], world_pos, cue_key, entity_id)
 
 	return false
 

@@ -1,0 +1,10 @@
+{
+	"default": {
+		"model": "inverse_square",
+		"unit_size": 15.0,
+		"max_distance": 120.0,
+		"filter_cutoff_hz": 10000.0,
+		"filter_db": -18.0,
+		"panning_strength": 0.8
+	}
+}
