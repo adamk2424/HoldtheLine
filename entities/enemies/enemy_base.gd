@@ -51,6 +51,22 @@ func initialize_enemy(enemy_id: String, p_data: Dictionary, difficulty_mult: Dic
 
 	# Initialize via EntityBase (registers with EntityRegistry, creates visual)
 	initialize(enemy_id, "enemy", enemy_data)
+	
+	# Apply enhanced visuals if visual node exists
+	if visual_node:
+		var enhanced_visual := EnemyVisualEnhanced.create_enhanced_enemy_visual(
+			enemy_id, 
+			enemy_data, 
+			Color.html(enemy_data.get("mesh_color", "#FFFFFF"))
+		)
+		if enhanced_visual:
+			# Replace the basic visual with enhanced version
+			visual_node.queue_free()
+			visual_node = enhanced_visual
+			add_child(enhanced_visual)
+			
+			# Set up animations
+			EnemyVisualEnhanced.setup_enemy_animations(enhanced_visual, enemy_id, enemy_data)
 
 	# Configure combat target type based on role
 	_configure_target_type()
