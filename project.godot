@@ -21,6 +21,7 @@ GameBus="*res://autoloads/game_bus.gd"
 GameData="*res://autoloads/game_data.gd"
 GameState="*res://autoloads/game_state.gd"
 AudioManager="*res://autoloads/audio_manager.gd"
+AudioDebugOverlay="*res://autoloads/audio_debug_overlay.gd"
 EntityRegistry="*res://autoloads/entity_registry.gd"
 MetaProgress="*res://autoloads/meta_progress.gd"
 

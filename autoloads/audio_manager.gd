@@ -1157,3 +1157,23 @@ func _play_ui_hover() -> void:
 
 func _play_ui_click() -> void:
 	play("ui.button_click")
+
+
+# --- Debug Overlay Accessors ---
+
+
+## Returns array of { player: AudioStreamPlayer3D, file: String } for active 3D sounds.
+func get_active_3d_emitters() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for player in _sfx_players_3d:
+		if player.playing:
+			var file_name := ""
+			if player.stream:
+				file_name = player.stream.resource_path.get_file() if player.stream.resource_path else "unknown"
+			result.append({"player": player, "file": file_name})
+	return result
+
+
+## Returns the attenuation preset for an entity (for debug radius visualization).
+func get_entity_preset(entity_id: String) -> Dictionary:
+	return _get_attenuation_for_entity(entity_id)
