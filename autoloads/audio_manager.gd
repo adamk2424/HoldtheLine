@@ -912,7 +912,30 @@ func _ws_build_state() -> Dictionary:
 		"wav_files": _wav_file_list,
 		"soloed": _soloed.keys(),
 		"muted": _muted.keys(),
+		"categories": _ws_build_entity_categories(),
 	}
+
+
+func _ws_build_entity_categories() -> Array:
+	var categories: Array = []
+	categories.append({"label": "CENTRAL TOWER", "entities": _wrap_ids(["central_tower"], "central_tower")})
+	categories.append({"label": "TOWERS - Offensive", "entities": _wrap_ids(GameData.get_all_towers_offensive(), "tower")})
+	categories.append({"label": "TOWERS - Resource", "entities": _wrap_ids(GameData.get_all_towers_resource(), "tower")})
+	categories.append({"label": "TOWERS - Support", "entities": _wrap_ids(GameData.get_all_towers_support(), "tower")})
+	categories.append({"label": "UNITS - Drone", "entities": _wrap_ids(GameData.get_all_units_drone(), "unit")})
+	categories.append({"label": "UNITS - Mech", "entities": _wrap_ids(GameData.get_all_units_mech(), "unit")})
+	categories.append({"label": "UNITS - Vehicle", "entities": _wrap_ids(GameData.get_all_units_war(), "unit")})
+	categories.append({"label": "ENEMIES", "entities": _wrap_ids(GameData.get_all_enemies(), "enemy")})
+	categories.append({"label": "PRODUCTION", "entities": _wrap_ids(GameData.get_all_production_buildings(), "production")})
+	categories.append({"label": "BARRIERS", "entities": _wrap_ids(GameData.get_all_barriers(), "barrier")})
+	return categories.filter(func(c): return not c["entities"].is_empty())
+
+
+func _wrap_ids(ids, type: String) -> Array:
+	var result: Array = []
+	for id in ids:
+		result.append({"id": id, "type": type})
+	return result
 
 
 func _ws_handle_message(ws: WebSocketPeer, text: String) -> void:

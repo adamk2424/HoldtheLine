@@ -1027,62 +1027,138 @@ function renderEntityTree() {
   const filter = document.getElementById('entity-filter').value.toLowerCase().trim();
   container.innerHTML = '';
 
-  // Group entities by category
-  const groups = {};
-  const entityIds = Object.keys(state.entities).sort();
+  if (state.categories && Array.isArray(state.categories) && state.categories.length > 0) {
+    // Use server-provided category data for proper grouping
+    state.categories.forEach(cat => {
+      const label = cat.label;
+      const entities = cat.entities
+        .map(e => e.id)
+        .filter(id => id in state.entities)
+        .filter(id => !filter || id.toLowerCase().includes(filter));
 
-  entityIds.forEach(id => {
-    if (filter && !id.toLowerCase().includes(filter)) return;
-    let cat;
-    if (state.categories && state.categories[id]) {
-      cat = state.categories[id];
-    } else {
-      cat = inferCategory(id, state.entities[id]);
-    }
-    if (!groups[cat]) groups[cat] = [];
-    groups[cat].push(id);
-  });
+      if (entities.length === 0) return;
 
-  const categoryOrder = ['Towers', 'Enemies', 'Units', 'Other'];
-  const sortedCats = Object.keys(groups).sort((a, b) => {
-    const ai = categoryOrder.indexOf(a);
-    const bi = categoryOrder.indexOf(b);
-    if (ai >= 0 && bi >= 0) return ai - bi;
-    if (ai >= 0) return -1;
-    if (bi >= 0) return 1;
-    return a.localeCompare(b);
-  });
+      const header = document.createElement('div');
+      header.className = 'category-header';
+      header.textContent = '\u25BE ' + label;
+      header.dataset.category = label;
+      let collapsed = false;
 
-  sortedCats.forEach(cat => {
-    const header = document.createElement('div');
-    header.className = 'category-header';
-    header.textContent = '\u25BE ' + cat.toUpperCase();
-    header.dataset.category = cat;
-    let collapsed = false;
-
-    header.addEventListener('click', () => {
-      collapsed = !collapsed;
-      header.textContent = (collapsed ? '\u25B8 ' : '\u25BE ') + cat.toUpperCase();
-      const items = container.querySelectorAll(`.entity-item[data-category="${cat}"]`);
-      items.forEach(it => it.style.display = collapsed ? 'none' : '');
-    });
-
-    container.appendChild(header);
-
-    groups[cat].forEach(id => {
-      const item = document.createElement('div');
-      item.className = 'entity-item' + (id === selectedEntity ? ' selected' : '');
-      item.textContent = formatEntityName(id);
-      item.dataset.entity = id;
-      item.dataset.category = cat;
-      item.addEventListener('click', () => {
-        selectedEntity = id;
-        renderEntityTree();
-        renderCueEditor();
+      header.addEventListener('click', () => {
+        collapsed = !collapsed;
+        header.textContent = (collapsed ? '\u25B8 ' : '\u25BE ') + label;
+        const items = container.querySelectorAll(`.entity-item[data-category="${CSS.escape(label)}"]`);
+        items.forEach(it => it.style.display = collapsed ? 'none' : '');
       });
-      container.appendChild(item);
+
+      container.appendChild(header);
+
+      entities.forEach(id => {
+        const item = document.createElement('div');
+        item.className = 'entity-item' + (id === selectedEntity ? ' selected' : '');
+        item.textContent = formatEntityName(id);
+        item.dataset.entity = id;
+        item.dataset.category = label;
+        item.addEventListener('click', () => {
+          selectedEntity = id;
+          renderEntityTree();
+          renderCueEditor();
+        });
+        container.appendChild(item);
+      });
     });
-  });
+
+    // Show any entities not covered by categories under "OTHER"
+    const categorizedIds = new Set();
+    state.categories.forEach(cat => cat.entities.forEach(e => categorizedIds.add(e.id)));
+    const uncategorized = Object.keys(state.entities)
+      .filter(id => !categorizedIds.has(id))
+      .filter(id => !filter || id.toLowerCase().includes(filter))
+      .sort();
+
+    if (uncategorized.length > 0) {
+      const header = document.createElement('div');
+      header.className = 'category-header';
+      header.textContent = '\u25BE OTHER';
+      header.dataset.category = 'OTHER';
+      let collapsed = false;
+
+      header.addEventListener('click', () => {
+        collapsed = !collapsed;
+        header.textContent = (collapsed ? '\u25B8 ' : '\u25BE ') + 'OTHER';
+        const items = container.querySelectorAll('.entity-item[data-category="OTHER"]');
+        items.forEach(it => it.style.display = collapsed ? 'none' : '');
+      });
+
+      container.appendChild(header);
+
+      uncategorized.forEach(id => {
+        const item = document.createElement('div');
+        item.className = 'entity-item' + (id === selectedEntity ? ' selected' : '');
+        item.textContent = formatEntityName(id);
+        item.dataset.entity = id;
+        item.dataset.category = 'OTHER';
+        item.addEventListener('click', () => {
+          selectedEntity = id;
+          renderEntityTree();
+          renderCueEditor();
+        });
+        container.appendChild(item);
+      });
+    }
+  } else {
+    // Fallback: infer categories from cue names (no server category data)
+    const groups = {};
+    const entityIds = Object.keys(state.entities).sort();
+
+    entityIds.forEach(id => {
+      if (filter && !id.toLowerCase().includes(filter)) return;
+      const cat = inferCategory(id, state.entities[id]);
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(id);
+    });
+
+    const categoryOrder = ['Towers', 'Enemies', 'Units', 'Other'];
+    const sortedCats = Object.keys(groups).sort((a, b) => {
+      const ai = categoryOrder.indexOf(a);
+      const bi = categoryOrder.indexOf(b);
+      if (ai >= 0 && bi >= 0) return ai - bi;
+      if (ai >= 0) return -1;
+      if (bi >= 0) return 1;
+      return a.localeCompare(b);
+    });
+
+    sortedCats.forEach(cat => {
+      const header = document.createElement('div');
+      header.className = 'category-header';
+      header.textContent = '\u25BE ' + cat.toUpperCase();
+      header.dataset.category = cat;
+      let collapsed = false;
+
+      header.addEventListener('click', () => {
+        collapsed = !collapsed;
+        header.textContent = (collapsed ? '\u25B8 ' : '\u25BE ') + cat.toUpperCase();
+        const items = container.querySelectorAll(`.entity-item[data-category="${cat}"]`);
+        items.forEach(it => it.style.display = collapsed ? 'none' : '');
+      });
+
+      container.appendChild(header);
+
+      groups[cat].forEach(id => {
+        const item = document.createElement('div');
+        item.className = 'entity-item' + (id === selectedEntity ? ' selected' : '');
+        item.textContent = formatEntityName(id);
+        item.dataset.entity = id;
+        item.dataset.category = cat;
+        item.addEventListener('click', () => {
+          selectedEntity = id;
+          renderEntityTree();
+          renderCueEditor();
+        });
+        container.appendChild(item);
+      });
+    });
+  }
 }
 
 document.getElementById('entity-filter').addEventListener('input', () => {
