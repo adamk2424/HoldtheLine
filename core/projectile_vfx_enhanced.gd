@@ -93,36 +93,11 @@ static func create_projectile_impact(
 	projectile_type: String,
 	target_type: String = "generic",
 	normal: Vector3 = Vector3.UP,
-	damage: float = 10.0
+	damage: float = 10.0,
+	target_entity: Node = null
 ) -> void:
-	var intensity := clampf(damage / 50.0, 0.3, 2.0)
-	
-	match projectile_type:
-		"autocannon":
-			VfxPool.play_impact_spark(pos, normal, Color(1.0, 0.7, 0.3), intensity)
-			if target_type == "armor":
-				AmbientVfx.create_sparks_shower(pos, 1.5, intensity * 0.5)
-		"missile":
-			AmbientVfx.create_area_damage_effect(pos, intensity * 2.0, "explosive")
-		"railgun":
-			VfxPool.play_beam_hit(pos, Color(0.8, 0.9, 1.0), intensity * 1.5)
-			AmbientVfx.create_energy_disturbance(pos, 3.0, intensity)
-		"plasma":
-			VfxPool.play_explosion(pos, intensity, Color(0.8, 0.2, 0.9))
-			AmbientVfx.create_heat_shimmer(pos, 8.0, intensity * 0.8)
-		"tesla":
-			VfxPool.play_beam_hit(pos, Color(0.5, 0.9, 1.0), intensity)
-			AmbientVfx.create_electric_arcs(pos, 2.0, intensity)
-		"flame":
-			VfxPool.play_fire_burst(pos, intensity, intensity)
-			AmbientVfx.create_fire_embers(pos, 6.0, intensity * 0.7)
-		"acid":
-			VfxPool.play_impact_spark(pos, normal, Color(0.6, 0.8, 0.2), intensity)
-			AmbientVfx.create_corruption_tendrils(pos, 5.0, intensity * 0.3)
-		"spine":
-			VfxPool.play_impact_spark(pos, normal, Color(0.9, 0.7, 0.4), intensity * 0.7)
-		_:
-			VfxPool.play_impact_spark(pos, normal, Color.WHITE, intensity)
+	# Use enhanced impact effects system
+	ImpactEffectsEnhanced.create_weapon_impact(pos, normal, damage, projectile_type, target_entity)
 
 # =============================================================================
 # Internal VFX Creation Functions

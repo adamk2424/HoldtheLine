@@ -161,7 +161,8 @@ func _hit() -> void:
 		weapon_type,
 		target_type,
 		normal,
-		damage
+		damage,
+		target
 	)
 	
 	if target and is_instance_valid(target):
