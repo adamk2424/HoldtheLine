@@ -353,9 +353,18 @@ func _cache_muzzle_nodes() -> void:
 
 
 func _trigger_muzzle_flash(_target: Node) -> void:
+	## Enhanced muzzle flash using Task 1B improvements
 	if _muzzle_nodes.is_empty() or _muzzle_flash_active:
 		return
 	_muzzle_flash_active = true
+	
+	# Use enhanced muzzle flash animations based on weapon type
+	VisualGenerator.animate_turret_advanced_muzzle_flash(visual_node, entity_id)
+	
+	# Enhanced recoil animations
+	VisualGenerator.animate_turret_enhanced_recoil(visual_node, 0.12)
+	
+	# Legacy muzzle flash for compatibility
 	for node: MeshInstance3D in _muzzle_nodes:
 		if not is_instance_valid(node):
 			continue
@@ -402,14 +411,17 @@ func _cache_animation_components() -> void:
 
 
 func _animate_turret_to_target(target: Node) -> void:
-	## Animates turret rotation and elevation to track target
+	## Enhanced turret targeting animation using Task 1B improvements
 	if not target or not supports_rotation:
 		return
 	
 	var target_pos: Vector3 = target.global_position
-	var turret_pos: Vector3 = global_position
 	
-	# Calculate horizontal rotation (Y-axis)
+	# Use enhanced turret tracking from Task 1B
+	VisualGenerator.animate_turret_advanced_tracking(visual_node, target_pos, 120.0)
+	
+	# Legacy fallback for compatibility
+	var turret_pos: Vector3 = global_position
 	var direction: Vector3 = target_pos - turret_pos
 	direction.y = 0  # Remove vertical component for rotation
 	direction = direction.normalized()
@@ -425,14 +437,14 @@ func _animate_turret_to_target(target: Node) -> void:
 		_target_elevation = rad_to_deg(elevation_rad)
 		_target_elevation = clamp(_target_elevation, -10.0, 45.0)  # Limit elevation range
 	
-	# Smooth rotation with tween
+	# Smooth rotation with tween (legacy support)
 	if turret_body_node:
 		if _rotation_tween:
 			_rotation_tween.kill()
 		_rotation_tween = create_tween()
 		_rotation_tween.tween_method(_set_turret_rotation, _current_rotation, _target_rotation, 0.2)
 	
-	# Smooth elevation with tween
+	# Smooth elevation with tween (legacy support)
 	if barrel_assembly_node and supports_elevation:
 		if _elevation_tween:
 			_elevation_tween.kill()
