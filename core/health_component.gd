@@ -38,6 +38,9 @@ func initialize(data: Dictionary) -> void:
 	regen_interval = float(data.get("regen_interval", 5.0))
 	is_dead = false
 	
+	# Apply item modifiers for structures
+	_apply_item_modifiers()
+	
 	# Apply auto-repair from items
 	if is_instance_valid(ItemSystem):
 		auto_repair_rate = ItemSystem.get_structure_modifiers().get("auto_repair", 0.0)
@@ -133,3 +136,21 @@ func _die(killer: Node = null) -> void:
 	died.emit(killer)
 	if entity:
 		entity.die(killer)
+
+
+func _apply_item_modifiers() -> void:
+	if not ItemSystem:
+		return
+	
+	# Check if this is a building/structure 
+	if entity and (entity.is_in_group("tower") or entity.is_in_group("barrier")):
+		var structure_mods := ItemSystem.get_structure_modifiers()
+		
+		# Apply health multiplier
+		var health_mult: float = structure_mods.get("health_multiplier", 1.0)
+		if health_mult != 1.0:
+			max_hp *= health_mult
+			current_hp = max_hp  # Start at full health with new max
+			
+		# Apply auto-repair rate
+		auto_repair_rate = structure_mods.get("auto_repair", 0.0)

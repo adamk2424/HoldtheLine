@@ -19,6 +19,8 @@ var _attack_timer: float = 0.0
 var is_active: bool = true
 var damage_multiplier: float = 1.0
 var range_multiplier: float = 1.0
+var accuracy_multiplier: float = 1.0
+var attack_speed_multiplier: float = 1.0
 
 # Retarget throttle: avoid scanning every frame when no target is found.
 var _retarget_cooldown: float = 0.0
@@ -44,6 +46,9 @@ func initialize(data: Dictionary) -> void:
 	attack_range = float(data.get("attack_range", 10.0))
 	attack_type = data.get("attack_type", "projectile")
 	can_target_air = data.get("can_target_air", false)
+
+	# Apply item system modifiers
+	_apply_item_modifiers()
 
 	# Stagger retarget timing so entities don't all search on the same frame
 	_retarget_cooldown = randf() * RETARGET_INTERVAL
@@ -314,3 +319,28 @@ func _create_chain_lightning_vfx(from_pos: Vector3, to_pos: Vector3) -> void:
 	# This would create a lightning bolt effect between positions
 	# For now, just emit audio
 	GameBus.audio_play_3d.emit("weapons.chain_lightning", from_pos)
+
+
+func _apply_item_modifiers() -> void:
+	if not ItemSystem:
+		return
+		
+	var tower_mods := ItemSystem.get_tower_modifiers()
+	
+	# Apply multipliers
+	range_multiplier = tower_mods.get("range_multiplier", 1.0)
+	accuracy_multiplier = tower_mods.get("accuracy_multiplier", 1.0) 
+	attack_speed_multiplier = tower_mods.get("attack_speed_multiplier", 1.0)
+	
+	# Apply additive bonuses
+	armor_pierce += tower_mods.get("armor_pierce", 0.0)
+	
+	# Apply tower-specific abilities
+	var chain_chance: float = tower_mods.get("chain_lightning_chance", 0.0)
+	if chain_chance > 0.0:
+		chain_count = max(chain_count, tower_mods.get("chain_lightning_bounces", 0))
+	
+	# Modify base stats with multipliers
+	attack_range *= range_multiplier
+	if attack_speed_multiplier != 1.0:
+		attack_rate /= attack_speed_multiplier  # Lower rate = faster attacks

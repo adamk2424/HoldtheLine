@@ -81,6 +81,9 @@ func _parse_resource_type() -> void:
 
 
 func _on_build_completed() -> void:
+	# Apply item modifiers to resource generation
+	_apply_item_modifiers()
+
 	# Leach Tower: listen for corpse spawns
 	if is_leach_tower:
 		if not GameBus.corpse_spawned.is_connected(_on_corpse_spawned):
@@ -237,3 +240,22 @@ func apply_upgrade_modifications(modifications: Dictionary) -> void:
 	_parse_resource_type()
 	if is_built:
 		_on_build_completed()
+
+
+func _apply_item_modifiers() -> void:
+	if not ItemSystem:
+		return
+		
+	var resource_mods := ItemSystem.get_resource_multipliers()
+	
+	# Apply energy generation multipliers
+	if is_solar_array or is_thermal_siphon:
+		var multiplier: float = resource_mods.get("energy_rate_multiplier", 1.0)
+		_energy_per_sec *= multiplier
+		_drain_per_enemy_per_sec *= multiplier
+	
+	# Apply material generation multipliers  
+	if is_recycler or is_leach_tower:
+		var multiplier: float = resource_mods.get("material_rate_multiplier", 1.0)
+		_materials_per_sec *= multiplier
+		_materials_per_hp *= multiplier

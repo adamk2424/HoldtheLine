@@ -207,6 +207,17 @@ func reset_state() -> void:
 
 func _on_game_started() -> void:
 	is_game_active = true
+	
+	# Apply starting resource bonuses from items
+	if ItemSystem:
+		var resource_mods := ItemSystem.get_resource_multipliers()
+		energy += resource_mods.get("energy_bonus", 0.0)
+		materials += resource_mods.get("materials_bonus", 0.0)
+		population_max += int(resource_mods.get("population_cap_bonus", 0.0))
+		
+		# Apply income multipliers to base rates
+		energy_rate *= resource_mods.get("energy_rate_multiplier", 1.0)
+		material_rate *= resource_mods.get("material_rate_multiplier", 1.0)
 	is_paused = false
 	_apply_item_starting_bonuses()
 

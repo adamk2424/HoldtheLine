@@ -182,7 +182,13 @@ func _start_building() -> void:
 
 
 func _process_build(delta: float) -> void:
-	build_timer += delta
+	# Apply build speed multiplier from items
+	var speed_multiplier: float = 1.0
+	if ItemSystem:
+		var structure_mods := ItemSystem.get_structure_modifiers()
+		speed_multiplier = structure_mods.get("build_speed_multiplier", 1.0)
+	
+	build_timer += delta * speed_multiplier
 	var progress: float = clampf(build_timer / build_time, 0.0, 1.0)
 
 	# Animate scale from 0 to 1
