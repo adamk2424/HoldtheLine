@@ -89,30 +89,30 @@
         0.625
       ],
       "effect_type": "damage_buff",
-      "effect_value": 7.5,
+      "effect_value": 5.25,
       "effect_radius": 8,
       "specials": [],
       "upgrades": [
         {
           "name": "Tier 2",
-          "stat_changes": "2.5x damage buff, +30% radius, 2x HP",
+          "stat_changes": "2.5x damage buff (+13.1%), +30% radius, 2x HP",
           "cost_energy": 20,
           "cost_materials": 50,
           "required_tech_level": "none",
           "modifications": {
-            "effect_value": 18.75,
+            "effect_value": 13.125,
             "effect_radius": 10.4,
             "hp": 250.0
           }
         },
         {
           "name": "Tier 3",
-          "stat_changes": "+75% damage buff, +30% radius, 2x HP, 2x regen",
+          "stat_changes": "+75% damage buff (+23.0%), +30% radius, 2x HP, 2x regen",
           "cost_energy": 30,
           "cost_materials": 100,
           "required_tech_level": "none",
           "modifications": {
-            "effect_value": 32.8125,
+            "effect_value": 22.96875,
             "effect_radius": 13.52,
             "hp": 500.0,
             "regen_percent": 2.0
@@ -151,30 +151,30 @@
         0.75
       ],
       "effect_type": "range_buff",
-      "effect_value": 10.0,
+      "effect_value": 5.0,
       "effect_radius": 8,
       "specials": [],
       "upgrades": [
         {
           "name": "Tier 2",
-          "stat_changes": "2.5x range buff, +30% radius, 2x HP",
+          "stat_changes": "2.5x range buff (+12.5%), +30% radius, 2x HP",
           "cost_energy": 20,
           "cost_materials": 50,
           "required_tech_level": "none",
           "modifications": {
-            "effect_value": 25.0,
+            "effect_value": 12.5,
             "effect_radius": 10.4,
             "hp": 250.0
           }
         },
         {
           "name": "Tier 3",
-          "stat_changes": "+75% range buff, +30% radius, 2x HP, 2x regen",
+          "stat_changes": "+75% range buff (+21.9%), +30% radius, 2x HP, 2x regen",
           "cost_energy": 30,
           "cost_materials": 100,
           "required_tech_level": "none",
           "modifications": {
-            "effect_value": 43.75,
+            "effect_value": 21.875,
             "effect_radius": 13.52,
             "hp": 500.0,
             "regen_percent": 2.0

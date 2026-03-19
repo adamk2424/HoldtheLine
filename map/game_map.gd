@@ -299,14 +299,12 @@ func _rebuild_navmesh_from_grid() -> void:
 					strip_start = col
 			else:
 				if strip_start != -1:
-					# Add per-cell quads for each cell in this strip (shared vertices)
-					for cx in range(strip_start, col):
-						_add_shared_quad(vertex_map, verts, polys, cx, row, cx + 1, row + 1)
+					# One quad for the entire strip of consecutive free cells.
+					_add_shared_quad(vertex_map, verts, polys, strip_start, row, col, row + 1)
 					strip_start = -1
 
 		if strip_start != -1:
-			for cx in range(strip_start, map_cells):
-				_add_shared_quad(vertex_map, verts, polys, cx, row, cx + 1, row + 1)
+			_add_shared_quad(vertex_map, verts, polys, strip_start, row, map_cells, row + 1)
 
 	var nav_mesh := NavigationMesh.new()
 	var packed := PackedVector3Array()

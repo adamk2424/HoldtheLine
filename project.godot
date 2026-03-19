@@ -17,6 +17,7 @@ config/features=PackedStringArray("4.6")
 
 [autoload]
 
+FrameBudget="*res://autoloads/frame_budget.gd"
 GameBus="*res://autoloads/game_bus.gd"
 GameData="*res://autoloads/game_data.gd"
 GameState="*res://autoloads/game_state.gd"

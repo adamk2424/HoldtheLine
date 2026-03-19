@@ -98,9 +98,9 @@
 	"rail_gun": {
 		"attack": {
 			"files": [
-				"res://audio/sfx/Rail_Gun_fire_01.wav",
-				"res://audio/sfx/Rail_Gun_Fire_02.wav",
-				"res://audio/sfx/Rail_Gun_fire_03.wav"
+				"res://audio/sfx/railgun_fire-001.wav",
+				"res://audio/sfx/railgun_fire-002.wav",
+				"res://audio/sfx/railgun_fire-003.wav"
 			],
 			"pitch_randomize": true,
 			"pitch_cents": 60,

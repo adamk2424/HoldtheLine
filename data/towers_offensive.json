@@ -133,8 +133,8 @@
       "attack_range": 36,
       "attack_type": "projectile",
       "can_target_air": true,
-      "cost_energy": 60,
-      "cost_materials": 50,
+      "cost_energy": 75,
+      "cost_materials": 63,
       "build_time": 4,
       "required_tech_level": "tier_1",
       "grid_size": [
@@ -195,8 +195,8 @@
       "aoe_radius": 3,
       "splash_damage_percent": 50,
       "can_target_air": true,
-      "cost_energy": 75,
-      "cost_materials": 60,
+      "cost_energy": 94,
+      "cost_materials": 75,
       "build_time": 5,
       "required_tech_level": "tier_2",
       "grid_size": [
@@ -255,8 +255,8 @@
       "attack_range": 20,
       "attack_type": "beam",
       "can_target_air": true,
-      "cost_energy": 55,
-      "cost_materials": 40,
+      "cost_energy": 69,
+      "cost_materials": 50,
       "build_time": 4,
       "required_tech_level": "tier_1",
       "grid_size": [

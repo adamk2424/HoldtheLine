@@ -119,10 +119,12 @@ func _tick_war_beacon() -> void:
 				continue
 			in_range_now.append(entity)
 
-	# Apply buff to new entities
+	# Apply buff to new entities (only one war beacon can buff a tower at a time)
 	for entity: Node in in_range_now:
 		if entity not in _beacon_buffed_entities:
 			if entity is EntityBase and entity.buff_debuff_component:
+				if entity.buff_debuff_component.has_buff_with_prefix("war_beacon_"):
+					continue
 				var buff_id: String = "war_beacon_%d" % get_instance_id()
 				var dmg_value: float = damage_buff_percent / 100.0
 				entity.buff_debuff_component.apply_buff(buff_id, "damage", dmg_value, -1.0, self)
@@ -149,10 +151,12 @@ func _tick_targeting_array() -> void:
 			continue
 		in_range_now.append(tower)
 
-	# Apply range buff to new towers
+	# Apply range buff to new towers (only one targeting array can buff a tower at a time)
 	for tower: Node in in_range_now:
 		if tower not in _array_buffed_entities:
 			if tower is EntityBase and tower.buff_debuff_component:
+				if tower.buff_debuff_component.has_buff_with_prefix("targeting_array_"):
+					continue
 				var range_buff_id: String = "targeting_array_%d" % get_instance_id()
 				var range_value: float = range_buff_percent / 100.0
 				tower.buff_debuff_component.apply_buff(range_buff_id, "range", range_value, -1.0, self)

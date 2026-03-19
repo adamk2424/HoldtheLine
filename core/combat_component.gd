@@ -81,7 +81,8 @@ func _process(delta: float) -> void:
 	if not _has_valid_target():
 		_retarget_cooldown -= delta
 		if _retarget_cooldown <= 0.0:
-			_find_target()
+			if FrameBudget.has_budget():
+				_find_target()
 			_retarget_cooldown = RETARGET_INTERVAL
 	else:
 		# Reset cooldown so we search quickly after losing a target

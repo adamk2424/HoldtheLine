@@ -73,6 +73,13 @@ func has_buff(buff_id: String) -> bool:
 	return active_buffs.has(buff_id)
 
 
+func has_buff_with_prefix(prefix: String) -> bool:
+	for buff_id: String in active_buffs:
+		if buff_id.begins_with(prefix):
+			return true
+	return false
+
+
 func has_debuff(debuff_id: String) -> bool:
 	return active_debuffs.has(debuff_id)
 

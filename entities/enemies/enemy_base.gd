@@ -194,10 +194,13 @@ func _enter_combat_zone() -> void:
 
 
 ## Returns true if this enemy should run expensive AI work this frame.
-## When enemy counts are high, AI ticks are spread across frames so only a
-## fraction of enemies do heavy work each frame.  Movement still runs every
-## frame — only targeting, retargeting, and behavior updates are staggered.
+## Two layers of throttling:
+##   1. Count-based stagger: spreads AI ticks across frames at high enemy counts.
+##   2. Frame budget: defers work entirely when the frame is already over budget.
+## Movement still runs every frame — only targeting and behavior are deferred.
 func should_process_ai() -> bool:
+	if not FrameBudget.has_budget():
+		return false
 	var count: int = EntityRegistry.get_count("enemy")
 	if count < 150:
 		return true

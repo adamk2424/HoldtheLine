@@ -1148,28 +1148,28 @@ static func _create_recycler_t2(c: Color) -> Node3D:
 	r.name = "Visual"
 	var dark := c.darkened(0.3)
 	var accent := Color(0.4, 1.0, 0.4)
-	# Foundation platform
-	_add_box(r, Vector3(3.8, 0.25, 3.8), Vector3(0, 0.125, 0), dark)
-	# Main processing building (taller)
-	_add_box(r, Vector3(2.6, 1.3, 2.6), Vector3(0, 0.9, 0), c)
+	# Foundation platform (same footprint as T1)
+	_add_box(r, Vector3(3.6, 0.25, 3.6), Vector3(0, 0.125, 0), dark)
+	# Main processing building (taller, same width)
+	_add_box(r, Vector3(2.4, 1.3, 2.4), Vector3(0, 0.9, 0), c)
 	# Roof
-	_add_box(r, Vector3(2.7, 0.1, 2.7), Vector3(0, 1.6, 0), dark)
+	_add_box(r, Vector3(2.5, 0.1, 2.5), Vector3(0, 1.6, 0), dark)
 	# Dual hoppers
 	_add_box(r, Vector3(0.9, 0.5, 0.9), Vector3(-0.5, 1.85, 0), dark)
 	_add_box(r, Vector3(0.9, 0.5, 0.9), Vector3(0.5, 1.85, 0), dark)
 	_add_box(r, Vector3(1.0, 0.08, 1.0), Vector3(-0.5, 2.14, 0), c.lightened(0.1))
 	_add_box(r, Vector3(1.0, 0.08, 1.0), Vector3(0.5, 2.14, 0), c.lightened(0.1))
-	# Conveyor belts
-	_add_box(r, Vector3(3.4, 0.12, 0.6), Vector3(0, 0.3, 1.4), dark)
-	_add_box(r, Vector3(3.4, 0.12, 0.6), Vector3(0, 0.3, -1.4), dark)
+	# Conveyor belts (same footprint as T1)
+	_add_box(r, Vector3(3.2, 0.12, 0.5), Vector3(0, 0.3, 1.3), dark)
+	_add_box(r, Vector3(3.2, 0.12, 0.5), Vector3(0, 0.3, -1.3), dark)
 	# Output chutes (both sides)
-	_add_box(r, Vector3(0.6, 0.5, 0.8), Vector3(1.4, 0.5, 0), dark)
-	_add_box(r, Vector3(0.6, 0.5, 0.8), Vector3(-1.4, 0.5, 0), dark)
-	# Status lights
-	_add_emissive_sphere(r, 0.07, Vector3(1.3, 1.3, 1.3), accent, 2.5)
-	_add_emissive_sphere(r, 0.07, Vector3(-1.3, 1.3, 1.3), accent, 2.5)
-	_add_emissive_sphere(r, 0.07, Vector3(1.3, 1.3, -1.3), accent, 2.5)
-	_add_emissive_sphere(r, 0.07, Vector3(-1.3, 1.3, -1.3), accent, 2.5)
+	_add_box(r, Vector3(0.6, 0.5, 0.8), Vector3(1.3, 0.5, 0), dark)
+	_add_box(r, Vector3(0.6, 0.5, 0.8), Vector3(-1.3, 0.5, 0), dark)
+	# Status lights (all 4 corners)
+	_add_emissive_sphere(r, 0.07, Vector3(1.2, 1.3, 1.2), accent, 2.5)
+	_add_emissive_sphere(r, 0.07, Vector3(-1.2, 1.3, 1.2), accent, 2.5)
+	_add_emissive_sphere(r, 0.07, Vector3(1.2, 1.3, -1.2), accent, 2.5)
+	_add_emissive_sphere(r, 0.07, Vector3(-1.2, 1.3, -1.2), accent, 2.5)
 	# Processing glow
 	_add_emissive_sphere(r, 0.18, Vector3(-0.5, 1.8, 0), accent, 3.0)
 	_add_emissive_sphere(r, 0.18, Vector3(0.5, 1.8, 0), accent, 3.0)
@@ -1181,35 +1181,35 @@ static func _create_recycler_t3(c: Color) -> Node3D:
 	r.name = "Visual"
 	var dark := c.darkened(0.25)
 	var accent := Color(0.5, 1.0, 0.5)
-	# Foundation platform
-	_add_box(r, Vector3(3.9, 0.3, 3.9), Vector3(0, 0.15, 0), dark)
-	# Main processing building (taller still)
-	_add_box(r, Vector3(2.8, 1.6, 2.8), Vector3(0, 1.1, 0), c)
+	# Foundation platform (same footprint as T1)
+	_add_box(r, Vector3(3.6, 0.3, 3.6), Vector3(0, 0.15, 0), dark)
+	# Main processing building (tallest, same width)
+	_add_box(r, Vector3(2.4, 1.6, 2.4), Vector3(0, 1.1, 0), c)
 	# Roof
-	_add_box(r, Vector3(2.9, 0.12, 2.9), Vector3(0, 1.96, 0), dark)
+	_add_box(r, Vector3(2.5, 0.12, 2.5), Vector3(0, 1.96, 0), dark)
 	# Large central hopper
-	_add_box(r, Vector3(1.4, 0.6, 1.4), Vector3(0, 2.26, 0), dark)
-	_add_box(r, Vector3(1.6, 0.1, 1.6), Vector3(0, 2.61, 0), c.lightened(0.1))
-	# Conveyor belts (wider)
-	_add_box(r, Vector3(3.6, 0.15, 0.7), Vector3(0, 0.35, 1.5), dark)
-	_add_box(r, Vector3(3.6, 0.15, 0.7), Vector3(0, 0.35, -1.5), dark)
+	_add_box(r, Vector3(1.2, 0.6, 1.2), Vector3(0, 2.26, 0), dark)
+	_add_box(r, Vector3(1.4, 0.1, 1.4), Vector3(0, 2.61, 0), c.lightened(0.1))
+	# Conveyor belts (same footprint as T1)
+	_add_box(r, Vector3(3.2, 0.15, 0.5), Vector3(0, 0.35, 1.3), dark)
+	_add_box(r, Vector3(3.2, 0.15, 0.5), Vector3(0, 0.35, -1.3), dark)
 	# Heavy output chutes
-	_add_box(r, Vector3(0.8, 0.6, 1.0), Vector3(1.5, 0.6, 0), dark)
-	_add_box(r, Vector3(0.8, 0.6, 1.0), Vector3(-1.5, 0.6, 0), dark)
+	_add_box(r, Vector3(0.6, 0.6, 0.8), Vector3(1.3, 0.6, 0), dark)
+	_add_box(r, Vector3(0.6, 0.6, 0.8), Vector3(-1.3, 0.6, 0), dark)
 	# Exhaust stacks
-	_add_cylinder(r, 0.08, 0.5, Vector3(1.1, 2.21, 1.1), dark)
-	_add_cylinder(r, 0.08, 0.5, Vector3(-1.1, 2.21, -1.1), dark)
+	_add_cylinder(r, 0.08, 0.5, Vector3(1.0, 2.21, 1.0), dark)
+	_add_cylinder(r, 0.08, 0.5, Vector3(-1.0, 2.21, -1.0), dark)
 	# Corner status lights
-	_add_emissive_sphere(r, 0.08, Vector3(1.4, 1.7, 1.4), accent, 3.0)
-	_add_emissive_sphere(r, 0.08, Vector3(-1.4, 1.7, 1.4), accent, 3.0)
-	_add_emissive_sphere(r, 0.08, Vector3(1.4, 1.7, -1.4), accent, 3.0)
-	_add_emissive_sphere(r, 0.08, Vector3(-1.4, 1.7, -1.4), accent, 3.0)
+	_add_emissive_sphere(r, 0.08, Vector3(1.2, 1.7, 1.2), accent, 3.0)
+	_add_emissive_sphere(r, 0.08, Vector3(-1.2, 1.7, 1.2), accent, 3.0)
+	_add_emissive_sphere(r, 0.08, Vector3(1.2, 1.7, -1.2), accent, 3.0)
+	_add_emissive_sphere(r, 0.08, Vector3(-1.2, 1.7, -1.2), accent, 3.0)
 	# Processing glow
 	_add_emissive_sphere(r, 0.25, Vector3(0, 2.2, 0), accent, 4.0)
 	# Capacitor banks on sides
-	_add_box(r, Vector3(0.2, 0.4, 0.2), Vector3(1.2, 0.5, 1.2), c.darkened(0.15))
-	_add_box(r, Vector3(0.2, 0.4, 0.2), Vector3(-1.2, 0.5, -1.2), c.darkened(0.15))
-	_add_emissive_box(r, Vector3(2.81, 0.04, 2.81), Vector3(0, 1.0, 0), accent, 1.5)
+	_add_box(r, Vector3(0.2, 0.4, 0.2), Vector3(1.0, 0.5, 1.0), c.darkened(0.15))
+	_add_box(r, Vector3(0.2, 0.4, 0.2), Vector3(-1.0, 0.5, -1.0), c.darkened(0.15))
+	_add_emissive_box(r, Vector3(2.41, 0.04, 2.41), Vector3(0, 1.0, 0), accent, 1.5)
 	return r
 
 

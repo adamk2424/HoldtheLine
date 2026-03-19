@@ -176,10 +176,10 @@ func create_enemy(enemy_id: String, spawn_pos: Vector3) -> EnemyBase:
 		enemy.queue_free()
 		return null
 
-	# Calculate difficulty multipliers with size-based armor
+	# Calculate difficulty multipliers with size-based + time-based armor
 	var difficulty_mult: Dictionary = _get_difficulty_multipliers()
 	var size_cat: String = edata.get("size", "small")
-	difficulty_mult["armor_bonus"] = get_armor_bonus_for_size(size_cat)
+	difficulty_mult["armor_bonus"] = get_armor_bonus_for_size(size_cat) + get_time_armor_bonus()
 
 	# Initialize enemy (adds components, sets up health bar, starts moving)
 	enemy.initialize_enemy(enemy_id, edata, difficulty_mult)
@@ -221,7 +221,7 @@ func spawn_boss(enemy_id: String) -> EnemyBase:
 
 	var difficulty_mult: Dictionary = _get_difficulty_multipliers()
 	var size_cat: String = edata.get("size", "huge")
-	difficulty_mult["armor_bonus"] = get_armor_bonus_for_size(size_cat)
+	difficulty_mult["armor_bonus"] = get_armor_bonus_for_size(size_cat) + get_time_armor_bonus()
 	enemy.initialize_enemy(enemy_id, edata, difficulty_mult)
 
 	# Add AI AFTER initialization so _ready() can access components and enemy_data
@@ -340,6 +340,38 @@ func _get_combat_scaling_bonus(minutes_elapsed: float) -> float:
 	if minutes_elapsed < 10.0:
 		return 0.0
 	return 0.05 * (minutes_elapsed - 10.0)
+
+
+## Flat armor bonus for ALL enemies based on elapsed time.
+## 10-20 min: +1 every 2 min. 20-30 min: +2 every min. 30+ min: +3 every min.
+func get_time_armor_bonus() -> float:
+	var minutes_elapsed: float = GameState.game_time / 60.0
+	if minutes_elapsed < 10.0:
+		return 0.0
+
+	# Phase 1: 10-20 min — +1 at 10 min, then +1 every 2 min after
+	var phase1_minutes: float = minf(minutes_elapsed, 20.0) - 10.0
+	var phase1_bonus: float = 1.0 + floor(phase1_minutes / 2.0)
+
+	if minutes_elapsed < 20.0:
+		return phase1_bonus
+
+	var phase1_total: float = 6.0  # 1 + floor(10/2)
+
+	# Phase 2: 20-30 min — +2 every minute
+	var phase2_minutes: float = minf(minutes_elapsed, 30.0) - 20.0
+	var phase2_bonus: float = floor(phase2_minutes) * 2.0
+
+	if minutes_elapsed < 30.0:
+		return phase1_total + phase2_bonus
+
+	var phase2_total: float = 20.0  # 10 * 2
+
+	# Phase 3: 30+ min — +3 every minute
+	var phase3_minutes: float = minutes_elapsed - 30.0
+	var phase3_bonus: float = floor(phase3_minutes) * 3.0
+
+	return phase1_total + phase2_total + phase3_bonus
 
 
 ## Calculate flat armor bonus based on enemy size and time elapsed.

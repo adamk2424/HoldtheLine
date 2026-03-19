@@ -179,8 +179,12 @@ static func _update_upgrade_visual(tower: TowerBase, branch_index: int) -> void:
 			var old_visual: Node3D = tower.visual_node
 			tower.visual_node = new_visual
 			tower.add_child(new_visual)
-			# Scale 30% larger per tier on top of the base 1.25x tower scale
-			new_visual.scale = Vector3.ONE * 1.25 * (1.0 + 0.3 * tier)
+			# Resource towers keep base scale; others grow 15% per tier
+			var category: String = tower.data.get("category", "")
+			if category == "resource":
+				new_visual.scale = Vector3.ONE * 1.25
+			else:
+				new_visual.scale = Vector3.ONE * 1.25 * (1.0 + 0.15 * tier)
 			old_visual.queue_free()
 			tower._cache_muzzle_nodes()
 		return

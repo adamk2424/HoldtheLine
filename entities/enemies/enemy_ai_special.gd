@@ -17,6 +17,14 @@ var _threat_duration: float = 3.0
 var _threat_cooldown: float = 10.0
 var _threat_timer: float = 0.0
 
+# Slam ability state (Clugg)
+var _has_slam: bool = false
+var _slam_damage: float = 50.0
+var _slam_range: float = 2.0
+var _slam_cooldown: float = 15.0
+var _slam_timer: float = 0.0  # counts up; fires when >= cooldown
+var _slam_ready: bool = true  # starts ready so first slam fires immediately
+
 # Death Blast state (Terror Bringer)
 var _has_death_blast: bool = false
 var _death_blast_damage: float = 500.0
@@ -54,6 +62,11 @@ func _ready() -> void:
 				_threat_radius = float(special.get("radius", 4.0))
 				_threat_duration = float(special.get("duration", 3.0))
 				_threat_cooldown = float(special.get("cooldown", 10.0))
+			"slam":
+				_has_slam = true
+				_slam_damage = float(special.get("damage", 50.0))
+				_slam_range = float(special.get("range", 2.0))
+				_slam_cooldown = float(special.get("cooldown", 15.0))
 			"death_blast":
 				_has_death_blast = true
 				_death_blast_damage = float(special.get("damage", 500.0))
@@ -85,6 +98,7 @@ func _process(delta: float) -> void:
 
 	if _has_threat_aura:
 		_process_threat_aura(delta)
+		_process_slam(delta)
 	elif _has_war_cry:
 		_process_war_cry(delta)
 
@@ -123,6 +137,44 @@ func _pulse_threat_aura() -> void:
 
 	GameBus.aoe_triggered.emit(enemy.global_position, _threat_radius, 0.0, enemy)
 	GameBus.audio_play_3d.emit("enemy.clugg.threat_aura", enemy.global_position)
+
+
+## --- Slam Ability (Clugg) ---
+
+func _process_slam(delta: float) -> void:
+	if not _has_slam:
+		return
+
+	# Cooldown ticks globally so it's always enforced
+	if not _slam_ready:
+		_slam_timer += delta
+		if _slam_timer >= _slam_cooldown:
+			_slam_timer = 0.0
+			_slam_ready = true
+
+	if _slam_ready:
+		# Find nearest player entity in slam range
+		var target: Node = _find_slam_target()
+		if target:
+			_execute_slam(target)
+
+
+func _find_slam_target() -> Node:
+	for etype: String in ["tower", "unit", "building", "barrier", "central_tower"]:
+		var nearest: Node = EntityRegistry.get_nearest(enemy.global_position, etype, _slam_range)
+		if nearest and is_instance_valid(nearest) and nearest.is_inside_tree():
+			return nearest
+	return null
+
+
+func _execute_slam(target: Node) -> void:
+	_slam_ready = false
+	_slam_timer = 0.0
+
+	if target is EntityBase and target.health_component:
+		target.health_component.take_damage(_slam_damage, enemy)
+
+	GameBus.audio_play_3d.emit("enemy.clugg.slam", enemy.global_position)
 
 
 ## --- Death Blast (Terror Bringer) ---
@@ -241,8 +293,8 @@ func _update_charge_behavior(delta: float) -> void:
 		return
 
 	if current_target and is_instance_valid(current_target) and current_target.is_inside_tree():
-		# Clugg: no attack, just moves toward towers
-		if _has_threat_aura:
+		# Clugg: just move toward towers, slam is handled separately
+		if _has_threat_aura and not _has_death_blast:
 			enemy.movement_component.move_to(current_target.global_position)
 			return
 

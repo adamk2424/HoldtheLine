@@ -4,7 +4,7 @@ extends Node
 ## 3D positional audio with distance attenuation and voice limiting.
 
 const MAX_CONCURRENT_SFX_2D: int = 8
-const MAX_CONCURRENT_SFX_3D: int = 32
+const MAX_CONCURRENT_SFX_3D: int = 65
 const MAX_VOICES_PER_CUE: int = 3
 
 const LIVE_TOOL_ENABLED: bool = true
@@ -171,6 +171,7 @@ func _configure_3d_player(player: AudioStreamPlayer3D, preset: Dictionary = {}) 
 	player.attenuation_filter_cutoff_hz = preset.get("filter_cutoff_hz", 10000.0)
 	player.attenuation_filter_db = preset.get("filter_db", -18.0)
 	player.panning_strength = preset.get("panning_strength", 0.8)
+	player.max_db = 0.0
 	player.max_polyphony = 1
 
 
@@ -341,8 +342,15 @@ func _load_entity_attenuation() -> void:
 		print("[AudioManager] Loaded attenuation assignments for %d entities" % _entity_attenuation.size())
 
 
-func _get_attenuation_for_entity(entity_id: String) -> Dictionary:
-	var preset_name: String = _entity_attenuation.get(entity_id, "default")
+func _get_attenuation_for_hook(entity_id: String, cue_key: String) -> Dictionary:
+	# Try specific cue_key first (e.g. "autocannon.attack"), then entity_id, then default
+	var preset_name: String = ""
+	if _entity_attenuation.has(cue_key):
+		preset_name = _entity_attenuation[cue_key]
+	elif _entity_attenuation.has(entity_id):
+		preset_name = _entity_attenuation[entity_id]
+	else:
+		preset_name = "default"
 	if _attenuation_presets.has(preset_name):
 		return _attenuation_presets[preset_name]
 	if _attenuation_presets.has("default"):
@@ -488,7 +496,7 @@ func _play_cue_data_3d(cue_data: Dictionary, world_pos: Vector3, cue_key: String
 
 	# Apply entity-specific attenuation preset
 	if not entity_id.is_empty():
-		_configure_3d_player(player, _get_attenuation_for_entity(entity_id))
+		_configure_3d_player(player, _get_attenuation_for_hook(entity_id, cue_key))
 	player.stream = stream
 	player.global_position = world_pos
 	_apply_cue_params_3d(player, cue_data)
@@ -512,12 +520,9 @@ func _acquire_3d_player(cue_key: String, max_voices: int = MAX_VOICES_PER_CUE) -
 
 	var voices: Array = _active_voices[cue_key]
 
-	# If at voice limit, stop the oldest (first in array)
-	while voices.size() >= max_voices:
-		var oldest: AudioStreamPlayer3D = voices[0]
-		voices.remove_at(0)
-		if is_instance_valid(oldest) and oldest.playing:
-			oldest.stop()
+	# If at voice limit, reject the new sound (let existing voices finish)
+	if voices.size() >= max_voices:
+		return null
 
 	# Find a free player from the pool (skip reserved looping players)
 	var player: AudioStreamPlayer3D = null
@@ -756,11 +761,13 @@ func play_at(hook_id: String, world_pos: Vector3) -> void:
 	if not stream:
 		return
 
-	# Derive a cue key from the hook_id for voice limiting
+	# Derive entity_id and cue key from the hook_id
 	var cue_key: String = hook_id
+	var entity_id: String = hook_id.get_slice(".", 0)
 	var player := _acquire_3d_player(cue_key)
 	if not player:
 		return
+	_configure_3d_player(player, _get_attenuation_for_hook(entity_id, cue_key))
 	player.stream = stream
 	player.global_position = world_pos
 	player.volume_db = 0.0
@@ -1199,4 +1206,4 @@ func get_active_3d_emitters() -> Array[Dictionary]:
 
 ## Returns the attenuation preset for an entity (for debug radius visualization).
 func get_entity_preset(entity_id: String) -> Dictionary:
-	return _get_attenuation_for_entity(entity_id)
+	return _get_attenuation_for_hook(entity_id, "")

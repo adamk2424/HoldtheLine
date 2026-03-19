@@ -155,6 +155,7 @@ func _create_dropship() -> void:
 			model = gltf_doc.generate_scene(gltf_state)
 
 	if model:
+		_apply_grey_material(model)
 		model.scale = Vector3(0.8, 0.8, 0.8)
 		model.rotation_degrees.y = -45.0  # Orient toward flight direction (+X, +Z)
 		_dropship.add_child(model)
@@ -179,6 +180,20 @@ func _create_dropship() -> void:
 	_scene_root.add_child(_dropship)
 
 
+static func _apply_grey_material(node: Node) -> void:
+	## Replace all materials on MeshInstance3D children with a uniform grey.
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.55, 0.55, 0.55)
+	mat.metallic = 0.2
+	mat.roughness = 0.7
+	if node is MeshInstance3D:
+		var mi := node as MeshInstance3D
+		for i in range(mi.get_surface_override_material_count()):
+			mi.set_surface_override_material(i, mat)
+	for child in node.get_children():
+		_apply_grey_material(child)
+
+
 func _run_sequence() -> void:
 	var dropship_start: Vector3 = _dropship.position
 	# Camera starts offset from dropship, looking at it from the side
@@ -191,23 +206,43 @@ func _run_sequence() -> void:
 	# Show skip hint
 	_tween.tween_property(_skip_label, "modulate:a", 0.5, 0.5)
 
-	# === Phase 1: Dropship takeoff (0-6s) ===
+	# === Phase 1: Dropship launch sequence (0-5.5s) ===
 	_tween.tween_callback(func() -> void: _track_dropship = true)
 
-	# Dropship lifts off slowly then accelerates upward and away
-	var dropship_end: Vector3 = _base_center + Vector3(40.0, 90.0, 40.0)
-	_tween.parallel().tween_property(
-		_dropship, "position", dropship_end, 5.5
-	).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
-
-	# Camera rises to follow the departing ship
+	# Camera rises to follow the departing ship (runs full 5.5s, starts with sub-phase A)
 	var cam_follow: Vector3 = cam_start + Vector3(5.0, 50.0, 5.0)
 	_tween.parallel().tween_property(
 		_cinematic_camera, "position", cam_follow, 5.5
 	).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SINE)
 
-	# Engine intensifies during takeoff
-	_tween.parallel().tween_property(_engine_light, "light_energy", 10.0, 3.0)
+	# --- Sub-phase A: Hover lift (0-1.5s) - engines warm, gentle vertical rise ---
+	var hover_pos := dropship_start + Vector3(1.0, 4.0, 1.0)
+	_tween.parallel().tween_property(
+		_dropship, "position", hover_pos, 1.5
+	).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SINE)
+	_tween.parallel().tween_property(_engine_light, "light_energy", 6.0, 1.5)
+
+	# --- Sub-phase B: Nose up and climb (1.5-3.5s) - pitch upward, gain altitude ---
+	var climb_pos := dropship_start + Vector3(10.0, 25.0, 10.0)
+	_tween.tween_property(
+		_dropship, "position", climb_pos, 2.0
+	).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+	# Pitch nose upward
+	_tween.parallel().tween_property(
+		_dropship, "rotation_degrees:x", -45.0, 2.0
+	).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	_tween.parallel().tween_property(_engine_light, "light_energy", 15.0, 2.0)
+
+	# --- Sub-phase C: Full burn to orbit (3.5-5.5s) - exponential acceleration ---
+	var orbit_pos := _base_center + Vector3(60.0, 160.0, 60.0)
+	_tween.tween_property(
+		_dropship, "position", orbit_pos, 2.0
+	).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_EXPO)
+	# Continue pitching toward near-vertical
+	_tween.parallel().tween_property(
+		_dropship, "rotation_degrees:x", -75.0, 2.0
+	).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+	_tween.parallel().tween_property(_engine_light, "light_energy", 25.0, 1.0)
 
 	# End of Phase 1 - stop tracking, hide dropship
 	_tween.tween_callback(func() -> void:
