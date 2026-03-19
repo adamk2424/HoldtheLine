@@ -1580,7 +1580,7 @@ static func _create_drone_printer(c: Color) -> Node3D:
 		_add_box(r, Vector3(0.8, 0.02, 0.04), Vector3(0, vent_y, -0.78), dark)
 		_add_box(r, Vector3(0.04, 0.02, 0.8), Vector3(-0.78, vent_y, 0), dark)
 	
-	# Enhanced visual details for Task 1A
+	# Enhanced visual details for Task 1A - Advanced Building Atmospherics
 	# Add fabrication work lights that pulse during assembly
 	for i in range(6):
 		var angle: float = i * TAU / 6.0
@@ -1593,6 +1593,26 @@ static func _create_drone_printer(c: Color) -> Node3D:
 	_add_emissive_box(r, Vector3(0.02, 0.02, 0.8), Vector3(0.6, 0.97, 0), green, 2.0)
 	_add_emissive_box(r, Vector3(0.8, 0.02, 0.02), Vector3(0, 0.97, -0.6), green, 2.0)
 	_add_emissive_box(r, Vector3(0.02, 0.02, 0.8), Vector3(-0.6, 0.97, 0), green, 2.0)
+	
+	# Task 1A: Enhanced atmospheric lighting and environmental details
+	# Add dynamic holographic build indicators above landing pad
+	_add_emissive_box(r, Vector3(0.6, 0.01, 0.6), Vector3(0, 1.02, 0), green.lightened(0.3), 1.0)
+	_add_emissive_box(r, Vector3(0.4, 0.01, 0.4), Vector3(0, 1.04, 0), green.lightened(0.5), 0.8)
+	
+	# Add industrial safety marking strips
+	for strip_i in range(4):
+		var strip_angle: float = strip_i * TAU / 4.0
+		var strip_x: float = cos(strip_angle) * 0.8
+		var strip_z: float = sin(strip_angle) * 0.8
+		_add_emissive_box(r, Vector3(0.08, 0.02, 0.02), Vector3(strip_x, 0.15, strip_z), Color(1.0, 0.5, 0.0), 1.5)
+	
+	# Power distribution nodes with circuit patterns
+	_add_emissive_box(r, Vector3(0.04, 0.12, 0.04), Vector3(0.7, 0.45, 0.7), green, 2.2)
+	_add_emissive_box(r, Vector3(0.04, 0.12, 0.04), Vector3(-0.7, 0.45, -0.7), green, 2.2)
+	
+	# Environmental atmosphere enhancers
+	_add_emissive_sphere(r, 0.01, Vector3(0.4, 0.8, 0.4), Color(0.6, 1.0, 0.8), 0.8)  # Air quality sensor
+	_add_emissive_sphere(r, 0.01, Vector3(-0.4, 0.8, -0.4), Color(1.0, 0.6, 0.2), 0.8)  # Temperature sensor
 	
 	# Store animation nodes for future use
 	r.set_meta("robotic_arm1_node", arm_1.get_path())
@@ -1746,7 +1766,7 @@ static func _create_mech_bay(c: Color) -> Node3D:
 	# Interior work lights
 	_add_emissive_box(r, Vector3(1.8, 0.04, 0.04), Vector3(0, 1.5, 0.72), Color(0.9, 0.9, 1.0), 1.0)
 	
-	# Enhanced visual details for Task 1A
+	# Enhanced visual details for Task 1A - Advanced Mech Bay Atmospherics
 	# Add reinforced structural supports and industrial details
 	_add_box(r, Vector3(0.06, 1.3, 0.06), Vector3(1.15, 0.9, 0.65), dark_steel.lightened(0.1))
 	_add_box(r, Vector3(0.06, 1.3, 0.06), Vector3(-1.15, 0.9, 0.65), dark_steel.lightened(0.1))
@@ -1761,6 +1781,25 @@ static func _create_mech_bay(c: Color) -> Node3D:
 	for i in range(8):
 		var vent_x: float = -1.0 + i * 0.25
 		_add_emissive_box(r, Vector3(0.08, 0.02, 0.06), Vector3(vent_x, 1.4, -0.75), Color(0.8, 0.4, 0.2), 1.5)
+	
+	# Task 1A: Enhanced mech bay environmental atmosphere
+	# Add pressurized forge effect glows for heavy industry feel
+	_add_emissive_sphere(r, 0.06, Vector3(0.8, 0.8, 0.3), Color(1.0, 0.6, 0.1), 3.0)  # Forge glow
+	_add_emissive_sphere(r, 0.06, Vector3(-0.8, 0.8, 0.3), Color(1.0, 0.6, 0.1), 3.0)
+	
+	# Enhanced bay door frame with military warning strips
+	for strip_i in range(6):
+		var strip_y: float = 0.4 + strip_i * 0.15
+		_add_box(r, Vector3(0.08, 0.04, 0.02), Vector3(0.95, strip_y, 0.78), Color(1.0, 0.5, 0.0))
+		_add_box(r, Vector3(0.08, 0.04, 0.02), Vector3(-0.95, strip_y, 0.78), Color(1.0, 0.5, 0.0))
+	
+	# Power coupling nodes for heavy machinery
+	_add_emissive_cylinder(r, 0.03, 0.08, Vector3(1.0, 0.6, -0.8), blue, 2.5)
+	_add_emissive_cylinder(r, 0.03, 0.08, Vector3(-1.0, 0.6, -0.8), blue, 2.5)
+	
+	# Environmental monitoring systems
+	_add_emissive_box(r, Vector3(0.06, 0.06, 0.02), Vector3(0.6, 1.8, -0.9), Color(0.2, 1.0, 0.4), 1.8)  # Air quality
+	_add_emissive_box(r, Vector3(0.06, 0.06, 0.02), Vector3(-0.6, 1.8, -0.9), Color(1.0, 0.8, 0.2), 1.8)  # Temperature
 	
 	# Store animation nodes for future use
 	r.set_meta("gantry_system_node", gantry_system.get_path())
@@ -1944,7 +1983,7 @@ static func _create_war_factory(c: Color) -> Node3D:
 			var rib_x: float = -1.1 + j * 0.44
 			_add_cylinder(r, 0.015, 0.02, Vector3(rib_x, 1.2, z_pos + 0.05), industrial_metal.darkened(0.3))
 	
-	# Enhanced visual details for Task 1A
+	# Enhanced visual details for Task 1A - Advanced War Factory Atmospherics  
 	# Add heavy industrial atmosphere with sparking electrical systems
 	for i in range(4):
 		var spark_x: float = -1.0 + i * 0.6
@@ -1966,6 +2005,24 @@ static func _create_war_factory(c: Color) -> Node3D:
 		var vx: float = cos(vent_angle) * 1.1
 		var vz: float = sin(vent_angle) * 1.1
 		_add_emissive_box(r, Vector3(0.06, 0.8, 0.03), Vector3(vx, 1.0, vz), orange, 1.8)
+	
+	# Task 1A: Enhanced war factory heavy industry atmosphere
+	# Add molten metal pour effects for vehicle forging
+	_add_emissive_sphere(r, 0.08, Vector3(0.5, 1.2, 0.2), Color(1.0, 0.4, 0.1), 4.0)  # Molten pour
+	_add_emissive_sphere(r, 0.06, Vector3(-0.5, 1.2, 0.2), Color(1.0, 0.3, 0.05), 3.5)
+	
+	# Enhanced hydraulic systems for heavy lifting
+	_add_emissive_cylinder(r, 0.04, 0.8, Vector3(1.1, 0.8, 0.3), orange, 2.0)
+	_add_emissive_cylinder(r, 0.04, 0.8, Vector3(-1.1, 0.8, 0.3), orange, 2.0)
+	
+	# Advanced fabrication guidance lasers
+	for laser_i in range(4):
+		var laser_x: float = -0.9 + laser_i * 0.6
+		_add_emissive_box(r, Vector3(0.01, 0.01, 1.5), Vector3(laser_x, 1.5, 0), Color(0.8, 0.2, 0.2), 3.0)
+	
+	# Environmental safety monitoring arrays
+	_add_emissive_box(r, Vector3(0.1, 0.04, 0.04), Vector3(1.2, 1.9, 0.9), Color(1.0, 1.0, 0.2), 2.0)  # Radiation
+	_add_emissive_box(r, Vector3(0.1, 0.04, 0.04), Vector3(-1.2, 1.9, 0.9), Color(0.2, 1.0, 0.2), 2.0)  # Chemical
 	
 	# Store animation nodes for future use
 	r.set_meta("assembly_line_node", assembly_line.get_path())
@@ -2179,6 +2236,27 @@ static func _add_cylinder(parent: Node3D, radius: float, height: float, pos: Vec
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
 	mat.roughness = 0.7
 	mat.metallic = 0.3
+	cyl.material = mat
+	mi.mesh = cyl
+	mi.position = pos
+	parent.add_child(mi)
+	return mi
+
+
+static func _add_emissive_cylinder(parent: Node3D, radius: float, height: float, pos: Vector3, color: Color, emission_strength: float = 2.0) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	var cyl := CylinderMesh.new()
+	cyl.top_radius = radius
+	cyl.bottom_radius = radius
+	cyl.height = height
+	var mat := StandardMaterial3D.new()
+	var opaque_color := Color(color.r, color.g, color.b, 1.0)
+	mat.albedo_color = opaque_color
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
+	mat.emission_enabled = true
+	mat.emission = opaque_color
+	mat.emission_energy_multiplier = emission_strength
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	cyl.material = mat
 	mi.mesh = cyl
 	mi.position = pos
@@ -3324,6 +3402,237 @@ static func _create_warning_light_pulse(visual_node: Node3D, position: Vector3) 
 	pass  # Implementation depends on specific node structure
 
 
+## Task 1B: Enhanced weapon-specific muzzle flash effects
+static func _create_autocannon_muzzle_flash(visual_node: Node3D) -> void:
+	var muzzle_points: Array = visual_node.get_meta("muzzle_flash_points", [])
+	for point in muzzle_points:
+		if point is Vector3:
+			var flash := _create_weapon_flash_node(visual_node, point, Color(1.0, 0.8, 0.2), 0.12, 0.08)
+			_animate_autocannon_flash(flash, 0.1)
+
+
+static func _create_missile_launch_flash(visual_node: Node3D) -> void:
+	var launch_points: Array = visual_node.get_meta("missile_launch_points", [])
+	for point in launch_points:
+		if point is Vector3:
+			var flash := _create_weapon_flash_node(visual_node, point, Color(1.0, 0.5, 0.1), 0.2, 0.15)
+			_animate_missile_flash(flash, 0.3)
+
+
+static func _create_rail_gun_discharge(visual_node: Node3D) -> void:
+	var beam_origin: Vector3 = visual_node.get_meta("energy_beam_origin", Vector3.ZERO)
+	if beam_origin != Vector3.ZERO:
+		var flash := _create_weapon_flash_node(visual_node, beam_origin, Color(0.3, 0.6, 1.0), 0.08, 0.5)
+		_animate_rail_gun_flash(flash, 0.2)
+
+
+static func _create_plasma_discharge_flash(visual_node: Node3D) -> void:
+	var muzzle_points: Array = visual_node.get_meta("muzzle_flash_points", [])
+	for point in muzzle_points:
+		if point is Vector3:
+			var flash := _create_weapon_flash_node(visual_node, point, Color(0.8, 0.2, 0.9), 0.15, 0.12)
+			_animate_plasma_flash(flash, 0.25)
+
+
+static func _create_tesla_arc_flash(visual_node: Node3D) -> void:
+	# Tesla coils create arcing effects between the top sphere and nearby points
+	var tesla_pos: Vector3 = visual_node.get_meta("tesla_discharge_point", Vector3.ZERO)
+	if tesla_pos != Vector3.ZERO:
+		_create_tesla_arc_effects(visual_node, tesla_pos)
+
+
+## Creates basic weapon flash node with specified properties
+static func _create_weapon_flash_node(visual_node: Node3D, position: Vector3, color: Color, radius: float, duration: float) -> MeshInstance3D:
+	var flash := MeshInstance3D.new()
+	flash.name = "WeaponFlash"
+	
+	var flash_mesh := SphereMesh.new()
+	flash_mesh.radius = radius
+	flash_mesh.height = radius * 2.0
+	
+	var flash_mat := StandardMaterial3D.new()
+	flash_mat.albedo_color = color
+	flash_mat.emission_enabled = true
+	flash_mat.emission = color
+	flash_mat.emission_energy_multiplier = 10.0
+	flash_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	flash_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	
+	flash_mesh.material = flash_mat
+	flash.mesh = flash_mesh
+	flash.position = position
+	
+	visual_node.add_child(flash)
+	return flash
+
+
+## Animates autocannon muzzle flash with quick strobe
+static func _animate_autocannon_flash(flash_node: MeshInstance3D, duration: float) -> void:
+	var tween := flash_node.create_tween()
+	tween.tween_property(flash_node, "modulate:a", 0.0, duration)
+	tween.tween_callback(flash_node.queue_free)
+
+
+## Animates missile launch flash with expanding smoke
+static func _animate_missile_flash(flash_node: MeshInstance3D, duration: float) -> void:
+	var tween := flash_node.create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(flash_node, "scale", Vector3(3.0, 3.0, 3.0), duration)
+	tween.tween_property(flash_node, "modulate:a", 0.0, duration)
+	tween.tween_callback(flash_node.queue_free)
+
+
+## Animates rail gun energy discharge with beam effects
+static func _animate_rail_gun_flash(flash_node: MeshInstance3D, duration: float) -> void:
+	var tween := flash_node.create_tween()
+	tween.set_parallel(true)
+	# Brief intense flash followed by linear fade
+	tween.tween_property(flash_node, "scale", Vector3(1.0, 1.0, 8.0), duration * 0.1)  # Beam stretch
+	tween.tween_property(flash_node, "scale", Vector3(0.2, 0.2, 8.0), duration * 0.9).set_delay(duration * 0.1)
+	tween.tween_property(flash_node, "modulate:a", 0.0, duration)
+	tween.tween_callback(flash_node.queue_free)
+
+
+## Animates plasma discharge with pulsing energy
+static func _animate_plasma_flash(flash_node: MeshInstance3D, duration: float) -> void:
+	var tween := flash_node.create_tween()
+	tween.set_parallel(true)
+	# Pulsing effect
+	tween.tween_method(
+		func(scale): flash_node.scale = Vector3(scale, scale, scale),
+		1.0, 2.5, duration * 0.3
+	)
+	tween.tween_method(
+		func(scale): flash_node.scale = Vector3(scale, scale, scale),
+		2.5, 1.0, duration * 0.7
+	).set_delay(duration * 0.3)
+	tween.tween_property(flash_node, "modulate:a", 0.0, duration)
+	tween.tween_callback(flash_node.queue_free)
+
+
+## Creates tesla arc effects between coil and nearby targets
+static func _create_tesla_arc_effects(visual_node: Node3D, tesla_position: Vector3) -> void:
+	# Create multiple arc lines radiating from tesla coil
+	for i in range(3):
+		var arc_target: Vector3 = tesla_position + Vector3(
+			randf_range(-2.0, 2.0),
+			randf_range(-0.5, 0.5), 
+			randf_range(-2.0, 2.0)
+		)
+		_create_tesla_arc_line(visual_node, tesla_position, arc_target)
+
+
+## Creates a single tesla arc line effect
+static func _create_tesla_arc_line(visual_node: Node3D, start_pos: Vector3, end_pos: Vector3) -> void:
+	var arc := MeshInstance3D.new()
+	arc.name = "TeslaArc"
+	
+	# Create a cylinder representing the electric arc
+	var arc_mesh := CylinderMesh.new()
+	var distance: float = start_pos.distance_to(end_pos)
+	arc_mesh.height = distance
+	arc_mesh.top_radius = 0.02
+	arc_mesh.bottom_radius = 0.02
+	
+	var arc_mat := StandardMaterial3D.new()
+	arc_mat.albedo_color = Color(0.6, 0.4, 1.0, 0.8)
+	arc_mat.emission_enabled = true
+	arc_mat.emission = Color(0.6, 0.4, 1.0)
+	arc_mat.emission_energy_multiplier = 8.0
+	arc_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	arc_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	
+	arc_mesh.material = arc_mat
+	arc.mesh = arc_mesh
+	
+	# Position and orient the arc between start and end points
+	var mid_point: Vector3 = (start_pos + end_pos) * 0.5
+	arc.position = mid_point
+	arc.look_at(end_pos, Vector3.UP)
+	
+	visual_node.add_child(arc)
+	
+	# Animate the arc with flickering and fade
+	var tween := visual_node.create_tween()
+	tween.set_parallel(true)
+	
+	# Flickering effect
+	for flicker_i in range(5):
+		tween.tween_property(arc, "modulate:a", randf_range(0.3, 1.0), 0.02).set_delay(flicker_i * 0.04)
+	
+	# Final fade
+	tween.tween_property(arc, "modulate:a", 0.0, 0.1).set_delay(0.2)
+	tween.tween_callback(arc.queue_free).set_delay(0.3)
+
+
+## Task 1B: Enhanced charge buildup animations
+static func _create_tesla_charge_buildup(visual_node: Node3D, charge_duration: float) -> void:
+	# Find tesla coil nodes and create charge effects
+	for child in visual_node.get_children():
+		if "Sphere" in child.name or "Emissive" in child.name:
+			var mesh_inst := child as MeshInstance3D
+			if mesh_inst and mesh_inst.mesh:
+				var mat: StandardMaterial3D = mesh_inst.mesh.material as StandardMaterial3D
+				if mat and mat.emission_enabled:
+					_animate_tesla_coil_charge(mesh_inst, charge_duration)
+
+
+static func _create_rail_gun_charge_buildup(visual_node: Node3D, charge_duration: float) -> void:
+	# Animate the energy conduit system charging up
+	if visual_node.has_meta("supports_sequential_coil_activation"):
+		animate_energy_charge_sequence(visual_node, charge_duration)
+
+
+static func _create_plasma_charge_buildup(visual_node: Node3D, charge_duration: float) -> void:
+	# Create pulsing plasma core effects
+	for child in visual_node.get_children():
+		if child is MeshInstance3D:
+			var mesh_inst := child as MeshInstance3D
+			if mesh_inst.name.contains("Plasma") or mesh_inst.name.contains("Core"):
+				_animate_plasma_core_charge(mesh_inst, charge_duration)
+
+
+## Animates tesla coil charging with crackling energy
+static func _animate_tesla_coil_charge(coil_node: MeshInstance3D, duration: float) -> void:
+	var mat: StandardMaterial3D = coil_node.mesh.material as StandardMaterial3D
+	if not mat:
+		return
+	
+	var base_emission: float = mat.emission_energy_multiplier
+	var tween := coil_node.create_tween()
+	
+	# Building charge effect with crackling
+	for i in range(int(duration * 10)):
+		var intensity: float = base_emission + (float(i) / (duration * 10)) * base_emission * 3.0
+		intensity += randf_range(-0.5, 0.5)  # Crackling effect
+		tween.tween_method(
+			func(energy): mat.emission_energy_multiplier = energy,
+			mat.emission_energy_multiplier, intensity, 0.1
+		)
+
+
+## Animates plasma core charging with pulsing intensity
+static func _animate_plasma_core_charge(core_node: MeshInstance3D, duration: float) -> void:
+	var mat: StandardMaterial3D = core_node.mesh.material as StandardMaterial3D
+	if not mat:
+		return
+	
+	var base_emission: float = mat.emission_energy_multiplier
+	var tween := core_node.create_tween()
+	
+	# Pulsing charge buildup
+	for pulse_i in range(int(duration)):
+		var target_intensity: float = base_emission * (2.0 + pulse_i)
+		tween.tween_method(
+			func(energy): mat.emission_energy_multiplier = energy,
+			base_emission, target_intensity, 0.3
+		)
+		tween.tween_method(
+			func(energy): mat.emission_energy_multiplier = energy,
+			target_intensity, base_emission * 1.5, 0.7
+		)
+
+
 ## Animates conveyor belt movement
 static func animate_conveyor_belts(visual_node: Node3D, belt_speed: float = 1.0) -> void:
 	var belt_positions: Array = visual_node.get_meta("conveyor_belt_nodes", [])
@@ -3530,6 +3839,15 @@ static func _normalize_angle_difference(angle_diff: float) -> float:
 	while angle_diff < -180.0:
 		angle_diff += 360.0
 	return angle_diff
+
+
+## Sets barrel spinner velocity for continuous rotation
+static func _set_barrel_spin_velocity(spinner_node: Node3D, angular_velocity: float) -> void:
+	if not spinner_node:
+		return
+	# Convert degrees per second to rotation delta
+	var delta: float = angular_velocity * spinner_node.get_process_delta_time()
+	spinner_node.rotation_degrees.z = fmod(spinner_node.rotation_degrees.z + delta, 360.0)
 
 
 static func _set_barrel_spin_velocity(spinner_node: Node3D, degrees_per_second: float) -> void:
