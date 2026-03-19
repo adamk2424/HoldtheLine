@@ -329,6 +329,182 @@ static func _handle_building_death(entity: Node, pos: Vector3) -> void:
 	create_dust_particles(pos, 30.0, 1.5)
 
 # =============================================================================
+# Additional Impact Effects (called by ImpactEffectsEnhanced)
+# =============================================================================
+
+## Create blood spatter effect for organic damage
+static func create_blood_spatter(pos: Vector3, normal: Vector3, intensity: float) -> void:
+	for i in range(int(intensity * 8)):
+		var direction := normal + Vector3(randf_range(-0.8, 0.8), randf_range(0, 0.5), randf_range(-0.8, 0.8))
+		var offset := direction.normalized() * randf_range(0.1, 0.4)
+		VfxPool.play_impact_spark(pos + offset, direction, Color(0.6, 0.1, 0.1), 0.8)
+
+## Create metal sparks for armor impacts
+static func create_metal_sparks(pos: Vector3, normal: Vector3, count: int, intensity: float) -> void:
+	for i in range(count):
+		var direction := normal + Vector3(randf_range(-1, 1), randf_range(0, 1), randf_range(-1, 1))
+		var offset := direction.normalized() * randf_range(0.05, 0.3)
+		VfxPool.play_impact_spark(pos + offset, direction, Color(1.0, 0.8, 0.3), intensity)
+
+## Create dust cloud for concrete impacts
+static func create_dust_cloud(pos: Vector3, velocity: Vector3, size: float) -> void:
+	for i in range(int(size * 6)):
+		var offset := Vector3(randf_range(-0.3, 0.3), randf_range(0, 0.2), randf_range(-0.3, 0.3))
+		var drift := velocity + Vector3(randf_range(-0.1, 0.1), randf_range(0.1, 0.3), randf_range(-0.1, 0.1))
+		VfxPool.play_smoke_puff(pos + offset, drift, size * 0.3)
+
+## Create concrete chips for heavy impacts
+static func create_concrete_chips(pos: Vector3, normal: Vector3, intensity: float) -> void:
+	for i in range(int(intensity * 10)):
+		var direction := normal + Vector3(randf_range(-0.6, 0.6), randf_range(0, 0.8), randf_range(-0.6, 0.6))
+		var offset := direction.normalized() * randf_range(0.08, 0.25)
+		VfxPool.play_impact_spark(pos + offset, direction, Color(0.7, 0.7, 0.6), 0.6)
+
+## Create impact crater for heavy damage
+static func create_impact_crater(pos: Vector3, size: float) -> void:
+	VfxPool.play_explosion(pos, size, Color(0.5, 0.4, 0.3))
+	create_dust_cloud(pos, Vector3.UP * 0.2, size)
+
+## Create energy burn effect for organic targets hit by energy weapons
+static func create_energy_burn(pos: Vector3, intensity: float) -> void:
+	VfxPool.play_beam_hit(pos, Color(0.8, 0.9, 1.0), intensity)
+	VfxPool.play_smoke_puff(pos, Vector3.UP * 0.1, intensity * 0.5)
+
+## Create molten metal effect for armor penetration
+static func create_molten_metal(pos: Vector3, direction: Vector3) -> void:
+	for i in range(6):
+		var offset := direction * randf_range(0.1, 0.3) + Vector3(randf_range(-0.1, 0.1), randf_range(-0.1, 0.1), randf_range(-0.1, 0.1))
+		VfxPool.play_fire_burst(pos + offset, 0.2, 2.0)
+
+## Create energy interference effect
+static func create_energy_interference(pos: Vector3, intensity: float) -> void:
+	for i in range(int(intensity * 4)):
+		var offset := Vector3(randf_range(-0.5, 0.5), randf_range(-0.3, 0.3), randf_range(-0.5, 0.5))
+		VfxPool.play_beam_hit(pos + offset, Color(0.8, 0.4, 1.0), intensity * 0.8)
+
+## Create gore explosion for heavy explosive damage to organics
+static func create_gore_explosion(pos: Vector3, size: float) -> void:
+	for i in range(int(size * 12)):
+		var direction := Vector3(randf_range(-1, 1), randf_range(0, 1), randf_range(-1, 1)).normalized()
+		var offset := direction * randf_range(0.1, size)
+		VfxPool.play_impact_spark(pos + offset, direction, Color(0.7, 0.1, 0.1), 1.0)
+
+## Create shrapnel burst for explosive impacts on armor
+static func create_shrapnel_burst(pos: Vector3, normal: Vector3, count: int, size: float) -> void:
+	for i in range(count):
+		var direction := normal + Vector3(randf_range(-1, 1), randf_range(0, 1), randf_range(-1, 1))
+		direction = direction.normalized()
+		var offset := direction * randf_range(0.1, size)
+		VfxPool.play_impact_spark(pos + offset, direction, Color(0.8, 0.8, 0.7), 1.2)
+
+## Create debris explosion for structural damage
+static func create_debris_explosion(pos: Vector3, size: float) -> void:
+	for i in range(int(size * 8)):
+		var direction := Vector3(randf_range(-1, 1), randf_range(0.2, 1), randf_range(-1, 1)).normalized()
+		var offset := direction * randf_range(0.1, size)
+		VfxPool.play_impact_spark(pos + offset, direction, Color(0.6, 0.5, 0.4), 1.0)
+
+## Create burning flesh effect
+static func create_burning_flesh(pos: Vector3, intensity: float) -> void:
+	VfxPool.play_fire_burst(pos, intensity, 1.5)
+	create_fire_embers(pos, intensity * 5, intensity * 0.8)
+
+## Create metal heating effect
+static func create_metal_heating(pos: Vector3, intensity: float) -> void:
+	VfxPool.play_energy_charge(pos, pos + Vector3.UP * 0.2, Color(1.0, 0.5, 0.1), intensity)
+
+## Create fire spread effect
+static func create_fire_spread(pos: Vector3, normal: Vector3, intensity: float) -> void:
+	for i in range(int(intensity * 6)):
+		var spread_pos := pos + Vector3(randf_range(-intensity, intensity), 0, randf_range(-intensity, intensity))
+		VfxPool.play_fire_burst(spread_pos, 0.3, 1.0)
+
+## Create electric nervous system effect (for electric damage to organics)
+static func create_electric_nervous_system(pos: Vector3, intensity: float) -> void:
+	for i in range(int(intensity * 4)):
+		var offset := Vector3(randf_range(-0.3, 0.3), randf_range(-0.2, 0.2), randf_range(-0.3, 0.3))
+		VfxPool.play_beam_hit(pos + offset, Color(0.4, 0.8, 1.0), intensity * 0.6)
+
+## Create EMP pulse effect
+static func create_emp_pulse(pos: Vector3, radius: float) -> void:
+	VfxPool.play_explosion(pos, radius * 0.3, Color(0.4, 0.8, 1.0))
+	create_electric_arcs(pos, 3.0, radius * 0.5)
+
+## Create energy field collapse
+static func create_energy_field_collapse(pos: Vector3, intensity: float) -> void:
+	VfxPool.play_explosion(pos, intensity * 0.4, Color(0.8, 0.4, 1.0))
+
+## Create acid dissolution effect
+static func create_acid_dissolution(pos: Vector3, intensity: float) -> void:
+	VfxPool.play_smoke_puff(pos, Vector3.UP * 0.1, intensity * 0.5)
+	for i in range(int(intensity * 3)):
+		var offset := Vector3(randf_range(-0.2, 0.2), 0, randf_range(-0.2, 0.2))
+		VfxPool.play_impact_spark(pos + offset, Vector3.UP, Color(0.6, 0.8, 0.2), 0.8)
+
+## Create metal corrosion effect
+static func create_metal_corrosion(pos: Vector3, intensity: float) -> void:
+	VfxPool.play_smoke_puff(pos, Vector3.UP * 0.15, intensity * 0.6)
+	VfxPool.play_impact_spark(pos, Vector3.UP, Color(0.5, 0.7, 0.2), intensity)
+
+## Create acid smoke
+static func create_acid_smoke(pos: Vector3, intensity: float) -> void:
+	create_battlefield_smoke(pos, intensity * 8, intensity * 0.7)
+
+## Create acid pool effect
+static func create_acid_pool(pos: Vector3, size: float) -> void:
+	VfxPool.play_energy_charge(pos, pos + Vector3.UP * 0.1, Color(0.6, 0.8, 0.2), size * 3)
+
+## Create toxin injection effect for biological weapons
+static func create_toxin_injection(pos: Vector3, intensity: float) -> void:
+	VfxPool.play_impact_spark(pos, Vector3.UP, Color(0.4, 0.8, 0.3), intensity)
+	VfxPool.play_smoke_puff(pos, Vector3.UP * 0.05, intensity * 0.3)
+
+## Create bone fragments for biological projectile impacts
+static func create_bone_fragments(pos: Vector3, normal: Vector3, count: int) -> void:
+	for i in range(count):
+		var direction := normal + Vector3(randf_range(-0.8, 0.8), randf_range(0, 0.8), randf_range(-0.8, 0.8))
+		var offset := direction.normalized() * randf_range(0.05, 0.2)
+		VfxPool.play_impact_spark(pos + offset, direction, Color(0.85, 0.8, 0.7), 0.6)
+
+## Create organic splatter
+static func create_organic_splatter(pos: Vector3, normal: Vector3, intensity: float) -> void:
+	for i in range(int(intensity * 5)):
+		var direction := normal + Vector3(randf_range(-0.6, 0.6), randf_range(0, 0.4), randf_range(-0.6, 0.6))
+		var offset := direction.normalized() * randf_range(0.05, 0.3)
+		VfxPool.play_impact_spark(pos + offset, direction, Color(0.8, 0.7, 0.4), 0.7)
+
+## Create entry wound effect for piercing weapons
+static func create_entry_wound(pos: Vector3, normal: Vector3, size: float) -> void:
+	VfxPool.play_beam_hit(pos, Color(0.8, 0.2, 0.2), size)
+	create_blood_spatter(pos, normal, size * 0.5)
+
+## Create penetration hole effect
+static func create_penetration_hole(pos: Vector3, normal: Vector3, size: float) -> void:
+	VfxPool.play_beam_hit(pos, Color(1.0, 0.8, 0.4), size)
+	create_molten_metal(pos, normal)
+
+## Create shell casing for autocannon
+static func create_shell_casing(pos: Vector3, velocity: Vector3) -> void:
+	# Visual representation of ejected shell casing
+	VfxPool.play_impact_spark(pos, velocity.normalized(), Color(0.8, 0.6, 0.3), 0.4)
+
+## Create plasma residue effect
+static func create_plasma_residue(pos: Vector3, size: float, duration: float) -> void:
+	VfxPool.play_energy_charge(pos, pos + Vector3.UP * 0.3, Color(0.8, 0.2, 0.9), duration * 0.5)
+	create_energy_disturbance(pos, duration, size * 0.8)
+
+## Create chain lightning effect
+static func create_chain_lightning(start_pos: Vector3, target_entity: Node, range: float) -> void:
+	if not is_instance_valid(target_entity):
+		return
+	
+	var end_pos := target_entity.global_position
+	if start_pos.distance_to(end_pos) > range:
+		return
+	
+	VfxPool.play_energy_charge(start_pos, end_pos, Color(0.4, 0.8, 1.0), 0.2)
+
+# =============================================================================
 # Cleanup
 # =============================================================================
 
