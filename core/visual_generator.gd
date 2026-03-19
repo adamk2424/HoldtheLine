@@ -179,6 +179,7 @@ static func create_entity_visual(entity_id: String, base_color: Color) -> Node3D
 		"shield_pylon": return _create_shield_pylon(base_color)
 		"leach_tower": return _create_leach_tower(base_color)
 		"thermal_siphon": return _create_thermal_siphon(base_color)
+		"solar_array": return _create_solar_array(base_color)
 		"recycler": return _create_recycler(base_color)
 		"drone_printer": return _create_drone_printer(base_color)
 		"mech_bay": return _create_mech_bay(base_color)
@@ -299,6 +300,14 @@ static func _create_autocannon(c: Color) -> Node3D:
 	r.set_meta("supports_rotation", true)
 	r.set_meta("supports_elevation", true)
 	r.set_meta("supports_barrel_spin", true)
+	r.set_meta("muzzle_flash_points", [
+		Vector3(-0.08, h + 0.25, 0.5),
+		Vector3(0.08, h + 0.25, 0.5)
+	])
+	r.set_meta("brass_ejection_points", [
+		Vector3(0.22, h + 0.15, 0.1),
+		Vector3(-0.22, h + 0.15, 0.1)
+	])
 	
 	return r
 
@@ -387,6 +396,18 @@ static func _create_missile_battery(c: Color) -> Node3D:
 	r.set_meta("supports_rotation", true)
 	r.set_meta("supports_missile_visibility", true)
 	r.set_meta("supports_radar_sweep", true)
+	r.set_meta("missile_launch_points", [
+		Vector3(-0.13, h + 0.425, -0.13) + Vector3(0, 0.35, 0),
+		Vector3(0.13, h + 0.425, -0.13) + Vector3(0, 0.35, 0),
+		Vector3(-0.13, h + 0.425, 0.13) + Vector3(0, 0.35, 0),
+		Vector3(0.13, h + 0.425, 0.13) + Vector3(0, 0.35, 0)
+	])
+	r.set_meta("exhaust_trail_points", [
+		Vector3(-0.13, h + 0.8, -0.13),
+		Vector3(0.13, h + 0.8, -0.13),
+		Vector3(-0.13, h + 0.8, 0.13),
+		Vector3(0.13, h + 0.8, 0.13)
+	])
 	
 	return r
 
@@ -618,6 +639,9 @@ static func _create_rail_gun(c: Color) -> Node3D:
 	r.set_meta("supports_energy_charging", true)
 	r.set_meta("supports_recoil", true)
 	r.set_meta("supports_sequential_coil_activation", true)
+	r.set_meta("energy_beam_origin", Vector3(0, h + 1.1, 1.08))
+	r.set_meta("recoil_distance", -0.15)  # Distance barrel moves back during recoil
+	r.set_meta("charge_duration", 1.5)    # Time to fully charge before firing
 	
 	return r
 
@@ -1264,6 +1288,25 @@ static func _create_thermal_siphon_t3(c: Color) -> Node3D:
 	_add_emissive_box(r, Vector3(0.3, 0.04, 0.3), Vector3(0, h + 0.05, 0), energy, 2.0)
 	return r
 
+static func _create_solar_array(c: Color) -> Node3D:
+	## Solar Array (2x2): Low profile solar farm with tracking panels and power conduits
+	var r := Node3D.new()
+	r.name = "Visual"
+	var dark := c.darkened(0.3)
+	var accent := Color(1.0, 0.8, 0.1)
+	# Low flat structure - no pedestal
+	# Base platform
+	_add_box(r, Vector3(1.8, 0.1, 1.8), Vector3(0, 0.05, 0), dark)
+	# 4 solar panels
+	for pos in [Vector3(-0.45, 0.3, -0.45), Vector3(0.45, 0.3, -0.45), Vector3(-0.45, 0.3, 0.45), Vector3(0.45, 0.3, 0.45)]:
+		_add_box(r, Vector3(0.8, 0.03, 0.8), pos, c)
+		_add_emissive_box(r, Vector3(0.7, 0.01, 0.7), Vector3(pos.x, pos.y + 0.02, pos.z), accent, 0.8)
+	# Central power hub
+	_add_box(r, Vector3(0.3, 0.25, 0.3), Vector3(0, 0.225, 0), c.lightened(0.1))
+	_add_emissive_sphere(r, 0.08, Vector3(0, 0.35, 0), accent, 2.5)
+	return r
+
+
 # --- Solar Array Tiers ---
 static func _create_solar_array_t2(c: Color) -> Node3D:
 	var r := Node3D.new()
@@ -1544,6 +1587,12 @@ static func _create_drone_printer(c: Color) -> Node3D:
 	r.set_meta("supports_arm_animation", true)
 	r.set_meta("supports_antenna_rotation", true)
 	r.set_meta("supports_assembly_glow", true)
+	r.set_meta("production_type", "drone")
+	r.set_meta("assembly_points", [
+		Vector3(0.2, 0.98, 0.15),   # Drone assembly point 1
+		Vector3(-0.18, 0.975, -0.12), # Drone assembly point 2
+		Vector3(0.05, 1.0, -0.2)    # Control core assembly
+	])
 	
 	return r
 
@@ -1693,6 +1742,15 @@ static func _create_mech_bay(c: Color) -> Node3D:
 	r.set_meta("supports_gantry_animation", true)
 	r.set_meta("supports_welding_animation", true)
 	r.set_meta("supports_crane_animation", true)
+	r.set_meta("production_type", "mech")
+	r.set_meta("welding_spark_points", [
+		Vector3(-0.2, 0.95, 0.4),   # Welding arm 1 spark
+		Vector3(0.15, 0.75, 0.35)   # Welding arm 2 spark
+	])
+	r.set_meta("steam_vent_points", [
+		Vector3(-0.8, 2.15, -0.5),  # Exhaust stack 1
+		Vector3(-1.0, 2.2, -0.3)    # Exhaust stack 2
+	])
 	
 	return r
 
@@ -1872,6 +1930,16 @@ static func _create_war_factory(c: Color) -> Node3D:
 	r.set_meta("supports_crane_animation", true)
 	r.set_meta("supports_beacon_rotation", true)
 	r.set_meta("supports_steam_animation", true)
+	r.set_meta("production_type", "vehicle")
+	r.set_meta("conveyor_belt_nodes", [
+		Vector3(0, 0.45, 0.8),      # Main assembly line
+		Vector3(0, 0.45, 0.2)       # Secondary line
+	])
+	r.set_meta("hazard_warning_points", [
+		Vector3(0.75, 1.5, 1.35),   # Right warning light
+		Vector3(-0.75, 1.5, 1.35),  # Left warning light
+		Vector3(0, 1.8, 1.35)       # Rotating beacon
+	])
 	
 	return r
 
@@ -2729,3 +2797,491 @@ static func _parse_scale(scale_val: Variant) -> Vector3:
 	elif scale_val is Vector3:
 		return scale_val
 	return Vector3.ONE
+
+
+# =============================================================================
+# ENHANCED TURRET ANIMATION SYSTEM
+# =============================================================================
+
+## Creates barrel recoil animation for rail guns and heavy weapons
+static func animate_barrel_recoil(visual_node: Node3D, recoil_distance: float = -0.15, duration: float = 0.3) -> void:
+	if not visual_node or not visual_node.has_meta("barrel_assembly_node"):
+		return
+	
+	var barrel_path: String = visual_node.get_meta("barrel_assembly_node")
+	var barrel_assembly := visual_node.get_node_or_null(NodePath(barrel_path))
+	if not barrel_assembly:
+		return
+	
+	var original_pos: Vector3 = barrel_assembly.position
+	var recoil_pos: Vector3 = original_pos + Vector3(0, 0, recoil_distance)
+	
+	# Quick recoil back, slower return to position
+	var tween := visual_node.create_tween()
+	tween.set_ease(Tween.EASE_OUT)
+	tween.set_trans(Tween.TRANS_BACK)
+	tween.tween_property(barrel_assembly, "position", recoil_pos, duration * 0.2)
+	tween.tween_property(barrel_assembly, "position", original_pos, duration * 0.8)
+
+
+## Animates energy charging sequence for rail guns and plasma weapons
+static func animate_energy_charge_sequence(visual_node: Node3D, charge_duration: float = 1.5) -> void:
+	if not visual_node or not visual_node.has_meta("supports_sequential_coil_activation"):
+		return
+	
+	var coil_count: int = visual_node.get_meta("coil_count", 0)
+	if coil_count == 0:
+		return
+	
+	# Find barrel assembly for coil access
+	var barrel_path: String = visual_node.get_meta("barrel_assembly_node", "")
+	var barrel_assembly := visual_node.get_node_or_null(NodePath(barrel_path))
+	if not barrel_assembly:
+		return
+	
+	# Activate coils sequentially with increasing intensity
+	for i in range(coil_count):
+		var coil_node := barrel_assembly.get_node_or_null("AcceleratorCoil_" + str(i))
+		if not coil_node:
+			continue
+		
+		var delay: float = (charge_duration / float(coil_count)) * float(i)
+		var activation_duration: float = charge_duration - delay
+		
+		# Create charging effect for this coil
+		visual_node.get_tree().create_timer(delay).timeout.connect(
+			func(): _animate_coil_activation(coil_node, activation_duration, 1.5 + i * 0.5)
+		)
+
+
+## Animates individual accelerator coil charging
+static func _animate_coil_activation(coil_node: Node3D, duration: float, max_intensity: float) -> void:
+	# Find emissive materials in the coil
+	for child in coil_node.get_children():
+		if child is MeshInstance3D:
+			var mesh_inst := child as MeshInstance3D
+			var mat := mesh_inst.get_surface_override_material(0) as StandardMaterial3D
+			if not mat:
+				mat = mesh_inst.mesh.material as StandardMaterial3D
+			
+			if mat and mat.emission_enabled:
+				var base_intensity: float = mat.emission_energy_multiplier
+				var tween := coil_node.create_tween()
+				tween.set_ease(Tween.EASE_OUT)
+				tween.set_trans(Tween.TRANS_EXPO)
+				
+				# Ramp up to max intensity
+				tween.tween_method(
+					func(intensity): mat.emission_energy_multiplier = intensity,
+					base_intensity, max_intensity, duration * 0.7
+				)
+				# Brief peak hold
+				tween.tween_delay(duration * 0.1)
+				# Quick discharge
+				tween.tween_method(
+					func(intensity): mat.emission_energy_multiplier = intensity,
+					max_intensity, base_intensity, duration * 0.2
+				)
+
+
+## Animates spinning barrel rotation for autocannons and gatling weapons
+static func animate_barrel_spin(visual_node: Node3D, spin_duration: float = 2.0, max_speed: float = 720.0) -> void:
+	if not visual_node or not visual_node.has_meta("barrel_spinner_node"):
+		return
+	
+	var spinner_path: String = visual_node.get_meta("barrel_spinner_node")
+	var barrel_spinner := visual_node.get_node_or_null(NodePath(spinner_path))
+	if not barrel_spinner:
+		return
+	
+	# Ramp up spin, sustain, then ramp down
+	var tween := visual_node.create_tween()
+	tween.set_ease(Tween.EASE_IN_OUT)
+	
+	# Calculate total rotation for smooth spinning
+	var spin_up_time: float = spin_duration * 0.3
+	var sustain_time: float = spin_duration * 0.4
+	var spin_down_time: float = spin_duration * 0.3
+	
+	# Spin up
+	tween.tween_method(
+		func(speed): barrel_spinner.rotation_degrees.z += speed * visual_node.get_process_delta_time(),
+		0.0, max_speed, spin_up_time
+	)
+	
+	# Sustain high speed
+	tween.tween_method(
+		func(speed): barrel_spinner.rotation_degrees.z += speed * visual_node.get_process_delta_time(),
+		max_speed, max_speed, sustain_time
+	)
+	
+	# Spin down
+	tween.tween_method(
+		func(speed): barrel_spinner.rotation_degrees.z += speed * visual_node.get_process_delta_time(),
+		max_speed, 0.0, spin_down_time
+	)
+
+
+## Animates missile visibility during reload sequences
+static func animate_missile_reload(visual_node: Node3D, missile_index: int = -1, reload_duration: float = 3.0) -> void:
+	if not visual_node or not visual_node.has_meta("launcher_assembly_node"):
+		return
+	
+	var launcher_path: String = visual_node.get_meta("launcher_assembly_node")
+	var launcher_assembly := visual_node.get_node_or_null(NodePath(launcher_path))
+	if not launcher_assembly:
+		return
+	
+	# If missile_index is -1, reload all missiles
+	var missile_count: int = visual_node.get_meta("missile_count", 4)
+	var missiles_to_reload: Array = []
+	
+	if missile_index >= 0:
+		missiles_to_reload.append(missile_index)
+	else:
+		for i in range(missile_count):
+			missiles_to_reload.append(i)
+	
+	# Animate each missile reload
+	for i in missiles_to_reload:
+		var missile_node := launcher_assembly.get_node_or_null("Missile_" + str(i))
+		if missile_node:
+			# Hide missile, wait for reload time, then show with assembly animation
+			missile_node.visible = false
+			
+			visual_node.get_tree().create_timer(reload_duration * randf_range(0.7, 1.3)).timeout.connect(
+				func(): _animate_missile_assembly(missile_node)
+			)
+
+
+## Animates individual missile assembly process
+static func _animate_missile_assembly(missile_node: Node3D) -> void:
+	if not missile_node:
+		return
+	
+	# Start below assembly position
+	var original_pos: Vector3 = missile_node.position
+	missile_node.position = original_pos + Vector3(0, -0.2, 0)
+	missile_node.visible = true
+	missile_node.modulate.a = 0.3
+	
+	# Animate assembly rising into position with fade in
+	var tween := missile_node.create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(missile_node, "position", original_pos, 1.5)
+	tween.tween_property(missile_node, "modulate:a", 1.0, 1.5)
+
+
+## Creates muzzle flash effects at specified points
+static func create_muzzle_flash_effects(visual_node: Node3D, flash_points: Array) -> void:
+	for point in flash_points:
+		if point is Vector3:
+			_create_single_muzzle_flash(visual_node, point)
+
+
+## Creates individual muzzle flash effect
+static func _create_single_muzzle_flash(visual_node: Node3D, position: Vector3) -> void:
+	var flash := MeshInstance3D.new()
+	flash.name = "MuzzleFlash"
+	
+	# Create bright sphere for flash
+	var flash_mesh := SphereMesh.new()
+	flash_mesh.radius = 0.08
+	flash_mesh.height = 0.16
+	
+	var flash_mat := StandardMaterial3D.new()
+	flash_mat.albedo_color = Color(1.0, 0.9, 0.4, 1.0)
+	flash_mat.emission_enabled = true
+	flash_mat.emission = Color(1.0, 0.8, 0.2)
+	flash_mat.emission_energy_multiplier = 8.0
+	flash_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	
+	flash_mesh.material = flash_mat
+	flash.mesh = flash_mesh
+	flash.position = position
+	
+	visual_node.add_child(flash)
+	
+	# Brief intense flash, then fade
+	var tween := visual_node.create_tween()
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(flash, "modulate:a", 0.0, 0.15)
+	tween.tween_callback(flash.queue_free)
+
+
+## Animates brass ejection from specified ejection ports
+static func animate_brass_ejection(visual_node: Node3D, ejection_points: Array, count: int = 3) -> void:
+	for point in ejection_points:
+		if point is Vector3:
+			for i in range(count):
+				var delay: float = i * 0.05  # Stagger ejection
+				visual_node.get_tree().create_timer(delay).timeout.connect(
+					func(): _create_ejected_brass(visual_node, point)
+				)
+
+
+## Creates animated ejected brass casing
+static func _create_ejected_brass(visual_node: Node3D, ejection_point: Vector3) -> void:
+	var brass := MeshInstance3D.new()
+	brass.name = "EjectedBrass"
+	
+	# Small cylinder for brass casing
+	var brass_mesh := CylinderMesh.new()
+	brass_mesh.top_radius = 0.01
+	brass_mesh.bottom_radius = 0.01
+	brass_mesh.height = 0.03
+	
+	var brass_mat := StandardMaterial3D.new()
+	brass_mat.albedo_color = Color(0.8, 0.7, 0.4, 1.0)
+	brass_mat.metallic = 0.7
+	brass_mat.roughness = 0.3
+	
+	brass_mesh.material = brass_mat
+	brass.mesh = brass_mesh
+	brass.position = ejection_point
+	
+	visual_node.add_child(brass)
+	
+	# Physics-like ejection trajectory
+	var eject_velocity: Vector3 = Vector3(
+		randf_range(-1.0, 1.0),    # Random sideways
+		randf_range(0.5, 1.5),     # Always upward
+		randf_range(-0.5, 0.5)     # Random forward/back
+	) * 2.0
+	
+	var gravity: Vector3 = Vector3(0, -9.8, 0)
+	var duration: float = 2.0
+	var steps: int = 60
+	var step_time: float = duration / float(steps)
+	
+	# Animate parabolic trajectory
+	var tween := visual_node.create_tween()
+	for i in range(steps):
+		var t: float = float(i) * step_time
+		var pos: Vector3 = ejection_point + eject_velocity * t + 0.5 * gravity * t * t
+		tween.tween_property(brass, "position", pos, step_time)
+		
+		# Rotate brass as it falls
+		var rotation: Vector3 = Vector3(t * 720, t * 360, t * 180)
+		tween.parallel().tween_property(brass, "rotation_degrees", rotation, step_time)
+	
+	# Fade out and cleanup
+	tween.tween_property(brass, "modulate:a", 0.0, 0.5)
+	tween.tween_callback(brass.queue_free)
+
+
+# =============================================================================
+# BUILDING ANIMATION SYSTEM
+# =============================================================================
+
+## Animates robotic arms for drone printer and mech bay assembly
+static func animate_robotic_arms(visual_node: Node3D, assembly_duration: float = 5.0) -> void:
+	if not visual_node:
+		return
+	
+	var arm_paths: Array = []
+	if visual_node.has_meta("robotic_arm1_node"):
+		arm_paths.append(visual_node.get_meta("robotic_arm1_node"))
+	if visual_node.has_meta("robotic_arm2_node"):
+		arm_paths.append(visual_node.get_meta("robotic_arm2_node"))
+	
+	for arm_path in arm_paths:
+		var arm_node := visual_node.get_node_or_null(NodePath(arm_path))
+		if arm_node:
+			_animate_single_robotic_arm(arm_node, assembly_duration)
+
+
+## Animates individual robotic arm with realistic assembly motions
+static func _animate_single_robotic_arm(arm_node: Node3D, duration: float) -> void:
+	if not arm_node:
+		return
+	
+	var original_rotation: Vector3 = arm_node.rotation_degrees
+	var tween := arm_node.create_tween()
+	tween.set_loops(int(duration / 3.0))  # Repeat cycle every 3 seconds
+	
+	# Assembly motion cycle: extend, work, retract
+	tween.tween_property(arm_node, "rotation_degrees", original_rotation + Vector3(0, -20, 15), 1.0)
+	tween.tween_property(arm_node, "rotation_degrees", original_rotation + Vector3(0, -25, 20), 0.5)
+	tween.tween_property(arm_node, "rotation_degrees", original_rotation, 1.5)
+
+
+## Creates welding spark effects at specified points
+static func animate_welding_sparks(visual_node: Node3D, spark_points: Array) -> void:
+	for point in spark_points:
+		if point is Vector3:
+			_create_welding_spark_effect(visual_node, point)
+
+
+## Creates individual welding spark effect
+static func _create_welding_spark_effect(visual_node: Node3D, position: Vector3) -> void:
+	var spark_count: int = 8
+	for i in range(spark_count):
+		var spark := MeshInstance3D.new()
+		spark.name = "WeldingSpark"
+		
+		# Tiny sphere for spark
+		var spark_mesh := SphereMesh.new()
+		spark_mesh.radius = 0.005
+		spark_mesh.height = 0.01
+		
+		var spark_mat := StandardMaterial3D.new()
+		spark_mat.albedo_color = Color(1.0, 0.8, 0.2, 1.0)
+		spark_mat.emission_enabled = true
+		spark_mat.emission = Color(1.0, 0.7, 0.1)
+		spark_mat.emission_energy_multiplier = 4.0
+		spark_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		
+		spark_mesh.material = spark_mat
+		spark.mesh = spark_mesh
+		spark.position = position
+		
+		visual_node.add_child(spark)
+		
+		# Random spark trajectory
+		var velocity: Vector3 = Vector3(
+			randf_range(-0.5, 0.5),
+			randf_range(-0.2, 0.3),
+			randf_range(-0.3, 0.3)
+		)
+		
+		var tween := visual_node.create_tween()
+		tween.set_parallel(true)
+		tween.tween_property(spark, "position", position + velocity, 0.8)
+		tween.tween_property(spark, "modulate:a", 0.0, 0.8)
+		tween.tween_callback(spark.queue_free)
+
+
+## Animates steam/smoke vents for industrial buildings
+static func animate_steam_vents(visual_node: Node3D, vent_points: Array) -> void:
+	for point in vent_points:
+		if point is Vector3:
+			_create_steam_puff_effect(visual_node, point)
+
+
+## Creates steam puff effect at vent points
+static func _create_steam_puff_effect(visual_node: Node3D, position: Vector3) -> void:
+	var steam := MeshInstance3D.new()
+	steam.name = "SteamPuff"
+	
+	# Sphere for steam cloud
+	var steam_mesh := SphereMesh.new()
+	steam_mesh.radius = 0.08
+	steam_mesh.height = 0.16
+	
+	var steam_mat := StandardMaterial3D.new()
+	steam_mat.albedo_color = Color(0.9, 0.9, 1.0, 0.4)
+	steam_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	steam_mat.emission_enabled = true
+	steam_mat.emission = Color(0.95, 0.95, 1.0)
+	steam_mat.emission_energy_multiplier = 0.5
+	
+	steam_mesh.material = steam_mat
+	steam.mesh = steam_mesh
+	steam.position = position
+	
+	visual_node.add_child(steam)
+	
+	# Steam rises and expands
+	var tween := visual_node.create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(steam, "position", position + Vector3(0, 0.3, 0), 2.0)
+	tween.tween_property(steam, "scale", Vector3(2.5, 2.5, 2.5), 2.0)
+	tween.tween_property(steam, "modulate:a", 0.0, 2.0)
+	tween.tween_callback(steam.queue_free)
+
+
+## Animates gear rotation for heavy machinery
+static func animate_gear_systems(visual_node: Node3D, rotation_speed: float = 30.0) -> void:
+	var gear_paths: Array = []
+	if visual_node.has_meta("heavy_gear_system1_node"):
+		gear_paths.append(visual_node.get_meta("heavy_gear_system1_node"))
+	if visual_node.has_meta("heavy_gear_system2_node"):
+		gear_paths.append(visual_node.get_meta("heavy_gear_system2_node"))
+	
+	for i in range(gear_paths.size()):
+		var gear_node := visual_node.get_node_or_null(NodePath(gear_paths[i]))
+		if gear_node:
+			# Alternate rotation direction for meshing gears
+			var direction: float = 1.0 if i % 2 == 0 else -1.0
+			_animate_gear_rotation(gear_node, rotation_speed * direction)
+
+
+## Animates continuous gear rotation
+static func _animate_gear_rotation(gear_node: Node3D, speed_deg_per_sec: float) -> void:
+	if not gear_node:
+		return
+	
+	# Create continuous rotation tween
+	var tween := gear_node.create_tween()
+	tween.set_loops()
+	tween.tween_method(
+		func(angle): gear_node.rotation_degrees.y = fmod(angle, 360.0),
+		0.0, 360.0, abs(360.0 / speed_deg_per_sec)
+	)
+
+
+## Animates warning beacon rotation and pulsing
+static func animate_warning_beacons(visual_node: Node3D) -> void:
+	if visual_node.has_meta("warning_beacon_node"):
+		var beacon_path: String = visual_node.get_meta("warning_beacon_node")
+		var beacon_node := visual_node.get_node_or_null(NodePath(beacon_path))
+		if beacon_node:
+			_animate_warning_beacon(beacon_node)
+	
+	# Also animate hazard warning lights if present
+	var warning_points: Array = visual_node.get_meta("hazard_warning_points", [])
+	for point in warning_points:
+		if point is Vector3:
+			_create_warning_light_pulse(visual_node, point)
+
+
+## Animates rotating beacon with pulsing light
+static func _animate_warning_beacon(beacon_node: Node3D) -> void:
+	if not beacon_node:
+		return
+	
+	# Continuous rotation
+	var rotation_tween := beacon_node.create_tween()
+	rotation_tween.set_loops()
+	rotation_tween.tween_property(beacon_node, "rotation_degrees:y", 360.0, 2.0)
+	
+	# Pulsing light effect
+	var light_tween := beacon_node.create_tween()
+	light_tween.set_loops()
+	for child in beacon_node.get_children():
+		if child is MeshInstance3D:
+			var mat: StandardMaterial3D = child.mesh.material as StandardMaterial3D
+			if mat and mat.emission_enabled:
+				var base_emission: float = mat.emission_energy_multiplier
+				light_tween.tween_method(
+					func(intensity): mat.emission_energy_multiplier = intensity,
+					base_emission, base_emission * 3.0, 0.5
+				)
+				light_tween.tween_method(
+					func(intensity): mat.emission_energy_multiplier = intensity,
+					base_emission * 3.0, base_emission, 0.5
+				)
+
+
+## Creates pulsing warning light effect
+static func _create_warning_light_pulse(visual_node: Node3D, position: Vector3) -> void:
+	# Find existing light nodes near this position and pulse them
+	# This is a simplified version - in a real implementation you'd find the actual light nodes
+	pass  # Implementation depends on specific node structure
+
+
+## Animates conveyor belt movement
+static func animate_conveyor_belts(visual_node: Node3D, belt_speed: float = 1.0) -> void:
+	var belt_positions: Array = visual_node.get_meta("conveyor_belt_nodes", [])
+	for pos in belt_positions:
+		if pos is Vector3:
+			_create_conveyor_movement_effect(visual_node, pos, belt_speed)
+
+
+## Creates visual conveyor belt movement effect
+static func _create_conveyor_movement_effect(visual_node: Node3D, belt_position: Vector3, speed: float) -> void:
+	# Create moving texture effect or moving objects on the belt
+	# This would require UV animation or moving child objects
+	# Implementation depends on specific conveyor visual design
+	pass  # Placeholder for future implementation
