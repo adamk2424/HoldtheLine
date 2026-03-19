@@ -278,6 +278,97 @@
 			"cost": {
 				"tech_points": 500
 			}
+		},
+		"efficiency_core": {
+			"id": "efficiency_core",
+			"name": "Efficiency Core",
+			"description": "Optimizes resource generation and reduces costs",
+			"rarity": "rare",
+			"type": "economic",
+			"effects": {
+				"resource_income_multiplier": 1.25,
+				"building_cost_reduction": 0.15
+			},
+			"unlock_conditions": {
+				"level_completed": "resource_crisis"
+			},
+			"icon": "res://assets/icons/items/efficiency_core.png",
+			"cost": {
+				"tech_points": 100
+			}
+		},
+		"mastery_emblem": {
+			"id": "mastery_emblem",
+			"name": "Mastery Emblem",
+			"description": "A symbol of mastery that enhances all progression",
+			"rarity": "legendary",
+			"type": "prestige",
+			"effects": {
+				"experience_multiplier": 1.5,
+				"tech_point_multiplier": 1.3
+			},
+			"unlock_conditions": {
+				"level_completed": "survival_mastery"
+			},
+			"icon": "res://assets/icons/items/mastery_emblem.png",
+			"cost": {
+				"tech_points": 300
+			}
+		},
+		"ultimate_core": {
+			"id": "ultimate_core",
+			"name": "Ultimate Core",
+			"description": "The pinnacle of combat enhancement technology",
+			"rarity": "legendary",
+			"type": "combat",
+			"effects": {
+				"all_damage_multiplier": 1.4,
+				"tower_range_multiplier": 1.2,
+				"tower_attack_speed_multiplier": 1.3
+			},
+			"unlock_conditions": {
+				"level_completed": "survival_mastery"
+			},
+			"icon": "res://assets/icons/items/ultimate_core.png",
+			"cost": {
+				"tech_points": 400
+			}
+		},
+		"speed_core": {
+			"id": "speed_core",
+			"name": "Speed Core",
+			"description": "Accelerates actions and increases efficiency",
+			"rarity": "rare",
+			"type": "utility",
+			"effects": {
+				"game_speed_bonus": 0.1,
+				"build_speed_multiplier": 1.5
+			},
+			"unlock_conditions": {
+				"achievement": "speed_demon"
+			},
+			"icon": "res://assets/icons/items/speed_core.png",
+			"cost": {
+				"tech_points": 150
+			}
+		},
+		"perfect_crystal": {
+			"id": "perfect_crystal",
+			"name": "Perfect Crystal",
+			"description": "Crystallized perfection enhances precision",
+			"rarity": "rare",
+			"type": "precision",
+			"effects": {
+				"critical_hit_chance": 0.15,
+				"accuracy_bonus": 0.25
+			},
+			"unlock_conditions": {
+				"achievement": "perfectionist"
+			},
+			"icon": "res://assets/icons/items/perfect_crystal.png",
+			"cost": {
+				"tech_points": 120
+			}
 		}
 	},
 	"rarities": {

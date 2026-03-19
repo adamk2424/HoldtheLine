@@ -1,0 +1,229 @@
+{
+  "achievements": [
+    {
+      "id": "first_victory",
+      "name": "First Victory",
+      "description": "Complete your first level",
+      "category": "progression",
+      "icon": "🏆",
+      "requirements": {
+        "type": "level_completion",
+        "count": 1
+      },
+      "rewards": {
+        "tech_points": 10
+      }
+    },
+    {
+      "id": "apprentice_defender",
+      "name": "Apprentice Defender",
+      "description": "Complete 5 levels",
+      "category": "progression",
+      "icon": "🛡️",
+      "requirements": {
+        "type": "level_completion",
+        "count": 5
+      },
+      "rewards": {
+        "tech_points": 25,
+        "items": ["defender_badge"]
+      }
+    },
+    {
+      "id": "veteran_commander",
+      "name": "Veteran Commander",
+      "description": "Complete 15 levels",
+      "category": "progression",
+      "icon": "⭐",
+      "requirements": {
+        "type": "level_completion",
+        "count": 15
+      },
+      "rewards": {
+        "tech_points": 50,
+        "items": ["commander_insignia"]
+      }
+    },
+    {
+      "id": "achievement_economist",
+      "name": "Resource Master",
+      "description": "Complete the Resource Crisis challenge",
+      "category": "challenge",
+      "icon": "💰",
+      "requirements": {
+        "type": "specific_level",
+        "level_id": "resource_crisis"
+      },
+      "rewards": {
+        "tech_points": 30,
+        "items": ["efficiency_core"]
+      }
+    },
+    {
+      "id": "achievement_master_survivor",
+      "name": "Master Survivor",
+      "description": "Complete the Survival Mastery challenge",
+      "category": "challenge",
+      "icon": "👑",
+      "requirements": {
+        "type": "specific_level",
+        "level_id": "survival_mastery"
+      },
+      "rewards": {
+        "tech_points": 100,
+        "items": ["mastery_emblem", "ultimate_core"]
+      }
+    },
+    {
+      "id": "speed_demon",
+      "name": "Speed Demon",
+      "description": "Complete any level in under 80% of target time",
+      "category": "skill",
+      "icon": "⚡",
+      "requirements": {
+        "type": "speed_completion",
+        "threshold_percent": 80
+      },
+      "rewards": {
+        "tech_points": 40,
+        "items": ["speed_core"]
+      }
+    },
+    {
+      "id": "perfectionist",
+      "name": "Perfectionist",
+      "description": "Complete a level without losing any towers",
+      "category": "skill",
+      "icon": "💎",
+      "requirements": {
+        "type": "perfect_run",
+        "count": 1
+      },
+      "rewards": {
+        "tech_points": 35,
+        "items": ["perfect_crystal"]
+      }
+    },
+    {
+      "id": "untouchable",
+      "name": "Untouchable",
+      "description": "Complete 5 levels without losing any towers",
+      "category": "skill",
+      "icon": "🛡️💎",
+      "requirements": {
+        "type": "perfect_run",
+        "count": 5
+      },
+      "rewards": {
+        "tech_points": 80,
+        "items": ["untouchable_shield"]
+      }
+    },
+    {
+      "id": "nightmare_conqueror",
+      "name": "Nightmare Conqueror",
+      "description": "Complete your first Nightmare difficulty level",
+      "category": "difficulty",
+      "icon": "😈",
+      "requirements": {
+        "type": "difficulty_completion",
+        "difficulty": "nightmare",
+        "count": 1
+      },
+      "rewards": {
+        "tech_points": 75,
+        "items": ["nightmare_core"]
+      }
+    },
+    {
+      "id": "endless_warrior",
+      "name": "Endless Warrior",
+      "description": "Survive 60 minutes in Endless Nightmare mode",
+      "category": "endurance",
+      "icon": "♾️",
+      "requirements": {
+        "type": "endless_survival",
+        "level_id": "endless_nightmare",
+        "time_minutes": 60
+      },
+      "rewards": {
+        "tech_points": 150,
+        "items": ["eternal_core"]
+      }
+    },
+    {
+      "id": "swarm_crusher",
+      "name": "Swarm Crusher",
+      "description": "Kill 1000 enemies in a single game",
+      "category": "combat",
+      "icon": "💀",
+      "requirements": {
+        "type": "kills_in_game",
+        "count": 1000
+      },
+      "rewards": {
+        "tech_points": 60,
+        "items": ["crusher_core"]
+      }
+    },
+    {
+      "id": "architect",
+      "name": "Master Architect",
+      "description": "Build 100 structures in a single game",
+      "category": "building",
+      "icon": "🏗️",
+      "requirements": {
+        "type": "buildings_built",
+        "count": 100
+      },
+      "rewards": {
+        "tech_points": 40,
+        "items": ["architect_blueprint"]
+      }
+    },
+    {
+      "id": "tech_collector",
+      "name": "Tech Collector",
+      "description": "Accumulate 1000 tech points",
+      "category": "progression",
+      "icon": "🔬",
+      "requirements": {
+        "type": "total_tech_points",
+        "count": 1000
+      },
+      "rewards": {
+        "tech_points": 100,
+        "items": ["tech_vault"]
+      }
+    },
+    {
+      "id": "challenge_seeker",
+      "name": "Challenge Seeker",
+      "description": "Complete all challenge levels",
+      "category": "completion",
+      "icon": "🎯",
+      "requirements": {
+        "type": "specific_levels",
+        "level_ids": ["speed_run", "resource_crisis", "survival_mastery"]
+      },
+      "rewards": {
+        "tech_points": 200,
+        "items": ["challenge_crown"]
+      }
+    },
+    {
+      "id": "completionist",
+      "name": "Completionist",
+      "description": "Complete all campaign levels",
+      "category": "completion",
+      "icon": "🌟",
+      "requirements": {
+        "type": "campaign_complete"
+      },
+      "rewards": {
+        "tech_points": 300,
+        "items": ["completion_trophy"]
+      }
+    }
+  ]
+}

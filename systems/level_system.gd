@@ -162,17 +162,63 @@ func _award_rewards(rewards: Dictionary) -> void:
 	var unlocks: Array = rewards.get("unlocks", [])
 	for unlock_id: String in unlocks:
 		_unlock_content(unlock_id)
+	
+	# Award items
+	var items: Array = rewards.get("items", [])
+	for item_id: String in items:
+		_award_item(item_id)
+	
+	# Trigger achievement notifications
+	if not unlocks.is_empty():
+		GameBus.achievements_unlocked.emit(unlocks)
 
 
 func _unlock_content(unlock_id: String) -> void:
-	# Add unlocked content to MetaProgress
-	if not MetaProgress.permanent_upgrades.has("unlocked_levels"):
-		MetaProgress.permanent_upgrades["unlocked_levels"] = []
+	# Handle different types of unlocks
+	if unlock_id.begins_with("level_"):
+		# Level unlock
+		if not MetaProgress.permanent_upgrades.has("unlocked_levels"):
+			MetaProgress.permanent_upgrades["unlocked_levels"] = []
+		
+		var unlocked_levels: Array = MetaProgress.permanent_upgrades["unlocked_levels"]
+		if unlock_id not in unlocked_levels:
+			unlocked_levels.append(unlock_id)
+			print("[LevelSystem] Unlocked level: %s" % unlock_id)
 	
-	var unlocked_levels: Array = MetaProgress.permanent_upgrades["unlocked_levels"]
-	if unlock_id not in unlocked_levels:
-		unlocked_levels.append(unlock_id)
-		print("[LevelSystem] Unlocked: %s" % unlock_id)
+	elif unlock_id.begins_with("achievement_"):
+		# Achievement unlock
+		if not MetaProgress.permanent_upgrades.has("unlocked_achievements"):
+			MetaProgress.permanent_upgrades["unlocked_achievements"] = []
+		
+		var unlocked_achievements: Array = MetaProgress.permanent_upgrades["unlocked_achievements"]
+		if unlock_id not in unlocked_achievements:
+			unlocked_achievements.append(unlock_id)
+			print("[LevelSystem] Achievement unlocked: %s" % unlock_id)
+	
+	else:
+		# Generic unlock
+		if not MetaProgress.permanent_upgrades.has("misc_unlocks"):
+			MetaProgress.permanent_upgrades["misc_unlocks"] = []
+		
+		var misc_unlocks: Array = MetaProgress.permanent_upgrades["misc_unlocks"]
+		if unlock_id not in misc_unlocks:
+			misc_unlocks.append(unlock_id)
+			print("[LevelSystem] Unlocked: %s" % unlock_id)
+
+
+func _award_item(item_id: String) -> void:
+	# Award items to inventory/collection
+	if not MetaProgress.permanent_upgrades.has("unlocked_items"):
+		MetaProgress.permanent_upgrades["unlocked_items"] = []
+	
+	var unlocked_items: Array = MetaProgress.permanent_upgrades["unlocked_items"]
+	if item_id not in unlocked_items:
+		unlocked_items.append(item_id)
+		print("[LevelSystem] Item unlocked: %s" % item_id)
+		
+		# Notify item system if available
+		if has_node("/root/ItemSystem"):
+			get_node("/root/ItemSystem").unlock_item(item_id)
 
 
 func _mark_level_completed(level_id: String) -> void:

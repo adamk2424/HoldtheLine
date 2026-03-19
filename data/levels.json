@@ -389,11 +389,41 @@
       "map_preset": "central_hub",
       "rewards": {
         "tech_points": 70,
-        "unlocks": []
+        "unlocks": ["achievement_economist"],
+        "items": ["efficiency_core"]
       },
       "special_modifiers": {
         "resource_penalty": 0.5,
         "economic_challenge": true
+      }
+    },
+    {
+      "id": "survival_mastery",
+      "name": "Survival Mastery",
+      "description": "The ultimate endurance test. Face all enemy types in perfect balance.",
+      "objective": "Survive 40 minutes against maximum diversity",
+      "difficulty": "nightmare",
+      "unlock_requirements": ["core_breach", "speed_run", "resource_crisis"],
+      "duration_seconds": 2400,
+      "starting_resources": {
+        "energy": 150,
+        "materials": 150
+      },
+      "enemy_spawn_multiplier": 2.8,
+      "enemy_health_multiplier": 2.2,
+      "enemy_damage_multiplier": 2.2,
+      "enabled_enemies": ["thrasher", "brute", "clugg", "scrit", "blight_mite", "polus", "slinker", "howler", "gorger", "gloom_wing", "bile_spitter", "behemoth", "terror_bringer"],
+      "disabled_enemies": [],
+      "map_preset": "fortress_siege",
+      "rewards": {
+        "tech_points": 150,
+        "unlocks": ["achievement_master_survivor"],
+        "items": ["mastery_emblem", "ultimate_core"]
+      },
+      "special_modifiers": {
+        "balanced_spawning": true,
+        "elite_variants": true,
+        "mastery_challenge": true
       }
     }
   ]

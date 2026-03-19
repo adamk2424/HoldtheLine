@@ -67,6 +67,9 @@ signal boss_killed(total_boss_kills: int)
 
 # --- Level System ---
 signal level_modifiers_applied(modifiers: Dictionary)
+signal achievements_unlocked(achievement_ids: Array)
+signal items_unlocked(item_ids: Array)
+signal progression_milestone_reached(milestone_type: String, data: Dictionary)
 signal level_objective_completed(objective_type: String)
 signal level_completed(level_id: String, rewards: Dictionary)
 signal level_failed(reason: String)
