@@ -29,6 +29,8 @@ VfxManager="*res://autoloads/vfx_manager.gd"
 VfxSystem="*res://autoloads/vfx_system.gd"
 LevelSystem="*res://systems/level_system.gd"
 ItemSystem="*res://systems/item_system.gd"
+ProgressionTracker="*res://systems/progression_tracker.gd"
+AchievementSystem="*res://systems/achievement_system.gd"
 
 [display]
 

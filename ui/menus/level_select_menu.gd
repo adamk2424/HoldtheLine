@@ -362,27 +362,48 @@ func _update_detail_panel(level_data: Dictionary) -> void:
 	_detail_difficulty.text = "Difficulty: " + difficulty.capitalize()
 	_detail_difficulty.add_theme_color_override("font_color", _get_difficulty_text_color(difficulty))
 	
-	# Format rewards
+	# Format rewards with enhanced display
 	var rewards: Dictionary = level_data.get("rewards", {})
-	var reward_text := "Rewards: "
+	var reward_parts: Array = []
+	
 	var tech_points := rewards.get("tech_points", 0)
 	if tech_points > 0:
-		reward_text += "%d Tech Points" % tech_points
+		reward_parts.append("🔬 %d Tech Points" % tech_points)
 	
 	var unlocks: Array = rewards.get("unlocks", [])
-	if not unlocks.is_empty():
-		if tech_points > 0:
-			reward_text += ", "
-		reward_text += "Unlocks: " + ", ".join(unlocks)
+	var items: Array = rewards.get("items", [])
 	
-	_detail_rewards.text = reward_text
+	if not unlocks.is_empty():
+		var unlock_display := []
+		for unlock: String in unlocks:
+			if unlock.begins_with("achievement_"):
+				unlock_display.append("🏆 " + unlock.replace("achievement_", "").capitalize())
+			else:
+				unlock_display.append("📖 " + unlock.capitalize())
+		reward_parts.append("Unlocks: " + ", ".join(unlock_display))
+	
+	if not items.is_empty():
+		var item_display := []
+		for item: String in items:
+			item_display.append("💎 " + item.replace("_", " ").capitalize())
+		reward_parts.append("Items: " + ", ".join(item_display))
+	
+	_detail_rewards.text = "Rewards: " + (", ".join(reward_parts) if not reward_parts.is_empty() else "None")
+	
+	# Show completion status and best time if available
+	var level_id: String = level_data.get("id", "")
+	var completion_status := _get_completion_status(level_id)
+	if completion_status != "":
+		_detail_rewards.text += "\n" + completion_status
 	
 	var is_unlocked := _is_level_unlocked(level_data)
 	_start_button.disabled = not is_unlocked
 	if not is_unlocked:
-		_start_button.text = "LOCKED"
+		_start_button.text = "🔒 LOCKED"
+		# Show unlock requirements
+		_show_unlock_requirements(level_data)
 	else:
-		_start_button.text = "START LEVEL"
+		_start_button.text = "▶ START LEVEL"
 
 
 func _on_level_card_clicked(level_id: String) -> void:
@@ -448,3 +469,46 @@ func _filter_levels() -> void:
 				show_card = false
 		
 		card.visible = show_card
+
+
+func _get_completion_status(level_id: String) -> String:
+	var completed_levels: Array = MetaProgress.permanent_upgrades.get("completed_levels", [])
+	if level_id not in completed_levels:
+		return ""
+	
+	var status_parts: Array = ["✅ Completed"]
+	
+	# Check for progression data if available
+	if has_node("/root/ProgressionTracker"):
+		var tracker = get_node("/root/ProgressionTracker")
+		var stats := tracker.get_level_completion_stats(level_id)
+		
+		if stats.get("fastest_time", -1.0) > 0:
+			var time: float = stats["fastest_time"]
+			var minutes := int(time / 60)
+			var seconds := int(time) % 60
+			status_parts.append("⏱️ Best: %d:%02d" % [minutes, seconds])
+		
+		if stats.get("has_perfect_run", false):
+			status_parts.append("💎 Perfect Run")
+	
+	return ", ".join(status_parts)
+
+
+func _show_unlock_requirements(level_data: Dictionary) -> void:
+	var requirements: Array = level_data.get("unlock_requirements", [])
+	if requirements.is_empty():
+		return
+	
+	var req_text := "\nRequires: "
+	var req_parts: Array = []
+	
+	for req: String in requirements:
+		var req_display := req.replace("level_", "").replace("_", " ").capitalize()
+		var completed_levels: Array = MetaProgress.permanent_upgrades.get("completed_levels", [])
+		if req in completed_levels:
+			req_parts.append("✅ " + req_display)
+		else:
+			req_parts.append("❌ " + req_display)
+	
+	_detail_objective.text += req_text + ", ".join(req_parts)

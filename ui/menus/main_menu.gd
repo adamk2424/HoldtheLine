@@ -11,6 +11,7 @@ var _loadout_menu: Control = null
 var _leaderboard: Control = null
 var _pre_game_menu: Control = null
 var _level_select_menu: Control = null
+var _progression_dashboard: Control = null
 
 
 func _ready() -> void:
@@ -79,6 +80,7 @@ func _build_ui() -> void:
 
 	_add_menu_button("Select Level", _on_level_select)
 	_add_menu_button("Quick Game", _on_new_game)
+	_add_menu_button("📊 Progression", _on_progression)
 	_add_menu_button("Loadout", _on_loadout)
 	_add_menu_button("Leaderboard", _on_leaderboard)
 	_add_menu_button("Settings", _on_settings)
@@ -133,6 +135,36 @@ func _add_menu_button(text: String, callback: Callable) -> void:
 	btn.add_theme_color_override("font_hover_color", Color(0.3, 1.0, 0.5))
 	btn.pressed.connect(callback)
 	_buttons_vbox.add_child(btn)
+
+
+func _on_progression() -> void:
+	# Show progression dashboard
+	var ProgressionDashboardScript := preload("res://ui/menus/progression_dashboard.gd")
+	_progression_dashboard = Control.new()
+	_progression_dashboard.set_script(ProgressionDashboardScript)
+	add_child(_progression_dashboard)
+	
+	_buttons_vbox.visible = false
+	_title_label.visible = false
+	_subtitle_label.visible = false
+	
+	# Add back button to dashboard
+	var back_button := Button.new()
+	back_button.text = "◄ Back to Main Menu"
+	back_button.custom_minimum_size = Vector2(200, 40)
+	back_button.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	back_button.offset_left = 30
+	back_button.offset_top = 30
+	back_button.offset_right = 230
+	back_button.offset_bottom = 70
+	back_button.pressed.connect(func() -> void:
+		_progression_dashboard.queue_free()
+		_progression_dashboard = null
+		_buttons_vbox.visible = true
+		_title_label.visible = true
+		_subtitle_label.visible = true
+	)
+	_progression_dashboard.add_child(back_button)
 
 
 func _on_level_select() -> void:
