@@ -71,10 +71,18 @@ func _process(delta: float) -> void:
 		# Skip boss-role enemies (handled by DifficultySystem)
 		if edata.get("role", "") == "boss":
 			continue
+		
+		# Check level restrictions
+		if not LevelSystem.should_enemy_spawn(enemy_id):
+			continue
 
 		var spawns_per_60s: float = float(edata.get("spawns_per_60s", 10))
 		var spawn_group: int = maxi(1, int(edata.get("spawn_group", 1)))
 		var ramp_in: float = float(edata.get("ramp_in", 1.0))
+		
+		# Apply level difficulty multipliers
+		var level_multipliers := LevelSystem.get_difficulty_multipliers()
+		spawns_per_60s *= level_multipliers.get("enemy_spawn_multiplier", 1.0)
 
 		# Calculate ramp-in multiplier: lerp from ramp_in to 1.0 over ramp_in_duration
 		var unlock_time: float = _enemy_unlock_times.get(enemy_id, 0.0)
@@ -283,10 +291,13 @@ func _get_difficulty_multipliers() -> Dictionary:
 
 	# Attack range and damage bonus: +5% per minute past 10 minutes
 	var combat_bonus: float = _get_combat_scaling_bonus(minutes_elapsed)
+	
+	# Get level multipliers
+	var level_multipliers := LevelSystem.get_difficulty_multipliers()
 
 	return {
-		"hp_mult": 1.0 + effective_hp_minutes,
-		"damage_mult": (1.0 + effective_damage_minutes) * (1.0 + combat_bonus),
+		"hp_mult": (1.0 + effective_hp_minutes) * level_multipliers.get("enemy_health_multiplier", 1.0),
+		"damage_mult": (1.0 + effective_damage_minutes) * (1.0 + combat_bonus) * level_multipliers.get("enemy_damage_multiplier", 1.0),
 		"speed_bonus": speed_bonus,
 		"attack_range_mult": 1.0 + combat_bonus,
 	}

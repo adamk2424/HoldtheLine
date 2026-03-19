@@ -14,6 +14,7 @@ var hud: CanvasLayer
 var build_menu: CanvasLayer
 var pause_menu: CanvasLayer
 var game_over_screen: CanvasLayer
+var level_complete_screen: CanvasLayer
 var intro_cinematic: CanvasLayer
 
 # System node references
@@ -99,6 +100,14 @@ func _setup_ui() -> void:
 	game_over_screen.set_script(GameOverScript)
 	game_over_screen.name = "GameOverScreen"
 	add_child(game_over_screen)
+
+	# Level Complete Screen
+	var LevelCompleteScript := preload("res://ui/menus/level_complete_screen.gd")
+	level_complete_screen = CanvasLayer.new()
+	level_complete_screen.set_script(LevelCompleteScript)
+	level_complete_screen.name = "LevelCompleteScreen"
+	level_complete_screen.layer = 26  # Above game over screen
+	add_child(level_complete_screen)
 
 	# Intro Cinematic
 	var IntroScript := preload("res://ui/cinematic/intro_cinematic.gd")
@@ -188,6 +197,7 @@ func _connect_signals() -> void:
 	GameBus.central_tower_destroyed.connect(_on_central_tower_destroyed)
 	GameBus.game_over.connect(_on_game_over)
 	GameBus.build_requested.connect(_on_build_requested)
+	GameBus.level_completed.connect(_on_level_completed)
 
 
 func _on_build_requested(entity_id: String, grid_pos: Vector2i, size: int) -> void:
@@ -589,6 +599,34 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _on_central_tower_destroyed() -> void:
 	GameBus.game_over.emit(GameState.game_time)
+
+
+func _on_level_completed(level_id: String, rewards: Dictionary) -> void:
+	GameState.is_game_active = false
+	MetaProgress.record_game_result(GameState.game_time, GameState.enemies_killed)
+	
+	# Show level complete screen instead of game over
+	var level_data := LevelSystem.get_level_data(level_id)
+	if level_complete_screen and level_complete_screen.has_method("show_level_complete"):
+		level_complete_screen.show_level_complete(level_data, rewards, GameState.game_time)
+		level_complete_screen.continue_requested.connect(_return_to_level_select)
+		level_complete_screen.replay_requested.connect(_replay_level)
+	
+	print("[GameSession] Level Complete! %s - Time: %s, Kills: %d" % [
+		level_data.get("name", level_id), GameState.get_game_time_formatted(), GameState.enemies_killed
+	])
+
+
+func _return_to_level_select() -> void:
+	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+
+
+func _replay_level() -> void:
+	# Restart current level
+	var current_level := GameState.selected_level_id
+	GameState.reset_state()
+	GameState.selected_level_id = current_level
+	get_tree().reload_current_scene()
 
 
 func _on_game_over(_survival_time: float) -> void:
