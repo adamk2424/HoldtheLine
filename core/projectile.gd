@@ -106,23 +106,22 @@ func setup(p_target: Node, p_damage: float, p_armor_pierce: float = 0.0, p_sourc
 	if target and is_instance_valid(target):
 		_target_last_pos = target.global_position
 	
-	# Enhanced weapon-specific VFX
+	# Lightweight VFX for maximum performance (Task 1C)
 	if source and is_instance_valid(source):
 		var weapon_type := _get_weapon_type_from_source(source)
 		var direction := (global_position.direction_to(_target_last_pos) if target else Vector3.FORWARD)
 		
-		# Enhanced muzzle flash
-		ProjectileVfxEnhanced.create_weapon_muzzle_flash(source.global_position, weapon_type, direction)
+		# Create lightweight muzzle flash
+		ProjectileVfxLightweight.create_muzzle_flash(weapon_type, source.global_position, direction)
 		
-		# Create projectile trail VFX
+		# Create lightweight projectile trail
 		var travel_time := global_position.distance_to(_target_last_pos) / speed
-		ProjectileVfxEnhanced.create_projectile_vfx(
+		ProjectileVfxLightweight.create_projectile_trail(
+			weapon_type,
 			source.global_position,
 			_target_last_pos,
-			weapon_type,
 			travel_time,
-			homing,
-			target
+			get_parent()
 		)
 
 
@@ -151,16 +150,15 @@ func _process(delta: float) -> void:
 
 
 func _hit() -> void:
-	# Enhanced impact VFX using new system
+	# Lightweight impact VFX for maximum performance (Task 1C)
 	var weapon_type := _get_weapon_type_from_source(source)
 	var normal := Vector3.UP  # TODO: Calculate actual surface normal
 	
-	ImpactEffectsEnhanced.create_weapon_impact(
+	ProjectileVfxLightweight.create_impact_effect(
+		weapon_type,
 		global_position,
 		normal,
-		damage,
-		weapon_type,
-		target
+		get_parent()
 	)
 	
 	if target and is_instance_valid(target):
