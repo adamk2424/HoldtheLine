@@ -57,6 +57,10 @@ func initialize(p_entity_id: String, p_entity_type: String, p_data: Dictionary =
 	upgrade_paths = data.get("upgrade_paths", data.get("upgrades", []))
 	sequential_upgrades = data.get("sequential_upgrades", false)
 
+	# Apply item effects to build time
+	var item_modifiers := ItemSystem.get_structure_modifiers()
+	build_time /= item_modifiers.get("build_speed_multiplier", 1.0)
+
 	# Configure combat component to target enemies
 	if combat_component:
 		combat_component.target_type = "enemy"
@@ -74,6 +78,9 @@ func initialize(p_entity_id: String, p_entity_type: String, p_data: Dictionary =
 
 	# Start construction
 	_start_building()
+	
+	# Apply item effects to tower stats after construction starts
+	_apply_item_effects()
 
 
 func _process(delta: float) -> void:
@@ -325,3 +332,56 @@ func _reset_muzzle_flash() -> void:
 		if mat:
 			mat.emission_energy_multiplier = node.get_meta("base_emission")
 		node.scale = node.get_meta("base_scale")
+
+
+func _apply_item_effects() -> void:
+	## Apply item bonuses to tower stats like health, range, damage, attack speed
+	if not is_instance_valid(ItemSystem):
+		return
+	
+	var structure_mods := ItemSystem.get_structure_modifiers()
+	var tower_mods := ItemSystem.get_tower_modifiers()
+	
+	# Apply health multiplier
+	var health_multiplier := structure_mods.get("health_multiplier", 1.0)
+	if health_multiplier != 1.0 and health_component:
+		var new_max_health := float(data.get("hp", 100)) * health_multiplier
+		health_component.max_health = new_max_health
+		health_component.current_health = new_max_health
+		data["hp"] = new_max_health  # Update data for upgrades
+	
+	# Apply tower-specific modifiers
+	if combat_component:
+		# Range multiplier
+		var range_multiplier := tower_mods.get("range_multiplier", 1.0)
+		if range_multiplier != 1.0:
+			var new_range := float(data.get("attack_range", 10)) * range_multiplier
+			combat_component.attack_range = new_range
+			data["attack_range"] = new_range
+		
+		# Attack speed multiplier  
+		var speed_multiplier := tower_mods.get("attack_speed_multiplier", 1.0)
+		if speed_multiplier != 1.0:
+			var new_attack_rate := float(data.get("attack_rate", 1.0)) * speed_multiplier
+			combat_component.attack_rate = new_attack_rate
+			data["attack_rate"] = new_attack_rate
+		
+		# Energy drain for overclocker
+		var energy_drain := tower_mods.get("energy_drain", 0.0)
+		if energy_drain > 0.0:
+			# Create timer to drain energy periodically
+			var drain_timer := Timer.new()
+			drain_timer.wait_time = 1.0
+			drain_timer.autostart = true
+			drain_timer.timeout.connect(_drain_energy.bind(energy_drain))
+			add_child(drain_timer)
+	
+	print("[TowerBase] Applied item effects to %s: health x%.2f, range x%.2f, speed x%.2f" % [
+		entity_id, health_multiplier, tower_mods.get("range_multiplier", 1.0), tower_mods.get("attack_speed_multiplier", 1.0)
+	])
+
+
+func _drain_energy(amount: float) -> void:
+	## Drain energy from game state (used by overclocker item)
+	if is_built and not is_building and GameState.energy > amount:
+		GameState.energy -= amount

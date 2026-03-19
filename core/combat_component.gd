@@ -158,14 +158,26 @@ func _deal_direct_damage(target: Node, amount: float) -> void:
 	var health: Node = _get_health(target)
 	if health:
 		var effective_damage := amount
-		if armor_pierce > 0.0:
+		
+		# Apply item-based armor piercing
+		var item_armor_pierce := 0.0
+		if is_instance_valid(ItemSystem):
+			var tower_mods := ItemSystem.get_tower_modifiers()
+			item_armor_pierce = tower_mods.get("armor_pierce", 0.0)
+		
+		var total_armor_pierce := armor_pierce + item_armor_pierce
+		
+		if total_armor_pierce > 0.0:
 			# Armor pierce: temporarily reduce target armor for this hit
 			var orig_armor: float = health.current_armor
-			health.current_armor = max(0.0, health.current_armor - armor_pierce)
+			health.current_armor = max(0.0, health.current_armor - total_armor_pierce)
 			health.take_damage(effective_damage, entity)
 			health.current_armor = orig_armor
 		else:
 			health.take_damage(effective_damage, entity)
+		
+		# Check for chain lightning from items
+		_try_chain_lightning(target, amount)
 
 
 func _spawn_projectile(target: Node, dmg: float) -> void:
@@ -230,3 +242,75 @@ func _get_weapon_type() -> String:
 					return "plasma"
 				_:
 					return "generic"
+
+
+func _try_chain_lightning(primary_target: Node, damage: float) -> void:
+	## Apply chain lightning from items to nearby enemies
+	if not is_instance_valid(ItemSystem):
+		return
+		
+	var tower_mods := ItemSystem.get_tower_modifiers()
+	var chain_chance := tower_mods.get("chain_lightning_chance", 0.0)
+	var max_bounces := int(tower_mods.get("chain_lightning_bounces", 0))
+	
+	if chain_chance <= 0.0 or max_bounces <= 0 or randf() > chain_chance:
+		return
+	
+	# Only apply to energy weapons
+	if not _is_energy_weapon():
+		return
+	
+	var chain_damage := damage * 0.5  # Chain lightning does 50% damage
+	var chain_range := attack_range * 0.6  # 60% of attack range
+	var bounced := 0
+	var hit_targets: Array[Node] = [primary_target]
+	var current_pos := primary_target.global_position
+	
+	while bounced < max_bounces:
+		var nearest_enemy := _find_nearest_chainable_enemy(current_pos, chain_range, hit_targets)
+		if not nearest_enemy:
+			break
+			
+		# Visual effect for chain lightning
+		_create_chain_lightning_vfx(current_pos, nearest_enemy.global_position)
+		
+		# Deal damage
+		var health := _get_health(nearest_enemy)
+		if health:
+			health.take_damage(chain_damage, entity)
+		
+		hit_targets.append(nearest_enemy)
+		current_pos = nearest_enemy.global_position
+		chain_damage *= 0.8  # Reduce damage with each bounce
+		bounced += 1
+
+
+func _is_energy_weapon() -> bool:
+	## Check if this tower uses energy weapons for chain lightning
+	var energy_weapons: Array[String] = ["laser_tower", "tesla_coil", "ion_cannon"]
+	return entity.entity_id in energy_weapons
+
+
+func _find_nearest_chainable_enemy(pos: Vector3, range: float, exclude: Array[Node]) -> Node:
+	## Find nearest enemy within range that hasn't been hit by chain lightning
+	var nearest: Node = null
+	var nearest_dist := range
+	
+	var entities := EntityRegistry.get_entities_by_type(target_type)
+	for target: Node in entities:
+		if target in exclude or not is_instance_valid(target):
+			continue
+			
+		var distance := pos.distance_to(target.global_position)
+		if distance <= range and distance < nearest_dist:
+			nearest = target
+			nearest_dist = distance
+	
+	return nearest
+
+
+func _create_chain_lightning_vfx(from_pos: Vector3, to_pos: Vector3) -> void:
+	## Create visual effect for chain lightning
+	# This would create a lightning bolt effect between positions
+	# For now, just emit audio
+	GameBus.audio_play_3d.emit("weapons.chain_lightning", from_pos)

@@ -19,6 +19,10 @@ var regen_percent: float = 1.0  # % of max HP
 var regen_interval: float = 5.0  # seconds
 var _regen_timer: float = 0.0
 
+# Auto-repair from items (like Nanobotic Swarm)
+var auto_repair_rate: float = 0.0  # % of max HP per second
+var _auto_repair_timer: float = 0.0
+
 var is_dead: bool = false
 var is_invulnerable: bool = false
 
@@ -33,17 +37,35 @@ func initialize(data: Dictionary) -> void:
 	regen_percent = float(data.get("regen_percent", 1.0))
 	regen_interval = float(data.get("regen_interval", 5.0))
 	is_dead = false
-	# No need to tick regen when starting at full HP.
-	set_process(false)
+	
+	# Apply auto-repair from items
+	if is_instance_valid(ItemSystem):
+		auto_repair_rate = ItemSystem.get_structure_modifiers().get("auto_repair", 0.0)
+	
+	# No need to tick regen when starting at full HP, unless we have auto-repair
+	if auto_repair_rate > 0.0:
+		set_process(true)
+	else:
+		set_process(false)
 
 
 func _process(delta: float) -> void:
 	if is_dead:
 		return
+	
+	# Standard regen
 	_regen_timer += delta
 	if _regen_timer >= regen_interval:
 		_regen_timer -= regen_interval
 		_regen_tick()
+	
+	# Auto-repair from items
+	if auto_repair_rate > 0.0 and current_hp < max_hp:
+		_auto_repair_timer += delta
+		if _auto_repair_timer >= 1.0:  # Apply every second
+			_auto_repair_timer -= 1.0
+			var repair_amount: float = max_hp * auto_repair_rate
+			heal(repair_amount)
 
 
 func _regen_tick() -> void:
@@ -64,8 +86,8 @@ func take_damage(amount: float, source: Node = null) -> float:
 	damage_taken.emit(actual_damage, source)
 	GameBus.damage_dealt.emit(entity, actual_damage, source)
 
-	# Enable regen ticking now that HP is below max.
-	if current_hp > 0.0 and current_hp < max_hp:
+	# Enable regen ticking now that HP is below max, or if we have auto-repair
+	if (current_hp > 0.0 and current_hp < max_hp) or auto_repair_rate > 0.0:
 		set_process(true)
 
 	if current_hp <= 0.0:
@@ -79,8 +101,8 @@ func heal(amount: float) -> void:
 		return
 	current_hp = snapped(min(max_hp, current_hp + amount), 0.001)
 	health_changed.emit(current_hp, max_hp)
-	# Disable regen ticking when back to full HP.
-	if current_hp >= max_hp:
+	# Disable regen ticking when back to full HP, unless we have auto-repair
+	if current_hp >= max_hp and auto_repair_rate <= 0.0:
 		set_process(false)
 
 
