@@ -1,0 +1,400 @@
+{
+  "levels": [
+    {
+      "id": "tutorial",
+      "name": "First Contact",
+      "description": "Learn the basics of tower defense. A small enemy wave approaches.",
+      "objective": "Survive for 5 minutes",
+      "difficulty": "easy",
+      "unlock_requirements": [],
+      "duration_seconds": 300,
+      "starting_resources": {
+        "energy": 150,
+        "materials": 150
+      },
+      "enemy_spawn_multiplier": 0.5,
+      "enemy_health_multiplier": 0.7,
+      "enemy_damage_multiplier": 0.6,
+      "enabled_enemies": ["thrasher", "brute"],
+      "disabled_enemies": [],
+      "map_preset": "valley_defense",
+      "rewards": {
+        "tech_points": 10,
+        "unlocks": ["level_outpost"]
+      },
+      "special_modifiers": {
+        "disable_bosses": true,
+        "slower_scaling": true
+      }
+    },
+    {
+      "id": "outpost",
+      "name": "Remote Outpost",
+      "description": "Defend a forward outpost with limited resources.",
+      "objective": "Survive for 8 minutes",
+      "difficulty": "easy",
+      "unlock_requirements": ["tutorial"],
+      "duration_seconds": 480,
+      "starting_resources": {
+        "energy": 120,
+        "materials": 120
+      },
+      "enemy_spawn_multiplier": 0.8,
+      "enemy_health_multiplier": 0.9,
+      "enemy_damage_multiplier": 0.8,
+      "enabled_enemies": ["thrasher", "brute", "clugg"],
+      "disabled_enemies": [],
+      "map_preset": "narrow_pass",
+      "rewards": {
+        "tech_points": 15,
+        "unlocks": ["level_supply_depot"]
+      },
+      "special_modifiers": {}
+    },
+    {
+      "id": "supply_depot",
+      "name": "Supply Depot",
+      "description": "Protect the central supply depot from multiple attack vectors.",
+      "objective": "Survive for 10 minutes",
+      "difficulty": "easy",
+      "unlock_requirements": ["outpost"],
+      "duration_seconds": 600,
+      "starting_resources": {
+        "energy": 100,
+        "materials": 100
+      },
+      "enemy_spawn_multiplier": 1.0,
+      "enemy_health_multiplier": 1.0,
+      "enemy_damage_multiplier": 1.0,
+      "enabled_enemies": ["thrasher", "brute", "clugg", "scrit"],
+      "disabled_enemies": [],
+      "map_preset": "central_hub",
+      "rewards": {
+        "tech_points": 20,
+        "unlocks": ["level_mining_station"]
+      },
+      "special_modifiers": {}
+    },
+    {
+      "id": "mining_station",
+      "name": "Mining Station",
+      "description": "Defend a resource-rich mining station. Higher income but stronger enemies.",
+      "objective": "Survive for 12 minutes",
+      "difficulty": "medium",
+      "unlock_requirements": ["supply_depot"],
+      "duration_seconds": 720,
+      "starting_resources": {
+        "energy": 80,
+        "materials": 200
+      },
+      "enemy_spawn_multiplier": 1.2,
+      "enemy_health_multiplier": 1.1,
+      "enemy_damage_multiplier": 1.1,
+      "enabled_enemies": ["thrasher", "brute", "clugg", "scrit", "blight_mite"],
+      "disabled_enemies": [],
+      "map_preset": "industrial_complex",
+      "rewards": {
+        "tech_points": 25,
+        "unlocks": ["level_borderlands"]
+      },
+      "special_modifiers": {
+        "resource_bonus": 1.5
+      }
+    },
+    {
+      "id": "borderlands",
+      "name": "The Borderlands",
+      "description": "A contested frontier region with unpredictable enemy patterns.",
+      "objective": "Survive for 15 minutes",
+      "difficulty": "medium",
+      "unlock_requirements": ["mining_station"],
+      "duration_seconds": 900,
+      "starting_resources": {
+        "energy": 80,
+        "materials": 80
+      },
+      "enemy_spawn_multiplier": 1.3,
+      "enemy_health_multiplier": 1.2,
+      "enemy_damage_multiplier": 1.2,
+      "enabled_enemies": ["thrasher", "brute", "clugg", "scrit", "blight_mite", "polus"],
+      "disabled_enemies": [],
+      "map_preset": "valley_defense",
+      "rewards": {
+        "tech_points": 30,
+        "unlocks": ["level_siege_point"]
+      },
+      "special_modifiers": {
+        "random_surge_timing": true
+      }
+    },
+    {
+      "id": "siege_point",
+      "name": "Siege Point Alpha",
+      "description": "Hold a strategic chokepoint against overwhelming odds.",
+      "objective": "Survive for 18 minutes",
+      "difficulty": "medium",
+      "unlock_requirements": ["borderlands"],
+      "duration_seconds": 1080,
+      "starting_resources": {
+        "energy": 120,
+        "materials": 60
+      },
+      "enemy_spawn_multiplier": 1.5,
+      "enemy_health_multiplier": 1.3,
+      "enemy_damage_multiplier": 1.3,
+      "enabled_enemies": ["thrasher", "brute", "clugg", "scrit", "blight_mite", "polus", "slinker"],
+      "disabled_enemies": [],
+      "map_preset": "narrow_pass",
+      "rewards": {
+        "tech_points": 35,
+        "unlocks": ["level_wasteland"]
+      },
+      "special_modifiers": {
+        "increased_boss_frequency": true
+      }
+    },
+    {
+      "id": "wasteland",
+      "name": "Toxic Wasteland",
+      "description": "Survive in a contaminated zone where enemies are more aggressive.",
+      "objective": "Survive for 20 minutes",
+      "difficulty": "hard",
+      "unlock_requirements": ["siege_point"],
+      "duration_seconds": 1200,
+      "starting_resources": {
+        "energy": 100,
+        "materials": 100
+      },
+      "enemy_spawn_multiplier": 1.6,
+      "enemy_health_multiplier": 1.4,
+      "enemy_damage_multiplier": 1.4,
+      "enabled_enemies": ["thrasher", "brute", "clugg", "scrit", "blight_mite", "polus", "slinker", "howler"],
+      "disabled_enemies": [],
+      "map_preset": "central_hub",
+      "rewards": {
+        "tech_points": 40,
+        "unlocks": ["level_hive_approach"]
+      },
+      "special_modifiers": {
+        "toxic_damage": true,
+        "faster_enemy_scaling": true
+      }
+    },
+    {
+      "id": "hive_approach",
+      "name": "Hive Approach",
+      "description": "Getting closer to the source. Flying enemies join the assault.",
+      "objective": "Survive for 22 minutes",
+      "difficulty": "hard",
+      "unlock_requirements": ["wasteland"],
+      "duration_seconds": 1320,
+      "starting_resources": {
+        "energy": 80,
+        "materials": 120
+      },
+      "enemy_spawn_multiplier": 1.7,
+      "enemy_health_multiplier": 1.5,
+      "enemy_damage_multiplier": 1.5,
+      "enabled_enemies": ["thrasher", "brute", "clugg", "scrit", "blight_mite", "polus", "slinker", "howler", "gorger"],
+      "disabled_enemies": [],
+      "map_preset": "industrial_complex",
+      "rewards": {
+        "tech_points": 45,
+        "unlocks": ["level_sky_fortress"]
+      },
+      "special_modifiers": {
+        "air_enemies_enabled": true
+      }
+    },
+    {
+      "id": "sky_fortress",
+      "name": "Sky Fortress Assault",
+      "description": "Defend against aerial attackers while ground forces swarm below.",
+      "objective": "Survive for 25 minutes",
+      "difficulty": "hard",
+      "unlock_requirements": ["hive_approach"],
+      "duration_seconds": 1500,
+      "starting_resources": {
+        "energy": 60,
+        "materials": 140
+      },
+      "enemy_spawn_multiplier": 1.8,
+      "enemy_health_multiplier": 1.6,
+      "enemy_damage_multiplier": 1.6,
+      "enabled_enemies": ["thrasher", "brute", "clugg", "scrit", "blight_mite", "polus", "slinker", "howler", "gorger", "gloom_wing"],
+      "disabled_enemies": [],
+      "map_preset": "valley_defense",
+      "rewards": {
+        "tech_points": 50,
+        "unlocks": ["level_deep_tunnels"]
+      },
+      "special_modifiers": {
+        "heavy_air_assault": true,
+        "reduced_anti_air_range": true
+      }
+    },
+    {
+      "id": "deep_tunnels",
+      "name": "Deep Tunnel Network",
+      "description": "Underground passages allow enemies to bypass some defenses.",
+      "objective": "Survive for 28 minutes",
+      "difficulty": "extreme",
+      "unlock_requirements": ["sky_fortress"],
+      "duration_seconds": 1680,
+      "starting_resources": {
+        "energy": 100,
+        "materials": 80
+      },
+      "enemy_spawn_multiplier": 2.0,
+      "enemy_health_multiplier": 1.7,
+      "enemy_damage_multiplier": 1.7,
+      "enabled_enemies": ["thrasher", "brute", "clugg", "scrit", "blight_mite", "polus", "slinker", "howler", "gorger", "gloom_wing", "bile_spitter"],
+      "disabled_enemies": [],
+      "map_preset": "narrow_pass",
+      "rewards": {
+        "tech_points": 60,
+        "unlocks": ["level_core_breach"]
+      },
+      "special_modifiers": {
+        "tunnel_spawns": true,
+        "barrier_bypass": true
+      }
+    },
+    {
+      "id": "core_breach",
+      "name": "Core Breach Protocol",
+      "description": "The enemy's core is exposed, but they're sending everything they have.",
+      "objective": "Survive for 30 minutes",
+      "difficulty": "extreme",
+      "unlock_requirements": ["deep_tunnels"],
+      "duration_seconds": 1800,
+      "starting_resources": {
+        "energy": 120,
+        "materials": 120
+      },
+      "enemy_spawn_multiplier": 2.2,
+      "enemy_health_multiplier": 1.8,
+      "enemy_damage_multiplier": 1.8,
+      "enabled_enemies": ["thrasher", "brute", "clugg", "scrit", "blight_mite", "polus", "slinker", "howler", "gorger", "gloom_wing", "bile_spitter", "behemoth"],
+      "disabled_enemies": [],
+      "map_preset": "central_hub",
+      "rewards": {
+        "tech_points": 75,
+        "unlocks": ["level_nexus_prime"]
+      },
+      "special_modifiers": {
+        "continuous_boss_spawns": true,
+        "escalating_difficulty": true
+      }
+    },
+    {
+      "id": "nexus_prime",
+      "name": "Nexus Prime",
+      "description": "The final assault on the enemy nexus. Everything is unlocked.",
+      "objective": "Survive for 35 minutes",
+      "difficulty": "nightmare",
+      "unlock_requirements": ["core_breach"],
+      "duration_seconds": 2100,
+      "starting_resources": {
+        "energy": 200,
+        "materials": 200
+      },
+      "enemy_spawn_multiplier": 2.5,
+      "enemy_health_multiplier": 2.0,
+      "enemy_damage_multiplier": 2.0,
+      "enabled_enemies": ["thrasher", "brute", "clugg", "scrit", "blight_mite", "polus", "slinker", "howler", "gorger", "gloom_wing", "bile_spitter", "behemoth", "terror_bringer"],
+      "disabled_enemies": [],
+      "map_preset": "industrial_complex",
+      "rewards": {
+        "tech_points": 100,
+        "unlocks": ["level_endless_nightmare"]
+      },
+      "special_modifiers": {
+        "all_enemies_enabled": true,
+        "maximum_difficulty": true,
+        "boss_waves": true
+      }
+    },
+    {
+      "id": "endless_nightmare",
+      "name": "Endless Nightmare",
+      "description": "Survive as long as possible. Difficulty scales infinitely.",
+      "objective": "Survive as long as possible",
+      "difficulty": "endless",
+      "unlock_requirements": ["nexus_prime"],
+      "duration_seconds": -1,
+      "starting_resources": {
+        "energy": 100,
+        "materials": 100
+      },
+      "enemy_spawn_multiplier": 3.0,
+      "enemy_health_multiplier": 2.5,
+      "enemy_damage_multiplier": 2.5,
+      "enabled_enemies": ["thrasher", "brute", "clugg", "scrit", "blight_mite", "polus", "slinker", "howler", "gorger", "gloom_wing", "bile_spitter", "behemoth", "terror_bringer"],
+      "disabled_enemies": [],
+      "map_preset": "valley_defense",
+      "rewards": {
+        "tech_points": 5
+      },
+      "special_modifiers": {
+        "infinite_scaling": true,
+        "endless_mode": true,
+        "tech_points_per_minute": true
+      }
+    },
+    {
+      "id": "speed_run",
+      "name": "Speed Run Challenge",
+      "description": "Race against time with accelerated gameplay and intense pressure.",
+      "objective": "Survive 10 minutes at 2x speed",
+      "difficulty": "extreme",
+      "unlock_requirements": ["siege_point"],
+      "duration_seconds": 600,
+      "starting_resources": {
+        "energy": 200,
+        "materials": 200
+      },
+      "enemy_spawn_multiplier": 2.0,
+      "enemy_health_multiplier": 1.5,
+      "enemy_damage_multiplier": 1.5,
+      "enabled_enemies": ["thrasher", "brute", "clugg", "scrit", "blight_mite", "polus", "slinker"],
+      "disabled_enemies": [],
+      "map_preset": "narrow_pass",
+      "rewards": {
+        "tech_points": 80,
+        "unlocks": []
+      },
+      "special_modifiers": {
+        "forced_game_speed": 2.0,
+        "speed_challenge": true
+      }
+    },
+    {
+      "id": "resource_crisis",
+      "name": "Resource Crisis",
+      "description": "Defend with extremely limited resources. Every decision counts.",
+      "objective": "Survive 15 minutes with 50% resource income",
+      "difficulty": "extreme",
+      "unlock_requirements": ["wasteland"],
+      "duration_seconds": 900,
+      "starting_resources": {
+        "energy": 50,
+        "materials": 50
+      },
+      "enemy_spawn_multiplier": 1.5,
+      "enemy_health_multiplier": 1.3,
+      "enemy_damage_multiplier": 1.3,
+      "enabled_enemies": ["thrasher", "brute", "clugg", "scrit", "blight_mite", "polus", "slinker", "howler"],
+      "disabled_enemies": [],
+      "map_preset": "central_hub",
+      "rewards": {
+        "tech_points": 70,
+        "unlocks": []
+      },
+      "special_modifiers": {
+        "resource_penalty": 0.5,
+        "economic_challenge": true
+      }
+    }
+  ]
+}
