@@ -552,8 +552,207 @@ func _trigger_missile_reload_sequence() -> void:
 			)
 
 
+func _trigger_autocannon_firing_sequence(target: Node) -> void:
+	## Enhanced autocannon firing with barrel spin, heat glow, and sustained fire effects
+	## Based on design: "Firing animation: barrel rotation accelerates, sustained muzzle flash, 
+	## light barrel glow from heat during sustained fire"
+	
+	if supports_barrel_spin and barrel_spinner_node:
+		_start_barrel_spin()
+		# Sustained fire burst
+		get_tree().create_timer(0.8).timeout.connect(_stop_barrel_spin)
+	
+	# Heat glow effect on barrels during sustained fire
+	if barrel_spinner_node:
+		for child in barrel_spinner_node.get_children():
+			if child is MeshInstance3D and child.name.begins_with("Barrel"):
+				var mat: StandardMaterial3D = child.mesh.material as StandardMaterial3D
+				if mat:
+					# Add heat glow that builds up during firing
+					var heat_tween := create_tween()
+					var base_color: Color = mat.albedo_color
+					var heated_color := Color(1.0, 0.6, 0.3)  # Orange heat glow
+					
+					heat_tween.tween_method(
+						func(color): mat.albedo_color = color,
+						base_color, heated_color, 0.3
+					)
+					heat_tween.tween_delay(0.5)  # Stay heated during burst
+					heat_tween.tween_method(
+						func(color): mat.albedo_color = color,
+						heated_color, base_color, 1.0  # Cool down slowly
+					)
+
+
+func _trigger_missile_launch_sequence(target: Node) -> void:
+	## Enhanced missile launch with smoke trails, ballistic arcs, and reload animation
+	## Based on design: "missiles launch with a visible smoke trail and arc through the air 
+	## in a ballistic curve before impacting with a fiery orange-red explosion"
+	
+	_trigger_missile_reload_sequence()
+	
+	# Create smoke wisps at launch tubes
+	if visual_node and visual_node.has_meta("launcher_assembly_node"):
+		var launcher_path: String = visual_node.get_meta("launcher_assembly_node")
+		var launcher_node := visual_node.get_node_or_null(NodePath(launcher_path))
+		
+		if launcher_node:
+			var missile_count: int = visual_node.get_meta("missile_count", 4)
+			
+			# Create smoke effects at each launch tube
+			for i in range(missile_count):
+				var tube_positions := [Vector3(-0.13, 0.35, -0.13), Vector3(0.13, 0.35, -0.13), 
+									Vector3(-0.13, 0.35, 0.13), Vector3(0.13, 0.35, 0.13)]
+				if i < tube_positions.size():
+					_create_smoke_wisp_effect(launcher_node, tube_positions[i])
+			
+			# Mechanical reload sound and animation delay
+			get_tree().create_timer(0.2).timeout.connect(func():
+				GameBus.audio_play_3d.emit("tower.missile_battery.reload_click", global_position)
+			)
+
+
+func _create_smoke_wisp_effect(parent: Node3D, position: Vector3) -> void:
+	## Creates a brief smoke wisp effect at the specified position
+	var smoke_sphere := MeshInstance3D.new()
+	smoke_sphere.name = "SmokeWisp"
+	
+	var sphere := SphereMesh.new()
+	sphere.radius = 0.05
+	sphere.height = 0.1
+	
+	var smoke_mat := StandardMaterial3D.new()
+	smoke_mat.albedo_color = Color(0.8, 0.8, 0.9, 0.6)
+	smoke_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	smoke_mat.emission_enabled = true
+	smoke_mat.emission = Color(0.9, 0.85, 0.8)
+	smoke_mat.emission_energy_multiplier = 0.8
+	
+	sphere.material = smoke_mat
+	smoke_sphere.mesh = sphere
+	smoke_sphere.position = position
+	parent.add_child(smoke_sphere)
+	
+	# Animate smoke dissipating
+	var smoke_tween := create_tween()
+	smoke_tween.set_parallel(true)
+	smoke_tween.tween_property(smoke_sphere, "scale", Vector3(2.0, 2.0, 2.0), 1.0)
+	smoke_tween.tween_property(smoke_sphere, "modulate:a", 0.0, 1.0)
+	
+	# Remove after animation
+	smoke_tween.tween_callback(smoke_sphere.queue_free).set_delay(1.0)
+
+
+func _trigger_plasma_mortar_firing(target: Node) -> void:
+	## Enhanced plasma mortar with charge buildup and persistent burn effects
+	## Based on design: "Lobs superheated plasma in a high arc, creating a devastating explosion on impact. 
+	## The plasma pool persists for 2 seconds dealing burn damage."
+	
+	if not visual_node:
+		return
+	
+	# Plasma charge buildup effect
+	for child in visual_node.get_children():
+		if child is MeshInstance3D and child.has_meta("muzzle_point"):
+			var mat: StandardMaterial3D = child.mesh.material as StandardMaterial3D
+			if mat and mat.emission_enabled:
+				var base_emission: float = mat.emission_energy_multiplier
+				
+				# Plasma charge sequence
+				var charge_tween := create_tween()
+				charge_tween.tween_method(
+					func(energy): mat.emission_energy_multiplier = energy,
+					base_emission, base_emission * 5.0, 0.4  # Slower charge
+				)
+				charge_tween.tween_method(
+					func(energy): mat.emission_energy_multiplier = energy,
+					base_emission * 5.0, base_emission, 0.3
+				)
+	
+	# Create heat distortion effect around mortar
+	if visual_node:
+		var heat_effect := MeshInstance3D.new()
+		heat_effect.name = "HeatDistortion"
+		
+		var distortion_sphere := SphereMesh.new()
+		distortion_sphere.radius = 0.8
+		
+		var distortion_mat := StandardMaterial3D.new()
+		distortion_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		distortion_mat.albedo_color = Color(1.0, 0.5, 0.2, 0.3)
+		distortion_mat.emission_enabled = true
+		distortion_mat.emission = Color(1.0, 0.4, 0.1)
+		distortion_mat.emission_energy_multiplier = 1.0
+		
+		distortion_sphere.material = distortion_mat
+		heat_effect.mesh = distortion_sphere
+		heat_effect.position.y = 1.0
+		visual_node.add_child(heat_effect)
+		
+		# Fade out heat effect
+		var heat_tween := create_tween()
+		heat_tween.tween_property(heat_effect, "modulate:a", 0.0, 1.5)
+		heat_tween.tween_callback(heat_effect.queue_free)
+
+
+func _trigger_inferno_beam_effects(target: Node) -> void:
+	## Enhanced inferno tower with continuous beam and heat buildup
+	## Based on design: "Projects a continuous heat beam that locks onto a single target and melts it down. 
+	## Damage ramps up the longer it stays on the same target"
+	
+	if not visual_node or not target:
+		return
+	
+	# Create visible beam effect to target
+	var beam_line := MeshInstance3D.new()
+	beam_line.name = "InfernoBeam"
+	
+	# Calculate beam direction and length
+	var beam_start: Vector3 = global_position + Vector3(0, 2.0, 0)
+	var beam_end: Vector3 = target.global_position + Vector3(0, 0.5, 0)
+	var beam_direction: Vector3 = beam_end - beam_start
+	var beam_length: float = beam_direction.length()
+	
+	# Create beam mesh
+	var beam_cylinder := CylinderMesh.new()
+	beam_cylinder.top_radius = 0.08
+	beam_cylinder.bottom_radius = 0.08
+	beam_cylinder.height = beam_length
+	
+	var beam_mat := StandardMaterial3D.new()
+	beam_mat.albedo_color = Color(1.0, 0.4, 0.1, 0.8)
+	beam_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	beam_mat.emission_enabled = true
+	beam_mat.emission = Color(1.0, 0.4, 0.1)
+	beam_mat.emission_energy_multiplier = 3.0
+	beam_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	
+	beam_cylinder.material = beam_mat
+	beam_line.mesh = beam_cylinder
+	
+	# Position and orient beam
+	beam_line.global_position = beam_start + beam_direction * 0.5
+	beam_line.look_at(beam_end, Vector3.UP)
+	beam_line.rotate_object_local(Vector3.RIGHT, PI/2)  # Align cylinder
+	
+	get_tree().current_scene.add_child(beam_line)
+	
+	# Beam intensity increases over time (heat ramp effect)
+	var ramp_tween := create_tween()
+	ramp_tween.tween_method(
+		func(intensity): beam_mat.emission_energy_multiplier = intensity,
+		3.0, 8.0, 1.5  # Ramp up over 1.5 seconds
+	)
+	
+	# Remove beam after duration
+	get_tree().create_timer(2.0).timeout.connect(beam_line.queue_free)
+
+
 func _trigger_tesla_discharge_effects() -> void:
 	## Creates brief electrical discharge effects for tesla coil
+	## Based on design: "Releases electric arcs that chain between nearby enemies. Each bolt jumps 
+	## to up to 3 additional targets within 4 grids of each other"
+	
 	if not visual_node:
 		return
 	
@@ -564,32 +763,184 @@ func _trigger_tesla_discharge_effects() -> void:
 			if mat and mat.emission_enabled:
 				var base_emission: float = mat.emission_energy_multiplier
 				
-				# Create brief flash effect
+				# Create brief flash effect with electrical intensity
 				var flash_tween := create_tween()
 				flash_tween.tween_method(
 					func(energy): mat.emission_energy_multiplier = energy,
-					base_emission, base_emission * 4.0, 0.1
+					base_emission, base_emission * 6.0, 0.05  # Very brief, intense flash
 				)
 				flash_tween.tween_method(
 					func(energy): mat.emission_energy_multiplier = energy,
-					base_emission * 4.0, base_emission, 0.2
+					base_emission * 6.0, base_emission, 0.3
 				)
+	
+	# Create electrical arc effects in random directions
+	for i in range(3):  # Multiple arcs for chain lightning effect
+		_create_electrical_arc(Vector3(randf_range(-2.0, 2.0), randf_range(1.0, 3.0), randf_range(-2.0, 2.0)))
+
+
+func _create_electrical_arc(end_position: Vector3) -> void:
+	## Creates a brief electrical arc effect
+	var arc_line := MeshInstance3D.new()
+	arc_line.name = "ElectricalArc"
+	
+	var arc_start: Vector3 = global_position + Vector3(0, 2.0, 0)
+	var arc_direction: Vector3 = end_position
+	var arc_length: float = arc_direction.length()
+	
+	# Create thin cylinder for arc
+	var arc_cylinder := CylinderMesh.new()
+	arc_cylinder.top_radius = 0.02
+	arc_cylinder.bottom_radius = 0.02
+	arc_cylinder.height = arc_length
+	
+	var arc_mat := StandardMaterial3D.new()
+	arc_mat.albedo_color = Color(0.3, 0.6, 1.0, 1.0)
+	arc_mat.emission_enabled = true
+	arc_mat.emission = Color(0.5, 0.8, 1.0)
+	arc_mat.emission_energy_multiplier = 8.0
+	arc_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	
+	arc_cylinder.material = arc_mat
+	arc_line.mesh = arc_cylinder
+	
+	# Position and orient arc
+	arc_line.global_position = arc_start + arc_direction * 0.5
+	arc_line.look_at(arc_start + arc_direction, Vector3.UP)
+	arc_line.rotate_object_local(Vector3.RIGHT, PI/2)
+	
+	visual_node.add_child(arc_line)
+	
+	# Quick fade out
+	var arc_tween := create_tween()
+	arc_tween.tween_property(arc_line, "modulate:a", 0.0, 0.2)
+	arc_tween.tween_callback(arc_line.queue_free)
 
 
 func _process_idle_animations(delta: float) -> void:
 	## Handles idle scanning and ambient animations when not in combat
+	## Based on design: "Idle animation: turret slowly scans left-right searching for targets"
+	
 	if not supports_rotation or not turret_body_node:
 		return
 	
 	_idle_scan_timer += delta
 	
-	# Slow scanning behavior - sweep back and forth
-	var scan_progress: float = _idle_scan_timer * _idle_scan_speed * _idle_scan_direction
-	var current_scan_angle: float = sin(scan_progress * 0.01) * _idle_scan_range * 0.5
+	# Enhanced scanning behavior - realistic search pattern
+	# Sweep back and forth with brief pauses to "look" for targets
+	var scan_cycle_time: float = 8.0  # Total time for one complete scan cycle
+	var pause_duration: float = 1.0   # Brief pause at each end
 	
-	# Apply smooth idle rotation
+	var cycle_progress: float = fmod(_idle_scan_timer, scan_cycle_time)
+	var current_scan_angle: float = 0.0
+	
+	if cycle_progress < pause_duration:
+		# Pause at left extreme
+		current_scan_angle = -_idle_scan_range * 0.5
+	elif cycle_progress < scan_cycle_time * 0.5 - pause_duration:
+		# Sweep from left to center
+		var sweep_progress: float = (cycle_progress - pause_duration) / (scan_cycle_time * 0.5 - pause_duration * 2.0)
+		current_scan_angle = lerp(-_idle_scan_range * 0.5, 0.0, smoothstep(0.0, 1.0, sweep_progress))
+	elif cycle_progress < scan_cycle_time * 0.5:
+		# Pause at center
+		current_scan_angle = 0.0
+	elif cycle_progress < scan_cycle_time * 0.5 + pause_duration:
+		# Continue to right extreme
+		var sweep_progress: float = (cycle_progress - scan_cycle_time * 0.5) / pause_duration
+		current_scan_angle = lerp(0.0, _idle_scan_range * 0.5, smoothstep(0.0, 1.0, sweep_progress))
+	elif cycle_progress < scan_cycle_time - pause_duration:
+		# Pause at right extreme
+		current_scan_angle = _idle_scan_range * 0.5
+	else:
+		# Sweep back from right to left
+		var sweep_progress: float = (cycle_progress - (scan_cycle_time - pause_duration)) / pause_duration
+		current_scan_angle = lerp(_idle_scan_range * 0.5, -_idle_scan_range * 0.5, smoothstep(0.0, 1.0, sweep_progress))
+	
+	# Apply smooth idle rotation with micro-adjustments for realism
 	if not _rotation_tween or not _rotation_tween.is_valid():
-		_set_turret_rotation(current_scan_angle)
+		# Add small random micro-adjustments to simulate target acquisition system
+		var micro_adjustment: float = sin(_idle_scan_timer * 3.0) * 2.0
+		_set_turret_rotation(current_scan_angle + micro_adjustment)
+	
+	# Tower-specific idle behaviors
+	_process_tower_specific_idle_effects(delta)
+
+
+func _process_tower_specific_idle_effects(delta: float) -> void:
+	## Handles tower-specific idle effects like radar rotation, antenna movement, etc.
+	
+	match entity_id:
+		"targeting_array":
+			_animate_radar_rotation(delta)
+		"repair_tower":
+			_animate_repair_field_pulse(delta)
+		"war_beacon":
+			_animate_beacon_pulse(delta)
+		"drone_printer":
+			_animate_antenna_scanning(delta)
+
+
+func _animate_radar_rotation(delta: float) -> void:
+	## Rotates radar dishes for targeting arrays
+	if not visual_node or not visual_node.has_meta("radar_system_node"):
+		return
+	
+	var radar_path: String = visual_node.get_meta("radar_system_node")
+	var radar_node := visual_node.get_node_or_null(NodePath(radar_path))
+	if radar_node:
+		radar_node.rotation_degrees.y += 30.0 * delta  # 30 degrees per second
+
+
+func _animate_repair_field_pulse(delta: float) -> void:
+	## Creates pulsing effect for repair tower field indicators
+	if not visual_node:
+		return
+	
+	var pulse_intensity: float = 0.5 + sin(_idle_scan_timer * 2.0) * 0.3
+	
+	# Find repair field emitters and pulse them
+	for child in visual_node.get_children():
+		if child is MeshInstance3D and child.name.contains("Repair"):
+			var mat: StandardMaterial3D = child.mesh.material as StandardMaterial3D
+			if mat and mat.emission_enabled:
+				mat.emission_energy_multiplier = pulse_intensity * 2.0
+
+
+func _animate_beacon_pulse(delta: float) -> void:
+	## Creates warning beacon rotation and pulsing for war beacons
+	if not visual_node:
+		return
+	
+	var beacon_intensity: float = 1.0 + sin(_idle_scan_timer * 4.0) * 0.5
+	
+	# Find beacon lights and pulse them
+	for child in visual_node.get_children():
+		if child is MeshInstance3D and child.name.contains("Beacon"):
+			var mat: StandardMaterial3D = child.mesh.material as StandardMaterial3D
+			if mat and mat.emission_enabled:
+				mat.emission_energy_multiplier = beacon_intensity * 3.0
+			# Rotate beacon
+			child.rotation_degrees.y += 60.0 * delta
+
+
+func _animate_antenna_scanning(delta: float) -> void:
+	## Animate antenna arrays for drone printer communication systems
+	if not visual_node or not visual_node.has_meta("antenna_array_node"):
+		return
+	
+	var antenna_path: String = visual_node.get_meta("antenna_array_node")
+	var antenna_node := visual_node.get_node_or_null(NodePath(antenna_path))
+	if antenna_node:
+		# Slow antenna rotation
+		antenna_node.rotation_degrees.y += 15.0 * delta
+		
+		# Signal pulse effect
+		var signal_intensity: float = 0.8 + sin(_idle_scan_timer * 3.0) * 0.4
+		for child in antenna_node.get_children():
+			if child is MeshInstance3D:
+				var mat: StandardMaterial3D = child.mesh.material as StandardMaterial3D
+				if mat and mat.emission_enabled:
+					mat.emission_energy_multiplier = signal_intensity * 2.0
 
 
 func _on_target_acquired(target: Node) -> void:
@@ -601,19 +952,20 @@ func _on_attack_fired(target: Node) -> void:
 	## Called when tower fires at target - triggers muzzle flash and animations
 	_trigger_muzzle_flash(target)
 	
-	# Tower-specific animations
+	# Tower-specific animations based on design descriptions
 	match entity_id:
 		"autocannon":
-			if supports_barrel_spin:
-				_start_barrel_spin()
-				# Stop spinning after a short burst
-				get_tree().create_timer(0.5).timeout.connect(_stop_barrel_spin)
+			_trigger_autocannon_firing_sequence(target)
 		"rail_gun":
 			_trigger_rail_gun_charge_sequence()
 		"missile_battery":
-			_trigger_missile_reload_sequence()
+			_trigger_missile_launch_sequence(target)
 		"tesla_coil":
 			_trigger_tesla_discharge_effects()
+		"plasma_mortar":
+			_trigger_plasma_mortar_firing(target)
+		"inferno_tower":
+			_trigger_inferno_beam_effects(target)
 	
 	# Update turret tracking during combat
 	if target:
