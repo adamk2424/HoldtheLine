@@ -1418,6 +1418,7 @@ static func _create_drone_printer(c: Color) -> Node3D:
 	
 	# Foundation
 	_add_box(r, Vector3(1.8, 0.15, 1.8), Vector3(0, 0.075, 0), dark)
+	
 	# Main building (compact industrial unit)
 	_add_box(r, Vector3(1.5, 0.7, 1.5), Vector3(0, 0.525, 0), military_grey)
 	
@@ -1425,22 +1426,50 @@ static func _create_drone_printer(c: Color) -> Node3D:
 	_add_box(r, Vector3(1.6, 0.05, 1.6), Vector3(0, 0.925, 0), lite)
 	_add_box(r, Vector3(1.2, 0.02, 1.2), Vector3(0, 0.96, 0), green.darkened(0.4))  # Landing grid
 	
+	# Landing pad grid markings
+	for i in range(4):
+		var offset: float = -0.45 + i * 0.3
+		_add_emissive_box(r, Vector3(1.0, 0.005, 0.02), Vector3(0, 0.965, offset), green, 0.8)
+		_add_emissive_box(r, Vector3(0.02, 0.005, 1.0), Vector3(offset, 0.965, 0), green, 0.8)
+	
 	# Transparent panels showing robotic arms inside
 	_add_emissive_box(r, Vector3(0.6, 0.3, 0.04), Vector3(0, 0.65, 0.76), Color(0.4, 0.8, 0.9), 0.8)
 	_add_emissive_box(r, Vector3(0.6, 0.3, 0.04), Vector3(0, 0.65, -0.76), Color(0.4, 0.8, 0.9), 0.8)
+	_add_emissive_box(r, Vector3(0.04, 0.3, 0.6), Vector3(0.76, 0.65, 0), Color(0.4, 0.8, 0.9), 0.8)
+	_add_emissive_box(r, Vector3(0.04, 0.3, 0.6), Vector3(-0.76, 0.65, 0), Color(0.4, 0.8, 0.9), 0.8)
 	
-	# Robotic arms visible through panels
-	_add_box(r, Vector3(0.06, 0.2, 0.06), Vector3(0.2, 0.6, 0.4), lite)
-	_add_box(r, Vector3(0.15, 0.04, 0.04), Vector3(0.275, 0.7, 0.42), lite)
-	_add_box(r, Vector3(0.06, 0.2, 0.06), Vector3(-0.2, 0.6, 0.4), lite)
-	_add_box(r, Vector3(0.15, 0.04, 0.04), Vector3(-0.275, 0.7, 0.42), lite)
+	# Robotic arms visible through panels (with articulated joints)
+	var arm_1 := Node3D.new()
+	arm_1.name = "RoboticArm1"
+	arm_1.position = Vector3(0.2, 0.6, 0.4)
+	r.add_child(arm_1)
+	_add_box(arm_1, Vector3(0.06, 0.2, 0.06), Vector3(0, 0, 0), lite)
+	_add_box(arm_1, Vector3(0.15, 0.04, 0.04), Vector3(0.075, 0.1, 0.02), lite)
+	_add_cylinder(arm_1, 0.02, 0.08, Vector3(0.15, 0.1, 0.02), lite.lightened(0.1))
 	
-	# Antenna array for drone commands
-	_add_cylinder(r, 0.02, 0.25, Vector3(0.6, 1.075, 0.6), lite)
-	_add_cylinder(r, 0.02, 0.2, Vector3(0.5, 1.05, 0.7), lite)
-	_add_cylinder(r, 0.02, 0.18, Vector3(0.7, 1.04, 0.5), lite)
+	var arm_2 := Node3D.new()
+	arm_2.name = "RoboticArm2"
+	arm_2.position = Vector3(-0.2, 0.6, 0.4)
+	r.add_child(arm_2)
+	_add_box(arm_2, Vector3(0.06, 0.2, 0.06), Vector3(0, 0, 0), lite)
+	_add_box(arm_2, Vector3(0.15, 0.04, 0.04), Vector3(-0.075, 0.1, 0.02), lite)
+	_add_cylinder(arm_2, 0.02, 0.08, Vector3(-0.15, 0.1, 0.02), lite.lightened(0.1))
+	
+	# Antenna array for drone commands (improved design)
+	var antenna_base := Node3D.new()
+	antenna_base.name = "AntennaArray"
+	antenna_base.position = Vector3(0.6, 1.0, 0.6)
+	r.add_child(antenna_base)
+	
+	_add_cylinder(antenna_base, 0.04, 0.1, Vector3(0, 0.05, 0), dark)
+	_add_cylinder(antenna_base, 0.02, 0.25, Vector3(0, 0.175, 0), lite)
+	_add_cylinder(antenna_base, 0.015, 0.2, Vector3(-0.1, 0.15, 0.1), lite)
+	_add_cylinder(antenna_base, 0.015, 0.18, Vector3(0.1, 0.14, -0.1), lite)
+	
 	# Small dishes on antennas
-	_add_box(r, Vector3(0.08, 0.08, 0.02), Vector3(0.6, 1.2, 0.6), lite)
+	_add_box(antenna_base, Vector3(0.08, 0.08, 0.02), Vector3(0, 0.3, 0), lite)
+	_add_box(antenna_base, Vector3(0.06, 0.06, 0.015), Vector3(-0.1, 0.26, 0.1), lite.lightened(0.05))
+	_add_box(antenna_base, Vector3(0.06, 0.06, 0.015), Vector3(0.1, 0.25, -0.1), lite.lightened(0.05))
 	
 	# Green status lights along base (operational indicators)
 	_add_emissive_sphere(r, 0.03, Vector3(0.6, 0.3, 0.6), green, 2.0)
@@ -1448,9 +1477,17 @@ static func _create_drone_printer(c: Color) -> Node3D:
 	_add_emissive_sphere(r, 0.03, Vector3(0.6, 0.3, -0.6), green, 2.0)
 	_add_emissive_sphere(r, 0.03, Vector3(-0.6, 0.3, -0.6), green, 2.0)
 	
+	# Additional status indicators on corners
+	_add_emissive_box(r, Vector3(0.08, 0.03, 0.08), Vector3(0.7, 0.42, 0.7), green, 1.5)
+	_add_emissive_box(r, Vector3(0.08, 0.03, 0.08), Vector3(-0.7, 0.42, 0.7), green, 1.5)
+	_add_emissive_box(r, Vector3(0.08, 0.03, 0.08), Vector3(0.7, 0.42, -0.7), green, 1.5)
+	_add_emissive_box(r, Vector3(0.08, 0.03, 0.08), Vector3(-0.7, 0.42, -0.7), green, 1.5)
+	
 	# Green accent lighting strips
 	_add_emissive_box(r, Vector3(1.5, 0.02, 0.04), Vector3(0, 0.25, 0.76), green, 1.5)
 	_add_emissive_box(r, Vector3(0.04, 0.02, 1.5), Vector3(0.76, 0.25, 0), green, 1.5)
+	_add_emissive_box(r, Vector3(1.5, 0.02, 0.04), Vector3(0, 0.25, -0.76), green, 1.5)
+	_add_emissive_box(r, Vector3(0.04, 0.02, 1.5), Vector3(-0.76, 0.25, 0), green, 1.5)
 	
 	# Landing pad edge lights
 	for i in range(8):
@@ -1458,6 +1495,22 @@ static func _create_drone_printer(c: Color) -> Node3D:
 		var lx: float = cos(angle) * 0.65
 		var lz: float = sin(angle) * 0.65
 		_add_emissive_sphere(r, 0.02, Vector3(lx, 0.97, lz), green, 1.8)
+	
+	# Assembly components (drone parts visible on platform)
+	_add_box(r, Vector3(0.15, 0.03, 0.1), Vector3(0.2, 0.98, 0.15), lite.lightened(0.2))
+	_add_box(r, Vector3(0.1, 0.02, 0.08), Vector3(-0.18, 0.975, -0.12), Color(0.6, 0.6, 0.7))
+	_add_sphere(r, 0.03, Vector3(0.05, 1.0, -0.2), green)
+	
+	# Fabrication heat signatures
+	_add_emissive_sphere(r, 0.02, Vector3(0.15, 0.985, 0.12), Color(1.0, 0.6, 0.2), 1.2)
+	_add_emissive_sphere(r, 0.015, Vector3(-0.12, 0.985, -0.08), Color(0.8, 0.4, 1.0), 0.8)
+	
+	# Store animation nodes for future use
+	r.set_meta("robotic_arm1_node", arm_1.get_path())
+	r.set_meta("robotic_arm2_node", arm_2.get_path())
+	r.set_meta("antenna_array_node", antenna_base.get_path())
+	r.set_meta("supports_arm_animation", true)
+	r.set_meta("supports_antenna_rotation", true)
 	
 	return r
 
@@ -1477,26 +1530,83 @@ static func _create_mech_bay(c: Color) -> Node3D:
 	# Main hangar building (heavy reinforced walls)
 	_add_box(r, Vector3(2.5, 1.3, 1.5), Vector3(0, 0.9, 0), dark_steel)
 	
-	# External armor plating
+	# External armor plating with rivets
 	_add_box(r, Vector3(0.08, 1.0, 1.4), Vector3(1.29, 0.75, 0), dark_steel.darkened(0.2))
 	_add_box(r, Vector3(0.08, 1.0, 1.4), Vector3(-1.29, 0.75, 0), dark_steel.darkened(0.2))
 	_add_box(r, Vector3(2.4, 0.08, 1.4), Vector3(0, 1.55, 0), dark_steel.darkened(0.2))
 	
+	# Rivets on armor plating
+	for i in range(5):
+		var y_pos: float = 0.4 + i * 0.25
+		_add_cylinder(r, 0.02, 0.02, Vector3(1.32, y_pos, 0.5), dark_steel.darkened(0.3))
+		_add_cylinder(r, 0.02, 0.02, Vector3(-1.32, y_pos, 0.5), dark_steel.darkened(0.3))
+		_add_cylinder(r, 0.02, 0.02, Vector3(1.32, y_pos, -0.5), dark_steel.darkened(0.3))
+		_add_cylinder(r, 0.02, 0.02, Vector3(-1.32, y_pos, -0.5), dark_steel.darkened(0.3))
+	
 	# Wide bay door (open, showing interior)
 	_add_box(r, Vector3(1.8, 1.1, 0.08), Vector3(0, 0.8, 0.76), Color(0.1, 0.1, 0.1))
 	
-	# Assembly gantries visible inside
-	_add_box(r, Vector3(0.06, 0.8, 0.06), Vector3(0.4, 0.7, 0.5), lite)
-	_add_box(r, Vector3(0.06, 0.8, 0.06), Vector3(-0.4, 0.7, 0.5), lite)
-	_add_box(r, Vector3(0.8, 0.06, 0.06), Vector3(0, 1.1, 0.5), lite)
+	# Bay door tracks and mechanisms
+	_add_box(r, Vector3(0.06, 1.1, 0.06), Vector3(-0.92, 0.8, 0.78), dark_steel)
+	_add_box(r, Vector3(0.06, 1.1, 0.06), Vector3(0.92, 0.8, 0.78), dark_steel)
+	_add_box(r, Vector3(1.9, 0.04, 0.04), Vector3(0, 1.36, 0.78), dark_steel)
+	
+	# Assembly gantries visible inside (more detailed)
+	var gantry_system := Node3D.new()
+	gantry_system.name = "GantrySystem"
+	gantry_system.position = Vector3(0, 0, 0.5)
+	r.add_child(gantry_system)
+	
+	_add_box(gantry_system, Vector3(0.06, 0.8, 0.06), Vector3(0.4, 0.7, 0), lite)
+	_add_box(gantry_system, Vector3(0.06, 0.8, 0.06), Vector3(-0.4, 0.7, 0), lite)
+	_add_box(gantry_system, Vector3(0.8, 0.06, 0.06), Vector3(0, 1.1, 0), lite)
+	
+	# Cross braces for stability
+	_add_box(gantry_system, Vector3(0.04, 0.04, 0.8), Vector3(0.4, 1.05, 0), lite.darkened(0.1))
+	_add_box(gantry_system, Vector3(0.04, 0.04, 0.8), Vector3(-0.4, 1.05, 0), lite.darkened(0.1))
+	
+	# Moveable welding arms
+	var welding_arm_1 := Node3D.new()
+	welding_arm_1.name = "WeldingArm1"
+	welding_arm_1.position = Vector3(0.3, 0.8, 0)
+	gantry_system.add_child(welding_arm_1)
+	_add_box(welding_arm_1, Vector3(0.04, 0.3, 0.04), Vector3(0, 0, 0), blue.darkened(0.3))
+	_add_box(welding_arm_1, Vector3(0.2, 0.04, 0.04), Vector3(-0.1, -0.15, 0), blue.darkened(0.3))
+	
+	var welding_arm_2 := Node3D.new()
+	welding_arm_2.name = "WeldingArm2"
+	welding_arm_2.position = Vector3(-0.3, 0.6, 0)
+	gantry_system.add_child(welding_arm_2)
+	_add_box(welding_arm_2, Vector3(0.04, 0.3, 0.04), Vector3(0, 0, 0), blue.darkened(0.3))
+	_add_box(welding_arm_2, Vector3(0.15, 0.04, 0.04), Vector3(0.08, -0.15, 0), blue.darkened(0.3))
 	
 	# Welding sparks effect points (emissive spots for animation)
-	_add_emissive_sphere(r, 0.03, Vector3(0.3, 0.8, 0.5), Color(1.0, 0.8, 0.4), 2.0)
-	_add_emissive_sphere(r, 0.03, Vector3(-0.2, 0.6, 0.5), Color(1.0, 0.8, 0.4), 2.0)
+	_add_emissive_sphere(welding_arm_1, 0.03, Vector3(-0.2, -0.15, 0), Color(1.0, 0.8, 0.4), 2.0)
+	_add_emissive_sphere(welding_arm_2, 0.03, Vector3(0.15, -0.15, 0), Color(1.0, 0.8, 0.4), 2.0)
 	
-	# Mech frames in various stages (simplified representations)
-	_add_box(r, Vector3(0.3, 0.5, 0.2), Vector3(0.5, 0.5, 0.3), dark_steel.lightened(0.1))
-	_add_box(r, Vector3(0.25, 0.4, 0.18), Vector3(-0.5, 0.45, 0.3), dark_steel.lightened(0.1))
+	# Additional sparks around mech frames
+	_add_emissive_sphere(r, 0.02, Vector3(0.5, 0.65, 0.4), Color(0.8, 0.9, 1.0), 1.5)
+	_add_emissive_sphere(r, 0.025, Vector3(-0.5, 0.55, 0.35), Color(1.0, 0.7, 0.3), 1.8)
+	
+	# Mech frames in various stages (more detailed)
+	# Sentinel frame under construction
+	var mech_frame_1 := Node3D.new()
+	mech_frame_1.name = "SentinelFrame"
+	mech_frame_1.position = Vector3(0.5, 0.5, 0.3)
+	r.add_child(mech_frame_1)
+	_add_box(mech_frame_1, Vector3(0.3, 0.5, 0.2), Vector3(0, 0, 0), dark_steel.lightened(0.1))
+	_add_box(mech_frame_1, Vector3(0.08, 0.3, 0.08), Vector3(0.15, 0.1, 0), dark_steel.lightened(0.05))  # Arm
+	_add_box(mech_frame_1, Vector3(0.08, 0.3, 0.08), Vector3(-0.15, 0.1, 0), dark_steel.lightened(0.05))  # Arm
+	_add_emissive_sphere(mech_frame_1, 0.03, Vector3(0, 0.2, 0.1), blue, 1.5)  # Optic system
+	
+	# Juggernaut frame (partially assembled)
+	var mech_frame_2 := Node3D.new()
+	mech_frame_2.name = "JuggernautFrame"
+	mech_frame_2.position = Vector3(-0.5, 0.45, 0.3)
+	r.add_child(mech_frame_2)
+	_add_box(mech_frame_2, Vector3(0.25, 0.4, 0.18), Vector3(0, 0, 0), dark_steel.lightened(0.1))
+	_add_box(mech_frame_2, Vector3(0.1, 0.25, 0.1), Vector3(0.12, 0.075, 0), dark_steel.lightened(0.05))
+	_add_box(mech_frame_2, Vector3(0.1, 0.25, 0.1), Vector3(-0.12, 0.075, 0), dark_steel.lightened(0.05))
 	
 	# Heavy door frame
 	_add_box(r, Vector3(1.9, 0.08, 0.1), Vector3(0, 1.37, 0.76), dark_steel)
@@ -1504,24 +1614,48 @@ static func _create_mech_bay(c: Color) -> Node3D:
 	_add_box(r, Vector3(0.08, 1.1, 0.1), Vector3(0.95, 0.8, 0.76), dark_steel)
 	
 	# Heavy crane arm with lifting capability
-	_add_box(r, Vector3(0.12, 0.7, 0.12), Vector3(0.8, 1.9, 0), dark_steel)
-	_add_box(r, Vector3(1.0, 0.08, 0.08), Vector3(0.8, 2.25, 0.4), dark_steel)
-	_add_box(r, Vector3(0.06, 0.15, 0.06), Vector3(1.3, 2.18, 0.4), lite)  # Hook
+	var crane_system := Node3D.new()
+	crane_system.name = "CraneSystem"
+	crane_system.position = Vector3(0.8, 1.9, 0)
+	r.add_child(crane_system)
+	_add_box(crane_system, Vector3(0.12, 0.7, 0.12), Vector3(0, 0, 0), dark_steel)
+	_add_box(crane_system, Vector3(1.0, 0.08, 0.08), Vector3(0, 0.35, 0.4), dark_steel)
+	_add_box(crane_system, Vector3(0.06, 0.15, 0.06), Vector3(0.5, 0.28, 0.4), lite)  # Hook
+	_add_cylinder(crane_system, 0.01, 0.25, Vector3(0.5, 0.1, 0.4), dark_steel.darkened(0.3))  # Cable
 	
 	# Exhaust ports with steam/smoke
 	_add_cylinder(r, 0.12, 0.5, Vector3(-0.8, 1.9, -0.5), dark_steel)
 	_add_cylinder(r, 0.1, 0.5, Vector3(-1.0, 1.9, -0.3), dark_steel)
 	_add_emissive_sphere(r, 0.08, Vector3(-0.8, 2.15, -0.5), Color(0.8, 0.8, 0.9), 1.0)  # Steam
+	_add_emissive_sphere(r, 0.06, Vector3(-1.0, 2.2, -0.3), Color(0.9, 0.85, 0.8), 0.8)  # Steam
 	
 	# Blue operational status lights
 	_add_emissive_sphere(r, 0.05, Vector3(0.8, 1.4, 0.76), blue, 3.0)
 	_add_emissive_sphere(r, 0.05, Vector3(-0.8, 1.4, 0.76), blue, 3.0)
 	_add_emissive_sphere(r, 0.05, Vector3(0, 1.6, 0.76), blue, 3.0)
 	
+	# Additional status lights on crane and gantry
+	_add_emissive_sphere(crane_system, 0.03, Vector3(0, 0.4, 0.42), blue, 2.0)
+	_add_emissive_sphere(gantry_system, 0.025, Vector3(0, 1.15, 0.05), blue, 2.0)
+	
 	# Blue accent lighting strips
 	_add_emissive_box(r, Vector3(2.4, 0.03, 0.04), Vector3(0, 0.4, 0.76), blue, 2.0)
 	_add_emissive_box(r, Vector3(0.04, 1.0, 0.04), Vector3(1.25, 0.75, 0.76), blue, 2.0)
 	_add_emissive_box(r, Vector3(0.04, 1.0, 0.04), Vector3(-1.25, 0.75, 0.76), blue, 2.0)
+	
+	# Interior work lights
+	_add_emissive_box(r, Vector3(1.8, 0.04, 0.04), Vector3(0, 1.5, 0.72), Color(0.9, 0.9, 1.0), 1.0)
+	
+	# Store animation nodes for future use
+	r.set_meta("gantry_system_node", gantry_system.get_path())
+	r.set_meta("welding_arm1_node", welding_arm_1.get_path())
+	r.set_meta("welding_arm2_node", welding_arm_2.get_path())
+	r.set_meta("crane_system_node", crane_system.get_path())
+	r.set_meta("sentinel_frame_node", mech_frame_1.get_path())
+	r.set_meta("juggernaut_frame_node", mech_frame_2.get_path())
+	r.set_meta("supports_gantry_animation", true)
+	r.set_meta("supports_welding_animation", true)
+	r.set_meta("supports_crane_animation", true)
 	
 	return r
 
@@ -1545,52 +1679,158 @@ static func _create_war_factory(c: Color) -> Node3D:
 	_add_box(r, Vector3(0.12, 1.2, 2.3), Vector3(-1.31, 0.9, 0), industrial_metal.darkened(0.2))
 	_add_box(r, Vector3(2.3, 0.12, 1.2), Vector3(0, 0.9, -1.31), industrial_metal.darkened(0.2))
 	
-	# Reinforced vehicle ramp exit
+	# Reinforced vehicle ramp exit with track marks
 	_add_box(r, Vector3(1.5, 1.2, 0.1), Vector3(0, 0.9, 1.35), industrial_metal.darkened(0.4))
 	_add_box(r, Vector3(1.5, 0.08, 0.6), Vector3(0, 0.24, 1.65), industrial_metal.darkened(0.2))
 	
-	# Tank treads and heavy machinery visible inside
-	_add_box(r, Vector3(0.8, 0.3, 0.15), Vector3(0.3, 0.45, 0.8), industrial_metal.lightened(0.1))
-	_add_box(r, Vector3(0.8, 0.3, 0.15), Vector3(-0.3, 0.45, 0.8), industrial_metal.lightened(0.1))
+	# Tank tread marks on ramp
+	_add_box(r, Vector3(0.3, 0.02, 0.5), Vector3(0.4, 0.25, 1.65), industrial_metal.darkened(0.4))
+	_add_box(r, Vector3(0.3, 0.02, 0.5), Vector3(-0.4, 0.25, 1.65), industrial_metal.darkened(0.4))
 	
-	# Large industrial gears/machinery
-	_add_cylinder(r, 0.3, 0.1, Vector3(0.6, 0.8, 0.2), industrial_metal.lightened(0.15))
-	_add_cylinder(r, 0.25, 0.1, Vector3(-0.6, 0.8, 0.2), industrial_metal.lightened(0.15))
+	# Interior assembly line (visible through openings)
+	var assembly_line := Node3D.new()
+	assembly_line.name = "AssemblyLine"
+	assembly_line.position = Vector3(0, 0.45, 0.8)
+	r.add_child(assembly_line)
 	
-	# Heavy crane arm (extends from roof for lifting components)
-	_add_box(r, Vector3(0.15, 0.8, 0.15), Vector3(0.9, 2.0, 0), industrial_metal)
-	_add_box(r, Vector3(1.2, 0.1, 0.1), Vector3(0.9, 2.4, 0.5), industrial_metal)
-	_add_cylinder(r, 0.04, 0.3, Vector3(1.5, 2.25, 0.5), industrial_metal.lightened(0.2))  # Cable
+	# Conveyor tracks
+	_add_box(assembly_line, Vector3(1.8, 0.05, 0.3), Vector3(0, 0, 0), industrial_metal.lightened(0.05))
+	_add_box(assembly_line, Vector3(1.8, 0.05, 0.3), Vector3(0, 0, -0.6), industrial_metal.lightened(0.05))
 	
-	# Multiple exhaust stacks releasing steam
-	_add_cylinder(r, 0.12, 0.6, Vector3(-0.8, 2.0, -0.8), industrial_metal)
-	_add_cylinder(r, 0.1, 0.5, Vector3(-0.5, 2.0, -0.9), industrial_metal)
-	_add_cylinder(r, 0.1, 0.5, Vector3(0.8, 2.0, -0.8), industrial_metal)
+	# Vehicle chassis in various stages
+	var striker_chassis := Node3D.new()
+	striker_chassis.name = "StrikerChassis"
+	striker_chassis.position = Vector3(0.3, 0.15, 0)
+	assembly_line.add_child(striker_chassis)
+	_add_box(striker_chassis, Vector3(0.8, 0.3, 0.15), Vector3(0, 0, 0), industrial_metal.lightened(0.1))
+	_add_box(striker_chassis, Vector3(0.15, 0.15, 0.12), Vector3(0.3, 0.2, 0), industrial_metal.lightened(0.05))  # Weapon mount
+	_add_emissive_sphere(striker_chassis, 0.02, Vector3(0, 0.1, 0.08), orange, 1.5)  # Power core
 	
-	# Steam bursts during production
-	_add_emissive_sphere(r, 0.1, Vector3(-0.8, 2.3, -0.8), Color(0.9, 0.9, 1.0), 1.5)
-	_add_emissive_sphere(r, 0.08, Vector3(-0.5, 2.25, -0.9), Color(0.9, 0.9, 1.0), 1.5)
+	var siege_walker_chassis := Node3D.new()
+	siege_walker_chassis.name = "SiegeWalkerChassis"
+	siege_walker_chassis.position = Vector3(-0.3, 0.15, -0.6)
+	assembly_line.add_child(siege_walker_chassis)
+	_add_box(siege_walker_chassis, Vector3(0.8, 0.3, 0.15), Vector3(0, 0, 0), industrial_metal.lightened(0.1))
+	# Walker legs (partially assembled)
+	_add_box(siege_walker_chassis, Vector3(0.08, 0.25, 0.08), Vector3(0.25, -0.1, 0), industrial_metal.lightened(0.05))
+	_add_box(siege_walker_chassis, Vector3(0.08, 0.25, 0.08), Vector3(-0.25, -0.1, 0), industrial_metal.lightened(0.05))
+	_add_emissive_sphere(siege_walker_chassis, 0.03, Vector3(0, 0.2, 0), Color(0.8, 0.4, 1.0), 2.0)  # Plasma core
 	
-	# Orange warning lights and hazard striping around deployment ramp
+	# Large industrial machinery (gear systems)
+	var machinery_1 := Node3D.new()
+	machinery_1.name = "HeavyGearSystem1"
+	machinery_1.position = Vector3(0.6, 0.8, 0.2)
+	r.add_child(machinery_1)
+	_add_cylinder(machinery_1, 0.3, 0.1, Vector3(0, 0, 0), industrial_metal.lightened(0.15))
+	# Gear teeth
+	for i in range(8):
+		var angle: float = i * TAU / 8.0
+		var tooth_x: float = cos(angle) * 0.32
+		var tooth_z: float = sin(angle) * 0.32
+		_add_box(machinery_1, Vector3(0.04, 0.12, 0.04), Vector3(tooth_x, 0, tooth_z), industrial_metal.lightened(0.2))
+	
+	var machinery_2 := Node3D.new()
+	machinery_2.name = "HeavyGearSystem2"
+	machinery_2.position = Vector3(-0.6, 0.8, 0.2)
+	r.add_child(machinery_2)
+	_add_cylinder(machinery_2, 0.25, 0.1, Vector3(0, 0, 0), industrial_metal.lightened(0.15))
+	# Gear teeth
+	for i in range(6):
+		var angle: float = i * TAU / 6.0
+		var tooth_x: float = cos(angle) * 0.27
+		var tooth_z: float = sin(angle) * 0.27
+		_add_box(machinery_2, Vector3(0.04, 0.12, 0.04), Vector3(tooth_x, 0, tooth_z), industrial_metal.lightened(0.2))
+	
+	# Heavy crane arm system
+	var crane_system := Node3D.new()
+	crane_system.name = "HeavyCraneSystem"
+	crane_system.position = Vector3(0.9, 2.0, 0)
+	r.add_child(crane_system)
+	_add_box(crane_system, Vector3(0.15, 0.8, 0.15), Vector3(0, 0, 0), industrial_metal)
+	_add_box(crane_system, Vector3(1.2, 0.1, 0.1), Vector3(0, 0.4, 0.5), industrial_metal)
+	_add_box(crane_system, Vector3(0.08, 0.15, 0.08), Vector3(0.6, 0.25, 0.5), industrial_metal.lightened(0.2))  # Hook
+	_add_cylinder(crane_system, 0.01, 0.4, Vector3(0.6, 0.05, 0.5), industrial_metal.darkened(0.3))  # Cable
+	
+	# Crane counterweight
+	_add_box(crane_system, Vector3(0.4, 0.2, 0.2), Vector3(-0.5, 0.3, 0), industrial_metal.darkened(0.2))
+	
+	# Multiple exhaust stacks with realistic details
+	var exhaust_1 := Node3D.new()
+	exhaust_1.name = "ExhaustStack1"
+	exhaust_1.position = Vector3(-0.8, 2.0, -0.8)
+	r.add_child(exhaust_1)
+	_add_cylinder(exhaust_1, 0.12, 0.6, Vector3(0, 0, 0), industrial_metal)
+	_add_cylinder(exhaust_1, 0.14, 0.05, Vector3(0, 0.32, 0), industrial_metal.darkened(0.1))  # Flare
+	_add_emissive_sphere(exhaust_1, 0.1, Vector3(0, 0.35, 0), Color(0.9, 0.9, 1.0), 1.5)  # Steam
+	
+	var exhaust_2 := Node3D.new()
+	exhaust_2.name = "ExhaustStack2"
+	exhaust_2.position = Vector3(-0.5, 2.0, -0.9)
+	r.add_child(exhaust_2)
+	_add_cylinder(exhaust_2, 0.1, 0.5, Vector3(0, 0, 0), industrial_metal)
+	_add_emissive_sphere(exhaust_2, 0.08, Vector3(0, 0.28, 0), Color(0.9, 0.9, 1.0), 1.5)
+	
+	var exhaust_3 := Node3D.new()
+	exhaust_3.name = "ExhaustStack3"
+	exhaust_3.position = Vector3(0.8, 2.0, -0.8)
+	r.add_child(exhaust_3)
+	_add_cylinder(exhaust_3, 0.1, 0.5, Vector3(0, 0, 0), industrial_metal)
+	_add_emissive_sphere(exhaust_3, 0.08, Vector3(0, 0.28, 0), Color(0.85, 0.9, 1.0), 1.2)
+	
+	# Orange warning lights and hazard systems
 	_add_emissive_sphere(r, 0.08, Vector3(0.75, 1.5, 1.35), orange, 3.0)
 	_add_emissive_sphere(r, 0.08, Vector3(-0.75, 1.5, 1.35), orange, 3.0)
 	_add_emissive_sphere(r, 0.06, Vector3(0.75, 0.8, 1.35), orange, 2.5)
 	_add_emissive_sphere(r, 0.06, Vector3(-0.75, 0.8, 1.35), orange, 2.5)
 	
-	# Hazard striping (orange and black stripes)
+	# Rotating beacon light
+	var beacon := Node3D.new()
+	beacon.name = "WarningBeacon"
+	beacon.position = Vector3(0, 1.8, 1.35)
+	r.add_child(beacon)
+	_add_cylinder(beacon, 0.06, 0.1, Vector3(0, 0, 0), industrial_metal.darkened(0.2))
+	_add_emissive_sphere(beacon, 0.08, Vector3(0, 0.08, 0), orange, 4.0)
+	
+	# Hazard striping (improved pattern)
 	for i in range(5):
 		var stripe_x: float = -0.6 + i * 0.3
-		_add_box(r, Vector3(0.08, 0.04, 0.1), Vector3(stripe_x, 0.28, 1.35), orange if i % 2 == 0 else industrial_metal.darkened(0.4))
+		var stripe_color: Color = orange if i % 2 == 0 else Color(0.1, 0.1, 0.1)
+		_add_box(r, Vector3(0.08, 0.04, 0.1), Vector3(stripe_x, 0.28, 1.35), stripe_color)
+		_add_box(r, Vector3(0.08, 0.04, 0.1), Vector3(stripe_x, 0.5, 1.35), stripe_color)
 	
 	# Orange accent lighting strips
 	_add_emissive_box(r, Vector3(2.4, 0.04, 0.04), Vector3(0, 0.5, 1.35), orange, 2.0)
 	_add_emissive_box(r, Vector3(0.04, 1.2, 0.04), Vector3(1.27, 0.9, 1.35), orange, 2.0)
 	_add_emissive_box(r, Vector3(0.04, 1.2, 0.04), Vector3(-1.27, 0.9, 1.35), orange, 2.0)
 	
+	# Work area lighting
+	_add_emissive_box(r, Vector3(2.2, 0.04, 0.04), Vector3(0, 1.3, 0.8), Color(0.9, 0.9, 1.0), 1.2)
+	
 	# Heavy reinforcement ribs (structural)
 	for i in range(4):
 		var z_pos: float = -1.0 + i * 0.65
 		_add_box(r, Vector3(2.6, 0.08, 0.1), Vector3(0, 1.2, z_pos), industrial_metal.darkened(0.1))
+		# Rivets on ribs
+		for j in range(6):
+			var rib_x: float = -1.1 + j * 0.44
+			_add_cylinder(r, 0.015, 0.02, Vector3(rib_x, 1.2, z_pos + 0.05), industrial_metal.darkened(0.3))
+	
+	# Store animation nodes for future use
+	r.set_meta("assembly_line_node", assembly_line.get_path())
+	r.set_meta("striker_chassis_node", striker_chassis.get_path())
+	r.set_meta("siege_walker_chassis_node", siege_walker_chassis.get_path())
+	r.set_meta("heavy_gear_system1_node", machinery_1.get_path())
+	r.set_meta("heavy_gear_system2_node", machinery_2.get_path())
+	r.set_meta("heavy_crane_system_node", crane_system.get_path())
+	r.set_meta("warning_beacon_node", beacon.get_path())
+	r.set_meta("exhaust_stack1_node", exhaust_1.get_path())
+	r.set_meta("exhaust_stack2_node", exhaust_2.get_path())
+	r.set_meta("exhaust_stack3_node", exhaust_3.get_path())
+	r.set_meta("supports_assembly_animation", true)
+	r.set_meta("supports_gear_rotation", true)
+	r.set_meta("supports_crane_animation", true)
+	r.set_meta("supports_beacon_rotation", true)
+	r.set_meta("supports_steam_animation", true)
 	
 	return r
 
