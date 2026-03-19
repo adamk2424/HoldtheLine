@@ -13,6 +13,7 @@ var health_bar: Node3D = null
 var health_bar_width: float = 1.0
 var ai_node: Node = null
 var _attack_tween: Tween = null
+var _idle_tween: Tween = null
 
 # Frame-stagger slot for AI processing.  Each enemy gets a random slot so
 # expensive AI work is distributed evenly across frames when counts are high.
@@ -70,6 +71,9 @@ func initialize_enemy(enemy_id: String, p_data: Dictionary, difficulty_mult: Dic
 	if combat_component:
 		combat_component.attack_fired.connect(_on_attack_fired)
 
+	# Start idle animation
+	_start_idle_animation()
+
 	# Start moving toward base center
 	if movement_component:
 		movement_component.move_to(BASE_CENTER)
@@ -112,16 +116,36 @@ func _configure_target_type() -> void:
 
 
 func _setup_health_bar() -> void:
-	# Determine height based on mesh scale
-	var scale_arr: Variant = enemy_data.get("mesh_scale", [1.0, 1.0, 1.0])
-	var mesh_height: float = 1.0
-	if scale_arr is Array and scale_arr.size() >= 2:
-		mesh_height = float(scale_arr[1])
-
-	health_bar_width = max(0.6, mesh_height * 0.8)
+	# Determine height based on actual enemy model bounds
+	var mesh_height: float = _get_visual_height()
+	
+	health_bar_width = max(0.6, mesh_height * 0.6)
 	health_bar = VisualGenerator.create_health_bar(health_bar_width, true)
 	health_bar.position.y = mesh_height + HEALTH_BAR_HEIGHT_OFFSET
 	add_child(health_bar)
+
+func _get_visual_height() -> float:
+	if not visual_node:
+		# Fallback to mesh scale if no visual yet
+		var scale_arr: Variant = enemy_data.get("mesh_scale", [1.0, 1.0, 1.0])
+		if scale_arr is Array and scale_arr.size() >= 2:
+			return float(scale_arr[1])
+		return 1.0
+	
+	# Get approximate height from visual bounds
+	match entity_id:
+		"thrasher", "blight_mite", "scrit":
+			return 0.5  # Small enemies
+		"polus", "howler":
+			return 1.0  # Medium enemies  
+		"brute", "slinker", "gorger", "gloom_wing", "bile_spitter":
+			return 1.5  # Large enemies
+		"clugg":
+			return 2.0  # Huge tank
+		"terror_bringer", "behemoth":
+			return 3.0  # Boss enemies
+		_:
+			return 1.0
 
 
 func _on_health_changed(current_hp: float, max_hp: float) -> void:
@@ -287,3 +311,81 @@ func find_lowest_hp_player_entity(max_range: float) -> Node:
 					best_hp = ent.health_component.current_hp
 					best = ent
 	return best
+
+# =============================================================================
+# Idle Animation System
+# =============================================================================
+
+func _start_idle_animation() -> void:
+	if not visual_node:
+		return
+	
+	# Different idle animations based on enemy type
+	match entity_id:
+		"scrit", "gloom_wing":
+			_start_floating_animation()
+		"thrasher", "polus":
+			_start_breathing_animation()
+		"clugg":
+			_start_slow_sway_animation()
+		"blight_mite":
+			_start_twitchy_animation()
+		"howler":
+			_start_head_pulse_animation()
+		_:
+			_start_gentle_bob_animation()
+
+func _start_floating_animation() -> void:
+	if _idle_tween:
+		_idle_tween.kill()
+	_idle_tween = create_tween()
+	_idle_tween.set_loops()
+	var base_y := visual_node.position.y
+	_idle_tween.tween_property(visual_node, "position:y", base_y + 0.1, 2.0)
+	_idle_tween.tween_property(visual_node, "position:y", base_y - 0.1, 2.0)
+
+func _start_breathing_animation() -> void:
+	if _idle_tween:
+		_idle_tween.kill()
+	_idle_tween = create_tween()
+	_idle_tween.set_loops()
+	var base_scale := visual_node.scale
+	_idle_tween.tween_property(visual_node, "scale", base_scale * 1.02, 1.5)
+	_idle_tween.tween_property(visual_node, "scale", base_scale * 0.98, 1.5)
+
+func _start_slow_sway_animation() -> void:
+	if _idle_tween:
+		_idle_tween.kill()
+	_idle_tween = create_tween()
+	_idle_tween.set_loops()
+	_idle_tween.tween_property(visual_node, "rotation:y", 0.05, 4.0)
+	_idle_tween.tween_property(visual_node, "rotation:y", -0.05, 4.0)
+
+func _start_twitchy_animation() -> void:
+	if _idle_tween:
+		_idle_tween.kill()
+	_idle_tween = create_tween()
+	_idle_tween.set_loops()
+	# Random quick movements
+	_idle_tween.tween_property(visual_node, "rotation:y", randf_range(-0.1, 0.1), 0.1)
+	_idle_tween.tween_delay(randf_range(0.5, 2.0))
+	_idle_tween.tween_property(visual_node, "rotation:y", randf_range(-0.1, 0.1), 0.1)
+
+func _start_head_pulse_animation() -> void:
+	# For enemies with large heads, pulse slightly
+	if _idle_tween:
+		_idle_tween.kill()
+	_idle_tween = create_tween()
+	_idle_tween.set_loops()
+	var base_scale := visual_node.scale
+	_idle_tween.tween_property(visual_node, "scale:y", base_scale.y * 1.05, 0.8)
+	_idle_tween.tween_property(visual_node, "scale:y", base_scale.y * 0.95, 0.8)
+
+func _start_gentle_bob_animation() -> void:
+	if _idle_tween:
+		_idle_tween.kill()
+	_idle_tween = create_tween()
+	_idle_tween.set_loops()
+	var base_y := visual_node.position.y
+	_idle_tween.tween_property(visual_node, "position:y", base_y + 0.02, 1.0)
+	_idle_tween.tween_property(visual_node, "position:y", base_y - 0.02, 1.0)
