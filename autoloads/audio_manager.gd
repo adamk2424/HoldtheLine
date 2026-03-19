@@ -7,6 +7,9 @@ const MAX_CONCURRENT_SFX_2D: int = 8
 const MAX_CONCURRENT_SFX_3D: int = 32
 const MAX_VOICES_PER_CUE: int = 3
 
+const LIVE_TOOL_ENABLED: bool = true
+const LIVE_TOOL_PORT: int = 8090
+
 
 const MUSIC_TRACKS: Array[String] = [
 	"res://audio/music/Starcraft Protoss Theme 1.mp3",
@@ -68,6 +71,13 @@ var _active_voices: Dictionary = {}
 # Node3D anchor for 3D players (sits at world origin; players are repositioned per-play)
 var _sfx_3d_anchor: Node3D = null
 
+# Live tool WebSocket server
+var _ws_server: TCPServer = null
+var _ws_peers: Array = []  # Array of WebSocketPeer
+var _ws_pending_state: Array = []  # WebSocketPeers waiting for STATE_OPEN to send initial state
+var _ws_voice_timer: float = 0.0
+var _wav_file_list: Array[String] = []
+
 
 func _ready() -> void:
 	_setup_audio_buses()
@@ -114,6 +124,43 @@ func _ready() -> void:
 	# Auto-connect hover and click sounds to every BaseButton added to the scene tree
 	get_tree().node_added.connect(_on_node_added_ui)
 
+	if LIVE_TOOL_ENABLED:
+		_start_ws_server()
+
+
+func _start_ws_server() -> void:
+	_ws_server = TCPServer.new()
+	var err := _ws_server.listen(LIVE_TOOL_PORT, "0.0.0.0")
+	if err != OK:
+		push_warning("[AudioManager] Failed to start WebSocket server on port %d" % LIVE_TOOL_PORT)
+		_ws_server = null
+		return
+	_scan_wav_files()
+	print("[AudioManager] Live tool server listening on port %d" % LIVE_TOOL_PORT)
+
+
+func _scan_wav_files() -> void:
+	_wav_file_list.clear()
+	_scan_wav_dir("res://audio/sfx")
+	_wav_file_list.sort()
+	print("[AudioManager] Scanned %d WAV files for live tool" % _wav_file_list.size())
+
+
+func _scan_wav_dir(path: String) -> void:
+	var dir := DirAccess.open(path)
+	if not dir:
+		return
+	dir.list_dir_begin()
+	var file_name := dir.get_next()
+	while file_name != "":
+		if dir.current_is_dir():
+			if not file_name.begins_with("."):
+				_scan_wav_dir(path.path_join(file_name))
+		elif file_name.get_extension().to_lower() == "wav":
+			_wav_file_list.append(path.path_join(file_name))
+		file_name = dir.get_next()
+	dir.list_dir_end()
+
 
 func _configure_3d_player(player: AudioStreamPlayer3D, preset: Dictionary = {}) -> void:
 	if preset.is_empty() and _attenuation_presets.has("default"):
@@ -159,6 +206,53 @@ func apply_volume_settings() -> void:
 	if sfx_idx != -1:
 		AudioServer.set_bus_volume_db(sfx_idx, linear_to_db(MetaProgress.sfx_volume))
 		AudioServer.set_bus_mute(sfx_idx, MetaProgress.sfx_volume <= 0.0)
+
+
+func _process(delta: float) -> void:
+	if not LIVE_TOOL_ENABLED or _ws_server == null:
+		return
+	_ws_poll(delta)
+
+
+func _ws_poll(delta: float) -> void:
+	# Accept new connections
+	while _ws_server.is_connection_available():
+		var tcp := _ws_server.take_connection()
+		if tcp:
+			var ws := WebSocketPeer.new()
+			ws.accept_stream(tcp)
+			_ws_peers.append(ws)
+			_ws_pending_state.append(ws)
+			print("[AudioManager] Live tool client connected")
+
+	# Poll existing peers
+	var i := _ws_peers.size() - 1
+	while i >= 0:
+		var ws: WebSocketPeer = _ws_peers[i]
+		ws.poll()
+		var state := ws.get_ready_state()
+
+		if state == WebSocketPeer.STATE_OPEN:
+			# Send initial state to newly connected peers
+			if ws in _ws_pending_state:
+				ws.send_text(JSON.stringify(_ws_build_state()))
+				_ws_pending_state.erase(ws)
+			while ws.get_available_packet_count() > 0:
+				var pkt := ws.get_packet()
+				_ws_handle_message(ws, pkt.get_string_from_utf8())
+		elif state == WebSocketPeer.STATE_CLOSING:
+			pass
+		elif state == WebSocketPeer.STATE_CLOSED:
+			_ws_peers.remove_at(i)
+			_ws_pending_state.erase(ws)
+			print("[AudioManager] Live tool client disconnected")
+		i -= 1
+
+	# Broadcast voice counts at ~4Hz
+	_ws_voice_timer += delta
+	if _ws_voice_timer >= 0.25:
+		_ws_voice_timer = 0.0
+		_ws_broadcast_voice_counts()
 
 
 # --- Music Playlist ---
@@ -547,6 +641,8 @@ func _release_looping_cue(cue_key: String) -> void:
 	var player: AudioStreamPlayer3D = entry["player"]
 	_reserved_players.erase(player.get_instance_id())
 	_looping_cues.erase(cue_key)
+	if LIVE_TOOL_ENABLED:
+		_ws_broadcast({"event": "cue_stopped", "entity": entry.get("entity_id", ""), "cue": cue_key})
 
 
 ## Bridge: try to resolve a hook_id through SFX assignments (2D, non-positional).
@@ -601,12 +697,18 @@ func _try_sfx_assignment_3d(hook_id: String, world_pos: Vector3) -> bool:
 		return true  # Return true to prevent fallback to audio_hooks, but don't play
 
 	if entity_cues.has(action) and _cue_has_files(entity_cues[action]):
-		return _play_cue_data_3d(entity_cues[action], world_pos, cue_key, entity_id)
+		var result := _play_cue_data_3d(entity_cues[action], world_pos, cue_key, entity_id)
+		if result:
+			_ws_emit_cue_fired(entity_id, cue_key, "", world_pos)
+		return result
 
 	var cue: String = ACTION_TO_CUE.get(action, "")
 	if not cue.is_empty() and entity_cues.has(cue) and _cue_has_files(entity_cues[cue]):
 		cue_key = entity_id + "." + cue
-		return _play_cue_data_3d(entity_cues[cue], world_pos, cue_key, entity_id)
+		var result := _play_cue_data_3d(entity_cues[cue], world_pos, cue_key, entity_id)
+		if result:
+			_ws_emit_cue_fired(entity_id, cue_key, "", world_pos)
+		return result
 
 	return false
 
@@ -791,6 +893,253 @@ func _on_audio_play_3d(hook_id: String, world_pos: Vector3) -> void:
 
 func _on_audio_stop(hook_id: String) -> void:
 	stop(hook_id)
+
+
+# --- WebSocket Server: State & Commands ---
+
+
+func _ws_build_state() -> Dictionary:
+	return {
+		"event": "state",
+		"entities": _sfx_assignments,
+		"attenuation_presets": _attenuation_presets,
+		"entity_attenuation": _entity_attenuation,
+		"bus_volumes": {
+			"master": db_to_linear(AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Master"))),
+			"music": db_to_linear(AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Music"))),
+			"sfx": db_to_linear(AudioServer.get_bus_volume_db(AudioServer.get_bus_index("SFX"))),
+		},
+		"wav_files": _wav_file_list,
+		"soloed": _soloed.keys(),
+		"muted": _muted.keys(),
+	}
+
+
+func _ws_handle_message(ws: WebSocketPeer, text: String) -> void:
+	var json := JSON.new()
+	if json.parse(text) != OK:
+		return
+	var msg: Dictionary = json.data
+	var cmd: String = msg.get("cmd", "")
+
+	match cmd:
+		"get_state":
+			ws.send_text(JSON.stringify(_ws_build_state()))
+		"set_cue_volume":
+			_ws_cmd_set_cue_volume(msg)
+		"set_cue_pitch":
+			_ws_cmd_set_cue_pitch(msg)
+		"set_cue_files":
+			_ws_cmd_set_cue_files(msg)
+		"set_cue_looping":
+			_ws_cmd_set_cue_looping(msg)
+		"set_cue_voices":
+			_ws_cmd_set_cue_voices(msg)
+		"set_bus_volume":
+			_ws_cmd_set_bus_volume(msg)
+		"set_attenuation_preset":
+			_ws_cmd_set_attenuation_preset(msg)
+		"assign_attenuation_preset":
+			_ws_cmd_assign_attenuation_preset(msg)
+		"delete_attenuation_preset":
+			_ws_cmd_delete_attenuation_preset(msg)
+		"solo":
+			_ws_cmd_solo(msg)
+		"mute":
+			_ws_cmd_mute(msg)
+		"test_play":
+			_ws_cmd_test_play(msg)
+		"save":
+			_ws_cmd_save()
+
+
+func _ws_cmd_set_cue_volume(msg: Dictionary) -> void:
+	var entity: String = msg.get("entity", "")
+	var cue: String = msg.get("cue", "")
+	var value: float = msg.get("value", 0.0)
+	if _sfx_assignments.has(entity) and _sfx_assignments[entity].has(cue):
+		_sfx_assignments[entity][cue]["volume_db"] = value
+
+
+func _ws_cmd_set_cue_pitch(msg: Dictionary) -> void:
+	var entity: String = msg.get("entity", "")
+	var cue: String = msg.get("cue", "")
+	if _sfx_assignments.has(entity) and _sfx_assignments[entity].has(cue):
+		if msg.has("enabled"):
+			_sfx_assignments[entity][cue]["pitch_randomize"] = msg["enabled"]
+		if msg.has("cents"):
+			_sfx_assignments[entity][cue]["pitch_cents"] = int(msg["cents"])
+
+
+func _ws_cmd_set_cue_files(msg: Dictionary) -> void:
+	var entity: String = msg.get("entity", "")
+	var cue: String = msg.get("cue", "")
+	var slot: int = msg.get("slot", 0)
+	var path: String = msg.get("path", "")
+	var key: String = msg.get("key", "files")
+	if _sfx_assignments.has(entity) and _sfx_assignments[entity].has(cue):
+		var cue_data: Dictionary = _sfx_assignments[entity][cue]
+		if not cue_data.has(key):
+			cue_data[key] = ["", "", ""]
+		var files: Array = cue_data[key]
+		if slot >= 0 and slot < files.size():
+			files[slot] = path
+
+
+func _ws_cmd_set_cue_looping(msg: Dictionary) -> void:
+	var entity: String = msg.get("entity", "")
+	var cue: String = msg.get("cue", "")
+	var is_looping: bool = msg.get("is_looping", false)
+	if _sfx_assignments.has(entity) and _sfx_assignments[entity].has(cue):
+		_sfx_assignments[entity][cue]["is_looping"] = is_looping
+		if is_looping:
+			var cue_data: Dictionary = _sfx_assignments[entity][cue]
+			if not cue_data.has("files_start"):
+				cue_data["files_start"] = ["", "", ""]
+			if not cue_data.has("files_end"):
+				cue_data["files_end"] = ["", "", ""]
+
+
+func _ws_cmd_set_cue_voices(msg: Dictionary) -> void:
+	var entity: String = msg.get("entity", "")
+	var cue: String = msg.get("cue", "")
+	var max_voices: int = msg.get("max_voices", MAX_VOICES_PER_CUE)
+	if _sfx_assignments.has(entity) and _sfx_assignments[entity].has(cue):
+		_sfx_assignments[entity][cue]["max_voices"] = max_voices
+
+
+func _ws_cmd_set_bus_volume(msg: Dictionary) -> void:
+	var bus: String = msg.get("bus", "")
+	var value_linear: float = msg.get("value", 1.0)
+	var bus_name := ""
+	match bus:
+		"master": bus_name = "Master"
+		"music": bus_name = "Music"
+		"sfx": bus_name = "SFX"
+	if bus_name.is_empty():
+		return
+	var idx := AudioServer.get_bus_index(bus_name)
+	if idx != -1:
+		AudioServer.set_bus_volume_db(idx, linear_to_db(value_linear))
+		AudioServer.set_bus_mute(idx, value_linear <= 0.0)
+
+
+func _ws_cmd_set_attenuation_preset(msg: Dictionary) -> void:
+	var preset_name: String = msg.get("preset_name", "")
+	var settings: Dictionary = msg.get("settings", {})
+	if preset_name.is_empty() or settings.is_empty():
+		return
+	_attenuation_presets[preset_name] = settings
+
+
+func _ws_cmd_assign_attenuation_preset(msg: Dictionary) -> void:
+	var entity: String = msg.get("entity", "")
+	var preset_name: String = msg.get("preset_name", "")
+	if entity.is_empty():
+		return
+	if preset_name == "default" or preset_name.is_empty():
+		_entity_attenuation.erase(entity)
+	else:
+		_entity_attenuation[entity] = preset_name
+
+
+func _ws_cmd_delete_attenuation_preset(msg: Dictionary) -> void:
+	var preset_name: String = msg.get("preset_name", "")
+	if preset_name.is_empty() or preset_name == "default":
+		return
+	_attenuation_presets.erase(preset_name)
+	var to_remove: Array[String] = []
+	for entity in _entity_attenuation:
+		if _entity_attenuation[entity] == preset_name:
+			to_remove.append(entity)
+	for entity in to_remove:
+		_entity_attenuation.erase(entity)
+
+
+func _ws_cmd_solo(msg: Dictionary) -> void:
+	var target: String = msg.get("target", "")
+	if target.is_empty():
+		return
+	if _soloed.has(target):
+		_soloed.erase(target)
+	else:
+		_soloed[target] = true
+
+
+func _ws_cmd_mute(msg: Dictionary) -> void:
+	var target: String = msg.get("target", "")
+	if target.is_empty():
+		return
+	if _muted.has(target):
+		_muted.erase(target)
+	else:
+		_muted[target] = true
+
+
+func _ws_cmd_test_play(msg: Dictionary) -> void:
+	var entity: String = msg.get("entity", "")
+	var cue: String = msg.get("cue", "")
+	if not _sfx_assignments.has(entity):
+		return
+	var entity_cues: Dictionary = _sfx_assignments[entity]
+	if not entity_cues.has(cue):
+		return
+	var cue_data: Dictionary = entity_cues[cue].duplicate(true)
+	cue_data["volume_db"] = 0.0
+	_play_cue_data_2d(cue_data)
+	_ws_emit_cue_fired(entity, entity + "." + cue, "")
+
+
+func _ws_cmd_save() -> void:
+	var file := FileAccess.open("res://data/sfx_assignments.json", FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(_sfx_assignments, "\t"))
+		file = null
+	file = FileAccess.open("res://data/attenuation_presets.json", FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(_attenuation_presets, "\t"))
+		file = null
+	file = FileAccess.open("res://data/entity_attenuation.json", FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(_entity_attenuation, "\t"))
+		file = null
+	print("[AudioManager] Live tool: saved all audio data")
+	_ws_broadcast({"event": "saved"})
+
+
+func _ws_broadcast(data: Dictionary) -> void:
+	if _ws_peers.is_empty():
+		return
+	var text := JSON.stringify(data)
+	for ws in _ws_peers:
+		if ws.get_ready_state() == WebSocketPeer.STATE_OPEN:
+			ws.send_text(text)
+
+
+func _ws_broadcast_voice_counts() -> void:
+	if _ws_peers.is_empty():
+		return
+	var counts := {}
+	for cue_key in _active_voices:
+		var voices: Array = _active_voices[cue_key]
+		var active := 0
+		for v in voices:
+			if is_instance_valid(v) and v.playing:
+				active += 1
+		if active > 0:
+			counts[cue_key] = active
+	for cue_key in _looping_cues:
+		counts[cue_key + " (loop)"] = 1
+	_ws_broadcast({"event": "voice_count", "counts": counts})
+
+
+func _ws_emit_cue_fired(entity_id: String, cue_key: String, file_path: String, world_pos: Variant = null) -> void:
+	if not LIVE_TOOL_ENABLED or _ws_peers.is_empty():
+		return
+	var data := {"event": "cue_fired", "entity": entity_id, "cue": cue_key, "file": file_path.get_file()}
+	if world_pos is Vector3:
+		data["position"] = {"x": world_pos.x, "y": world_pos.y, "z": world_pos.z}
+	_ws_broadcast(data)
 
 
 # --- Auto UI Sounds ---
