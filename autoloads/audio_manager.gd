@@ -57,6 +57,11 @@ var _entity_attenuation: Dictionary = {}  # entity_id -> preset_name
 var _soloed: Dictionary = {}
 var _muted: Dictionary = {}
 
+# Looping cue tracking: "entity_id.cue_id" -> { player, state, cue_data, entity_id, cue_key, world_pos }
+var _looping_cues: Dictionary = {}
+# Reserved players (looping): player instance ID -> true. Excluded from general pool.
+var _reserved_players: Dictionary = {}
+
 # Voice limiting: cue_key -> Array of AudioStreamPlayer3D currently playing that cue
 var _active_voices: Dictionary = {}
 
@@ -325,6 +330,18 @@ func _resolve_cue_stream(cue_data: Dictionary) -> AudioStream:
 	return _get_or_load_stream(chosen)
 
 
+func _resolve_stream_from_key(cue_data: Dictionary, key: String) -> AudioStream:
+	var files: Array = cue_data.get(key, [])
+	var valid: Array[String] = []
+	for f in files:
+		if f is String and not f.is_empty():
+			valid.append(f)
+	if valid.is_empty():
+		return null
+	var chosen: String = valid[randi() % valid.size()]
+	return _get_or_load_stream(chosen)
+
+
 func _apply_cue_params_2d(player: AudioStreamPlayer, cue_data: Dictionary) -> void:
 	player.volume_db = cue_data.get("volume_db", 0.0)
 	if cue_data.get("pitch_randomize", false):
@@ -361,6 +378,10 @@ func _play_cue_data_2d(cue_data: Dictionary) -> bool:
 
 
 func _play_cue_data_3d(cue_data: Dictionary, world_pos: Vector3, cue_key: String, entity_id: String = "") -> bool:
+	# Handle looping cues separately
+	if cue_data.get("is_looping", false):
+		return _play_looping_cue_3d(cue_data, world_pos, cue_key, entity_id)
+
 	var stream := _resolve_cue_stream(cue_data)
 	if not stream:
 		return false
@@ -404,10 +425,10 @@ func _acquire_3d_player(cue_key: String, max_voices: int = MAX_VOICES_PER_CUE) -
 		if is_instance_valid(oldest) and oldest.playing:
 			oldest.stop()
 
-	# Find a free player from the pool
+	# Find a free player from the pool (skip reserved looping players)
 	var player: AudioStreamPlayer3D = null
 	for p in _sfx_players_3d:
-		if not p.playing:
+		if not p.playing and not _reserved_players.has(p.get_instance_id()):
 			player = p
 			break
 	if not player:
@@ -415,6 +436,117 @@ func _acquire_3d_player(cue_key: String, max_voices: int = MAX_VOICES_PER_CUE) -
 
 	voices.append(player)
 	return player
+
+
+# --- Looping Cue Playback ---
+
+
+func _play_looping_cue_3d(cue_data: Dictionary, world_pos: Vector3, cue_key: String, entity_id: String) -> bool:
+	# If this loop is already playing, don't start another
+	if _looping_cues.has(cue_key):
+		return true
+
+	var max_v: int = cue_data.get("max_voices", MAX_VOICES_PER_CUE)
+	var player := _acquire_3d_player(cue_key, max_v)
+	if not player:
+		return false
+
+	# Reserve this player
+	_reserved_players[player.get_instance_id()] = true
+
+	var loop_entry := {
+		"player": player,
+		"state": "start",
+		"cue_data": cue_data,
+		"entity_id": entity_id,
+		"cue_key": cue_key,
+		"world_pos": world_pos,
+	}
+	_looping_cues[cue_key] = loop_entry
+
+	# Try START files first
+	var start_stream := _resolve_stream_from_key(cue_data, "files_start")
+	if start_stream:
+		player.stream = start_stream
+		player.global_position = world_pos
+		_apply_cue_params_3d(player, cue_data)
+		if not player.finished.is_connected(_on_loop_start_finished):
+			player.finished.connect(_on_loop_start_finished.bind(cue_key), CONNECT_ONE_SHOT)
+		player.play()
+	else:
+		# No start files, go straight to loop
+		loop_entry["state"] = "loop"
+		_begin_loop_body(cue_key, world_pos)
+
+	return true
+
+
+func _begin_loop_body(cue_key: String, world_pos: Vector3) -> void:
+	if not _looping_cues.has(cue_key):
+		return
+	var entry: Dictionary = _looping_cues[cue_key]
+	var player: AudioStreamPlayer3D = entry["player"]
+	var cue_data: Dictionary = entry["cue_data"]
+
+	var loop_stream := _resolve_stream_from_key(cue_data, "files")
+	if not loop_stream:
+		_stop_looping_cue(cue_key)
+		return
+
+	# Duplicate stream to avoid mutating the cached version, then enable looping
+	if loop_stream is AudioStreamWAV:
+		loop_stream = loop_stream.duplicate() as AudioStreamWAV
+		loop_stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		# loop_begin defaults to 0, loop_end=0 means loop the entire file in Godot 4.x
+
+	entry["state"] = "loop"
+	player.stream = loop_stream
+	player.global_position = world_pos
+	_apply_cue_params_3d(player, cue_data)
+	player.play()
+
+
+func _on_loop_start_finished(cue_key: String) -> void:
+	if not _looping_cues.has(cue_key):
+		return
+	var entry: Dictionary = _looping_cues[cue_key]
+	_begin_loop_body(cue_key, entry["world_pos"])
+
+
+func _stop_looping_cue(cue_key: String) -> void:
+	if not _looping_cues.has(cue_key):
+		return
+	var entry: Dictionary = _looping_cues[cue_key]
+	var player: AudioStreamPlayer3D = entry["player"]
+	var cue_data: Dictionary = entry["cue_data"]
+
+	player.stop()
+
+	# Try END files
+	var end_stream := _resolve_stream_from_key(cue_data, "files_end")
+	if end_stream:
+		entry["state"] = "end"
+		player.stream = end_stream
+		_apply_cue_params_3d(player, cue_data)
+		if not player.finished.is_connected(_on_loop_end_finished):
+			player.finished.connect(_on_loop_end_finished.bind(cue_key), CONNECT_ONE_SHOT)
+		player.play()
+	else:
+		# No end files, just release immediately
+		_release_looping_cue(cue_key)
+
+
+func _on_loop_end_finished(cue_key: String) -> void:
+	_release_looping_cue(cue_key)
+
+
+func _release_looping_cue(cue_key: String) -> void:
+	if not _looping_cues.has(cue_key):
+		return
+	var entry: Dictionary = _looping_cues[cue_key]
+	var player: AudioStreamPlayer3D = entry["player"]
+	_reserved_players.erase(player.get_instance_id())
+	_looping_cues.erase(cue_key)
 
 
 ## Bridge: try to resolve a hook_id through SFX assignments (2D, non-positional).
@@ -539,6 +671,13 @@ func stop(hook_id: String) -> void:
 		_music_player.stop()
 	elif hook_id.begins_with("ambience."):
 		_ambience_player.stop()
+	else:
+		# Check for looping cue stop
+		var parts := hook_id.split(".")
+		if parts.size() >= 3:
+			var cue_key := parts[1] + "." + parts[2]
+			if _looping_cues.has(cue_key):
+				_stop_looping_cue(cue_key)
 
 
 func _play_sfx_2d(stream: AudioStream) -> void:
