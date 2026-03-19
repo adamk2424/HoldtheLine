@@ -1451,7 +1451,7 @@ static func _create_recycler_t3(c: Color) -> Node3D:
 # =============================================================================
 
 static func _create_drone_printer(c: Color) -> Node3D:
-	## Drone factory (2x2): Compact industrial fabrication unit with landing pad, robotic arms, green status lights
+	## Drone factory (2x2): Enhanced compact industrial fabrication unit with landing pad, robotic arms, green status lights
 	## Based on design: "Compact industrial fabrication unit with a flat top landing pad where drones are assembled 
 	## and launched. Robotic arms visible through transparent panels assembling components. Green status lights along 
 	## the base. Drones lift off from the top pad when production completes. Antenna array on one side for drone 
@@ -3755,3 +3755,477 @@ static func _animate_single_missile_reload(visual_node: Node3D, missile_index: i
 	reload_tween.tween_property(missile, "position", reload_pos, duration)
 	reload_tween.tween_property(missile, "modulate:a", 1.0, duration)
 	reload_tween.tween_callback(missile.queue_free).set_delay(duration + 1.0)
+
+
+# =============================================================================
+# TASK 1B: ENHANCED TURRET ANIMATION SYSTEM
+# =============================================================================
+
+## Initialize turret animation components from visual metadata
+static func setup_turret_animations(tower_node: Node3D) -> void:
+	if not tower_node or not tower_node.has_child("Visual"):
+		return
+	
+	var visual_node := tower_node.get_node("Visual")
+	if not visual_node.has_meta("supports_rotation"):
+		return
+	
+	# Extract animation node references from metadata
+	var turret_body_path: String = visual_node.get_meta("turret_body_node", "")
+	var barrel_assembly_path: String = visual_node.get_meta("barrel_assembly_node", "")
+	var barrel_spinner_path: String = visual_node.get_meta("barrel_spinner_node", "")
+	
+	# Store references on the tower for easy access during combat
+	if not turret_body_path.is_empty():
+		var turret_node := visual_node.get_node_or_null(NodePath(turret_body_path))
+		if turret_node:
+			tower_node.set_meta("turret_body", turret_node)
+			tower_node.set_meta("supports_rotation", true)
+	
+	if not barrel_assembly_path.is_empty():
+		var barrel_node := visual_node.get_node_or_null(NodePath(barrel_assembly_path))
+		if barrel_node:
+			tower_node.set_meta("barrel_assembly", barrel_node)
+			tower_node.set_meta("supports_elevation", true)
+			tower_node.set_meta("supports_recoil", visual_node.has_meta("supports_recoil"))
+	
+	if not barrel_spinner_path.is_empty():
+		var spinner_node := visual_node.get_node_or_null(NodePath(barrel_spinner_path))
+		if spinner_node:
+			tower_node.set_meta("barrel_spinner", spinner_node)
+			tower_node.set_meta("supports_barrel_spin", true)
+	
+	# Initialize idle scan state
+	tower_node.set_meta("idle_scan_direction", 1)
+	tower_node.set_meta("idle_scan_timer", 0.0)
+	tower_node.set_meta("base_rotation", 0.0)
+
+
+## Enhanced turret tracking with realistic physics and constraints
+static func animate_turret_tracking(tower_node: Node3D, target_position: Vector3) -> void:
+	if not tower_node.has_meta("turret_body"):
+		return
+	
+	var turret_body: Node3D = tower_node.get_meta("turret_body")
+	var tower_pos := tower_node.global_position
+	
+	# Calculate horizontal rotation (turret body)
+	var to_target := (target_position - tower_pos)
+	to_target.y = 0  # Flatten for horizontal rotation
+	var target_angle := atan2(to_target.x, to_target.z) * RAD_TO_DEG
+	
+	# Smooth rotation with realistic constraints
+	var current_angle := turret_body.rotation_degrees.y
+	var angle_diff := _normalize_angle_difference(target_angle - current_angle)
+	
+	# Limit rotation speed for realism (120 deg/sec max)
+	var max_rotation_speed := 120.0
+	var frame_time := tower_node.get_process_delta_time()
+	var max_turn_this_frame := max_rotation_speed * frame_time
+	
+	if abs(angle_diff) > max_turn_this_frame:
+		angle_diff = sign(angle_diff) * max_turn_this_frame
+	
+	turret_body.rotation_degrees.y = current_angle + angle_diff
+	
+	# Calculate barrel elevation if supported
+	if tower_node.has_meta("barrel_assembly"):
+		var barrel_assembly: Node3D = tower_node.get_meta("barrel_assembly")
+		var distance := tower_pos.distance_to(target_position)
+		var height_diff := target_position.y - tower_pos.y
+		var elevation_angle := atan2(height_diff, distance) * RAD_TO_DEG
+		
+		# Apply realistic elevation constraints (-10 to +45 degrees)
+		elevation_angle = clamp(elevation_angle, -10.0, 45.0)
+		
+		# Smooth elevation change
+		var current_elevation := barrel_assembly.rotation_degrees.x
+		var elevation_diff := elevation_angle - current_elevation
+		var max_elevation_speed := 60.0  # degrees per second
+		var max_elevation_this_frame := max_elevation_speed * frame_time
+		
+		if abs(elevation_diff) > max_elevation_this_frame:
+			elevation_diff = sign(elevation_diff) * max_elevation_this_frame
+		
+		barrel_assembly.rotation_degrees.x = current_elevation + elevation_diff
+
+
+## Enhanced idle scanning animation with natural movement patterns
+static func animate_turret_idle_scan(tower_node: Node3D, delta: float) -> void:
+	if not tower_node.has_meta("turret_body"):
+		return
+	
+	var turret_body: Node3D = tower_node.get_meta("turret_body")
+	var scan_direction: int = tower_node.get_meta("idle_scan_direction", 1)
+	var scan_timer: float = tower_node.get_meta("idle_scan_timer", 0.0)
+	var base_rotation: float = tower_node.get_meta("base_rotation", 0.0)
+	
+	# Scanning parameters
+	var scan_speed := 25.0  # degrees per second
+	var scan_range := 60.0  # total scan range
+	var pause_duration := 1.0  # pause at each end
+	
+	scan_timer += delta
+	
+	# Calculate target angle based on scan pattern
+	var scan_progress := sin(scan_timer * 0.8) * 0.5 + 0.5  # Smooth sine wave 0-1
+	var target_angle := base_rotation + (scan_progress - 0.5) * scan_range
+	
+	# Smooth movement toward target angle
+	var current_angle := turret_body.rotation_degrees.y
+	var angle_diff := _normalize_angle_difference(target_angle - current_angle)
+	var max_turn := scan_speed * delta
+	
+	if abs(angle_diff) > max_turn:
+		angle_diff = sign(angle_diff) * max_turn
+	
+	turret_body.rotation_degrees.y = current_angle + angle_diff
+	
+	# Update timer metadata
+	tower_node.set_meta("idle_scan_timer", scan_timer)
+
+
+## Enhanced firing animation with weapon-specific effects
+static func animate_turret_firing_sequence(tower_node: Node3D, weapon_type: String) -> void:
+	match weapon_type:
+		"autocannon":
+			_animate_autocannon_firing(tower_node)
+		"missile_battery":
+			_animate_missile_launch(tower_node)
+		"rail_gun":
+			_animate_rail_gun_firing(tower_node)
+		"plasma_mortar":
+			_animate_plasma_firing(tower_node)
+		"tesla_coil":
+			_animate_tesla_discharge(tower_node)
+		"inferno_tower":
+			_animate_flame_discharge(tower_node)
+		_:
+			# Generic firing animation
+			_animate_generic_firing(tower_node)
+
+
+## Autocannon firing animation with barrel spin and muzzle flash
+static func _animate_autocannon_firing(tower_node: Node3D) -> void:
+	# Start barrel spin
+	if tower_node.has_meta("barrel_spinner"):
+		var spinner: Node3D = tower_node.get_meta("barrel_spinner")
+		var spin_tween := tower_node.create_tween()
+		
+		# Spin up, sustain, spin down
+		for i in range(20):  # 20 shots over 2 seconds
+			var delay := i * 0.1
+			spin_tween.tween_callback(_create_autocannon_muzzle_flash_at_spinner.bind(spinner)).set_delay(delay)
+			
+		# Barrel spin animation
+		var barrel_tween := tower_node.create_tween()
+		barrel_tween.set_loops()
+		barrel_tween.tween_property(spinner, "rotation_degrees:z", spinner.rotation_degrees.z + 360, 0.1)
+	
+	# Recoil animation
+	if tower_node.has_meta("supports_recoil"):
+		_animate_barrel_recoil_enhanced(tower_node, 0.08, 2.0)
+
+
+## Missile launch animation with sequential firing
+static func _animate_missile_launch(tower_node: Node3D) -> void:
+	if not tower_node.has_child("Visual"):
+		return
+	
+	var visual_node := tower_node.get_node("Visual")
+	
+	# Find missile launch points from metadata
+	var launch_points: Array = visual_node.get_meta("missile_launch_points", [])
+	for i in range(min(4, launch_points.size())):
+		var delay := i * 0.3  # Stagger launches
+		tower_node.get_tree().create_timer(delay).timeout.connect(
+			func(): _create_missile_launch_effect(visual_node, launch_points[i])
+		)
+
+
+## Rail gun firing with charge buildup and energy discharge
+static func _animate_rail_gun_firing(tower_node: Node3D) -> void:
+	if not tower_node.has_child("Visual"):
+		return
+	
+	var visual_node := tower_node.get_node("Visual")
+	
+	# Energy charge sequence
+	_create_rail_gun_charge_buildup(visual_node, 1.0)
+	
+	# Discharge and recoil after charge
+	tower_node.get_tree().create_timer(1.0).timeout.connect(
+		func(): 
+			_create_rail_gun_discharge(visual_node)
+			_animate_barrel_recoil_enhanced(tower_node, 0.2, 1.0)
+	)
+
+
+## Tesla coil discharge with electrical arcs
+static func _animate_tesla_discharge(tower_node: Node3D) -> void:
+	if not tower_node.has_child("Visual"):
+		return
+	
+	var visual_node := tower_node.get_node("Visual")
+	
+	# Create multiple electrical arcs
+	for i in range(5):
+		var delay := i * 0.05
+		tower_node.get_tree().create_timer(delay).timeout.connect(
+			func(): _create_tesla_arc_effect(visual_node, 4.0 + i * 0.5)
+		)
+
+
+## Enhanced barrel recoil with realistic physics
+static func _animate_barrel_recoil_enhanced(tower_node: Node3D, recoil_distance: float, duration: float) -> void:
+	if not tower_node.has_meta("barrel_assembly"):
+		return
+	
+	var barrel: Node3D = tower_node.get_meta("barrel_assembly")
+	var original_pos := barrel.position
+	
+	var recoil_tween := tower_node.create_tween()
+	recoil_tween.set_ease(Tween.EASE_OUT)
+	recoil_tween.set_trans(Tween.TRANS_BACK)
+	
+	# Sharp recoil back
+	recoil_tween.tween_property(barrel, "position", 
+		original_pos + Vector3(0, 0, -recoil_distance), duration * 0.1)
+	
+	# Slow return with slight overshoot
+	recoil_tween.tween_property(barrel, "position", 
+		original_pos + Vector3(0, 0, 0.02), duration * 0.6)
+	
+	# Settle to original position  
+	recoil_tween.tween_property(barrel, "position", original_pos, duration * 0.3)
+
+
+## Create enhanced muzzle flash for spinning barrels
+static func _create_autocannon_muzzle_flash_at_spinner(spinner_node: Node3D) -> void:
+	if not spinner_node:
+		return
+	
+	# Create flash at current barrel positions
+	var barrel_count := 2  # Twin barrels
+	for i in range(barrel_count):
+		var flash_pos := Vector3((-0.08 if i == 0 else 0.08), 0, 0.5)
+		
+		var flash := MeshInstance3D.new()
+		flash.name = "MuzzleFlash" + str(i)
+		
+		var flash_mesh := SphereMesh.new()
+		flash_mesh.radius = 0.06
+		flash_mesh.height = 0.12
+		
+		var flash_mat := StandardMaterial3D.new()
+		flash_mat.albedo_color = Color(1.0, 0.85, 0.3)
+		flash_mat.emission_enabled = true
+		flash_mat.emission = Color(1.0, 0.75, 0.2)
+		flash_mat.emission_energy_multiplier = 6.0
+		flash_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		
+		flash_mesh.material = flash_mat
+		flash.mesh = flash_mesh
+		flash.position = flash_pos
+		
+		spinner_node.add_child(flash)
+		
+		# Quick flash and fade
+		var flash_tween := spinner_node.create_tween()
+		flash_tween.tween_property(flash, "modulate:a", 0.0, 0.08)
+		flash_tween.tween_callback(flash.queue_free)
+
+
+## Create missile launch effect with smoke trail
+static func _create_missile_launch_effect(visual_node: Node3D, launch_point: Vector3) -> void:
+	# Bright launch flash
+	var flash := MeshInstance3D.new()
+	flash.name = "LaunchFlash"
+	
+	var flash_mesh := SphereMesh.new()
+	flash_mesh.radius = 0.1
+	
+	var flash_mat := StandardMaterial3D.new()
+	flash_mat.albedo_color = Color(1.0, 0.6, 0.2)
+	flash_mat.emission_enabled = true
+	flash_mat.emission = Color(1.0, 0.5, 0.1)
+	flash_mat.emission_energy_multiplier = 8.0
+	flash_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	
+	flash_mesh.material = flash_mat
+	flash.mesh = flash_mesh
+	flash.position = launch_point
+	
+	visual_node.add_child(flash)
+	
+	# Flash animation
+	var flash_tween := visual_node.create_tween()
+	flash_tween.set_parallel(true)
+	flash_tween.tween_property(flash, "scale", Vector3(2.0, 2.0, 2.0), 0.2)
+	flash_tween.tween_property(flash, "modulate:a", 0.0, 0.2)
+	flash_tween.tween_callback(flash.queue_free)
+	
+	# Smoke trail effect
+	for i in range(8):
+		var delay := i * 0.05
+		visual_node.get_tree().create_timer(delay).timeout.connect(
+			func(): _create_smoke_puff(visual_node, launch_point + Vector3(0, i * 0.1, 0))
+		)
+
+
+## Create smoke puff for missile trails and steam vents
+static func _create_smoke_puff(visual_node: Node3D, position: Vector3) -> void:
+	var smoke := MeshInstance3D.new()
+	smoke.name = "SmokePuff"
+	
+	var smoke_mesh := SphereMesh.new()
+	smoke_mesh.radius = 0.05
+	
+	var smoke_mat := StandardMaterial3D.new()
+	smoke_mat.albedo_color = Color(0.7, 0.7, 0.8, 0.6)
+	smoke_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	
+	smoke_mesh.material = smoke_mat
+	smoke.mesh = smoke_mesh
+	smoke.position = position
+	
+	visual_node.add_child(smoke)
+	
+	# Smoke rises and dissipates
+	var smoke_tween := visual_node.create_tween()
+	smoke_tween.set_parallel(true)
+	smoke_tween.tween_property(smoke, "position", position + Vector3(0, 0.4, 0), 1.5)
+	smoke_tween.tween_property(smoke, "scale", Vector3(2.0, 2.0, 2.0), 1.5)
+	smoke_tween.tween_property(smoke, "modulate:a", 0.0, 1.5)
+	smoke_tween.tween_callback(smoke.queue_free)
+
+
+## Generic firing animation fallback
+static func _animate_generic_firing(tower_node: Node3D) -> void:
+	# Simple recoil for any tower
+	if tower_node.has_meta("barrel_assembly"):
+		_animate_barrel_recoil_enhanced(tower_node, 0.05, 0.5)
+	
+	# Flash effect at tower center if no specific muzzle points
+	if tower_node.has_child("Visual"):
+		var visual_node := tower_node.get_node("Visual")
+		var flash_pos := Vector3(0, 1.0, 0.5)  # Default position
+		_create_generic_muzzle_flash(visual_node, flash_pos)
+
+
+## Create generic muzzle flash
+static func _create_generic_muzzle_flash(visual_node: Node3D, position: Vector3) -> void:
+	var flash := MeshInstance3D.new()
+	flash.name = "MuzzleFlash"
+	
+	var flash_mesh := SphereMesh.new()
+	flash_mesh.radius = 0.08
+	
+	var flash_mat := StandardMaterial3D.new()
+	flash_mat.albedo_color = Color(1.0, 0.8, 0.4)
+	flash_mat.emission_enabled = true
+	flash_mat.emission = Color(1.0, 0.7, 0.3)
+	flash_mat.emission_energy_multiplier = 4.0
+	flash_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	
+	flash_mesh.material = flash_mat
+	flash.mesh = flash_mesh
+	flash.position = position
+	
+	visual_node.add_child(flash)
+	
+	var flash_tween := visual_node.create_tween()
+	flash_tween.tween_property(flash, "modulate:a", 0.0, 0.15)
+	flash_tween.tween_callback(flash.queue_free)
+
+
+## Plasma mortar firing animation
+static func _animate_plasma_firing(tower_node: Node3D) -> void:
+	if not tower_node.has_child("Visual"):
+		return
+	
+	var visual_node := tower_node.get_node("Visual")
+	
+	# Plasma buildup
+	_create_plasma_charge_buildup(visual_node, 0.8)
+	
+	# Launch after buildup
+	tower_node.get_tree().create_timer(0.8).timeout.connect(
+		func(): 
+			var launch_pos := Vector3(0, 1.2, 0.3)  # Mortar tube position
+			_create_plasma_launch_effect(visual_node, launch_pos)
+	)
+
+
+## Create plasma launch effect
+static func _create_plasma_launch_effect(visual_node: Node3D, position: Vector3) -> void:
+	var plasma := MeshInstance3D.new()
+	plasma.name = "PlasmaLaunch"
+	
+	var plasma_mesh := SphereMesh.new()
+	plasma_mesh.radius = 0.12
+	
+	var plasma_mat := StandardMaterial3D.new()
+	plasma_mat.albedo_color = Color(1.0, 0.3, 0.8)
+	plasma_mat.emission_enabled = true
+	plasma_mat.emission = Color(1.0, 0.2, 0.6)
+	plasma_mat.emission_energy_multiplier = 10.0
+	plasma_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	
+	plasma_mesh.material = plasma_mat
+	plasma.mesh = plasma_mesh
+	plasma.position = position
+	
+	visual_node.add_child(plasma)
+	
+	# Plasma projectile animation (brief visibility before it flies away)
+	var plasma_tween := visual_node.create_tween()
+	plasma_tween.set_parallel(true)
+	plasma_tween.tween_property(plasma, "position", position + Vector3(0, 2.0, 0), 0.3)
+	plasma_tween.tween_property(plasma, "modulate:a", 0.0, 0.3)
+	plasma_tween.tween_callback(plasma.queue_free)
+
+
+## Flame thrower discharge animation
+static func _animate_flame_discharge(tower_node: Node3D) -> void:
+	if not tower_node.has_child("Visual"):
+		return
+	
+	var visual_node := tower_node.get_node("Visual")
+	
+	# Create flame stream effect
+	for i in range(10):
+		var delay := i * 0.05
+		tower_node.get_tree().create_timer(delay).timeout.connect(
+			func(): _create_flame_puff(visual_node, Vector3(0, 1.3, 0.5 + i * 0.1))
+		)
+
+
+## Create flame puff effect
+static func _create_flame_puff(visual_node: Node3D, position: Vector3) -> void:
+	var flame := MeshInstance3D.new()
+	flame.name = "FlamePuff"
+	
+	var flame_mesh := SphereMesh.new()
+	flame_mesh.radius = 0.08
+	
+	var flame_mat := StandardMaterial3D.new()
+	flame_mat.albedo_color = Color(1.0, 0.5, 0.1, 0.8)
+	flame_mat.emission_enabled = true
+	flame_mat.emission = Color(1.0, 0.4, 0.1)
+	flame_mat.emission_energy_multiplier = 4.0
+	flame_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	flame_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	
+	flame_mesh.material = flame_mat
+	flame.mesh = flame_mesh
+	flame.position = position
+	
+	visual_node.add_child(flame)
+	
+	# Flame flickers and fades
+	var flame_tween := visual_node.create_tween()
+	flame_tween.set_parallel(true)
+	flame_tween.tween_property(flame, "scale", Vector3(1.5, 1.5, 1.5), 0.4)
+	flame_tween.tween_property(flame, "modulate:a", 0.0, 0.4)
+	flame_tween.tween_callback(flame.queue_free)
