@@ -361,11 +361,26 @@ func _trigger_muzzle_flash(_target: Node) -> void:
 		return
 	_muzzle_flash_active = true
 	
-	# Use enhanced muzzle flash animations based on weapon type
+	# Use enhanced muzzle flash animations based on weapon type (Task 1B)
 	VisualGenerator.animate_turret_advanced_muzzle_flash(visual_node, entity_id)
 	
-	# Enhanced recoil animations
+	# Enhanced recoil animations (Task 1B)
 	VisualGenerator.animate_turret_enhanced_recoil(visual_node, 0.12)
+	
+	# Weapon-specific enhanced firing sequences (Task 1B)
+	match entity_id:
+		"autocannon":
+			VisualGenerator.animate_turret_barrel_spinning(visual_node, 1.5, 1200.0)
+			_trigger_autocannon_firing_sequence(null)
+		"rail_gun":
+			VisualGenerator.animate_turret_charge_sequence(visual_node, 1.0, "rail_gun")
+			VisualGenerator.animate_barrel_recoil(visual_node, 0.2, 0.4)
+		"missile_battery":
+			VisualGenerator.animate_turret_missile_reload(visual_node, -1, 2.5)
+		"tesla_coil":
+			VisualGenerator.animate_turret_charge_sequence(visual_node, 0.8, "tesla")
+		"plasma_mortar":
+			VisualGenerator.animate_turret_charge_sequence(visual_node, 1.2, "plasma")
 	
 	# Legacy muzzle flash for compatibility
 	for node: MeshInstance3D in _muzzle_nodes:
@@ -421,7 +436,7 @@ func _animate_turret_to_target(target: Node) -> void:
 	var target_pos: Vector3 = target.global_position
 	
 	# Use enhanced turret tracking from Task 1B
-	VisualGenerator.animate_turret_tracking(self, target_pos)
+	VisualGenerator.animate_turret_advanced_tracking(visual_node, target_pos, 90.0)
 	
 	# Legacy fallback for compatibility
 	var turret_pos: Vector3 = global_position
@@ -572,7 +587,10 @@ func _trigger_autocannon_firing_sequence(target: Node) -> void:
 	## Based on design: "Firing animation: barrel rotation accelerates, sustained muzzle flash, 
 	## light barrel glow from heat during sustained fire"
 	
+	# Enhanced barrel spinning using Task 1B system
 	if supports_barrel_spin and barrel_spinner_node:
+		VisualGenerator.animate_turret_barrel_spinning(visual_node, 1.5, 1800.0)
+		# Legacy fallback
 		_start_barrel_spin()
 		# Sustained fire burst
 		get_tree().create_timer(0.8).timeout.connect(_stop_barrel_spin)
