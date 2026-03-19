@@ -26,6 +26,7 @@ AudioDebugOverlay="*res://autoloads/audio_debug_overlay.gd"
 EntityRegistry="*res://autoloads/entity_registry.gd"
 MetaProgress="*res://autoloads/meta_progress.gd"
 VfxManager="*res://autoloads/vfx_manager.gd"
+VfxSystem="*res://autoloads/vfx_system.gd"
 LevelSystem="*res://systems/level_system.gd"
 ItemSystem="*res://systems/item_system.gd"
 
