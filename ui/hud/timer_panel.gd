@@ -3,6 +3,7 @@ extends PanelContainer
 ## Speed buttons emit GameBus.game_speed_changed via GameState.set_game_speed().
 
 var time_label: Label
+var objective_label: Label
 var speed_slow_btn: Button
 var speed_normal_btn: Button
 var speed_fast_btn: Button
@@ -56,6 +57,13 @@ func _build_ui() -> void:
 	time_label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
 	time_label.add_theme_font_size_override("font_size", 16)
 	time_container.add_child(time_label)
+
+	# Level objective display
+	objective_label = Label.new()
+	objective_label.text = ""
+	objective_label.add_theme_color_override("font_color", Color(0.4, 0.9, 0.6))
+	objective_label.add_theme_font_size_override("font_size", 13)
+	time_container.add_child(objective_label)
 
 	# Separator
 	var sep := VSeparator.new()
@@ -112,6 +120,7 @@ func _create_speed_button(text: String, speed: float) -> Button:
 
 func _connect_signals() -> void:
 	GameBus.game_speed_changed.connect(_on_game_speed_changed)
+	GameBus.game_started.connect(_on_game_started)
 
 
 func _process(_delta: float) -> void:
@@ -167,3 +176,15 @@ func _set_button_active(btn: Button, active: bool) -> void:
 		normal_style.set_content_margin_all(4)
 		btn.add_theme_stylebox_override("normal", normal_style)
 		btn.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
+
+
+func _on_game_started() -> void:
+	# Update objective display when game starts
+	if not GameState.current_level_data.is_empty():
+		var objective: String = GameState.current_level_data.get("objective", "")
+		if not objective.is_empty():
+			objective_label.text = " - " + objective
+		else:
+			objective_label.text = ""
+	else:
+		objective_label.text = ""

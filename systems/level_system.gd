@@ -189,6 +189,10 @@ func is_level_unlocked(level_id: String) -> bool:
 	var level_data := get_level_data(level_id)
 	var requirements: Array = level_data.get("unlock_requirements", [])
 	
+	# Tutorial level is always unlocked
+	if level_id == "tutorial":
+		return true
+		
 	# No requirements means it's unlocked
 	if requirements.is_empty():
 		return true

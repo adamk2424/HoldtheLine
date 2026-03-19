@@ -9,7 +9,7 @@ var high_scores: Array = []  # Array of {time: float, kills: int, date: String}
 var total_games_played: int = 0
 var total_enemies_killed: int = 0
 var tech_points: int = 0
-var permanent_upgrades: Dictionary = {}  # Future: between-run upgrades
+var permanent_upgrades: Dictionary = {}  # Between-run upgrades and level progression
 
 # Settings
 var master_volume: float = 1.0

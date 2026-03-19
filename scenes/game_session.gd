@@ -618,7 +618,7 @@ func _on_level_completed(level_id: String, rewards: Dictionary) -> void:
 
 
 func _return_to_level_select() -> void:
-	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+	get_tree().change_scene_to_file("res://ui/menus/main_menu.tscn")
 
 
 func _replay_level() -> void:
