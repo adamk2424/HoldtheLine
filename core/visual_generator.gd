@@ -232,46 +232,162 @@ static func _add_tower_pedestal(parent: Node3D, pillar_w: float, platform_w: flo
 # =============================================================================
 
 static func _create_autocannon(c: Color) -> Node3D:
-	## Military turret on pillar: rotating drum + twin barrels
+	## Military turret on pillar: rotating drum + twin barrels with animation hooks
 	var r := Node3D.new()
 	r.name = "Visual"
 	var dark := c.darkened(0.3)
 	var lite := c.lightened(0.2)
 	var h := _add_tower_pedestal(r, 0.3, 0.6, c)
-	# Turret body
-	_add_box(r, Vector3(0.5, 0.45, 0.5), Vector3(0, h + 0.225, 0), c)
+	
+	# Turret base (stationary)
+	_add_box(r, Vector3(0.5, 0.25, 0.5), Vector3(0, h + 0.125, 0), c)
+	
+	# Rotating turret body (this will rotate to track targets)
+	var turret_body := Node3D.new()
+	turret_body.name = "TurretBody"
+	turret_body.position = Vector3(0, h + 0.25, 0)
+	r.add_child(turret_body)
+	
+	# Upper turret housing
+	_add_box(turret_body, Vector3(0.45, 0.35, 0.45), Vector3(0, 0.175, 0), c)
+	
+	# Barrel assembly (this will elevate up/down)
+	var barrel_assembly := Node3D.new()
+	barrel_assembly.name = "BarrelAssembly"
+	barrel_assembly.position = Vector3(0, 0.25, 0.1)
+	turret_body.add_child(barrel_assembly)
+	
 	# Barrel mount
-	_add_box(r, Vector3(0.25, 0.2, 0.15), Vector3(0, h + 0.35, 0.32), lite)
-	# Twin barrels
-	_add_box(r, Vector3(0.06, 0.06, 0.6), Vector3(-0.08, h + 0.38, 0.6), lite)
-	_add_box(r, Vector3(0.06, 0.06, 0.6), Vector3(0.08, h + 0.38, 0.6), lite)
-	# Ammo box on side
-	_add_box(r, Vector3(0.18, 0.15, 0.18), Vector3(-0.3, h + 0.2, 0), dark)
-	# Muzzle flash emissive tips
-	_add_muzzle_sphere(r, 0.04, Vector3(-0.08, h + 0.38, 0.9), Color(1.0, 0.8, 0.2), 2.0)
-	_add_muzzle_sphere(r, 0.04, Vector3(0.08, h + 0.38, 0.9), Color(1.0, 0.8, 0.2), 2.0)
+	_add_box(barrel_assembly, Vector3(0.25, 0.2, 0.15), Vector3(0, 0.0, 0.22), lite)
+	
+	# Twin rotating barrels (will spin during firing)
+	var barrel_spinner := Node3D.new()
+	barrel_spinner.name = "BarrelSpinner"
+	barrel_spinner.position = Vector3(0, 0.0, 0.4)
+	barrel_assembly.add_child(barrel_spinner)
+	
+	_add_box(barrel_spinner, Vector3(0.06, 0.06, 0.5), Vector3(-0.08, 0.0, 0.25), lite)
+	_add_box(barrel_spinner, Vector3(0.06, 0.06, 0.5), Vector3(0.08, 0.0, 0.25), lite)
+	
+	# Barrel rifling details (visual enhancement)
+	_add_cylinder(barrel_spinner, 0.025, 0.5, Vector3(-0.08, 0.0, 0.25), lite.lightened(0.1))
+	_add_cylinder(barrel_spinner, 0.025, 0.5, Vector3(0.08, 0.0, 0.25), lite.lightened(0.1))
+	
+	# Muzzle flash attachment points
+	_add_muzzle_sphere(barrel_spinner, 0.04, Vector3(-0.08, 0.0, 0.5), Color(1.0, 0.8, 0.2), 2.0)
+	_add_muzzle_sphere(barrel_spinner, 0.04, Vector3(0.08, 0.0, 0.5), Color(1.0, 0.8, 0.2), 2.0)
+	
+	# Brass ejection ports (animation markers)
+	_add_box(turret_body, Vector3(0.04, 0.02, 0.06), Vector3(0.22, 0.15, 0.1), dark)
+	_add_box(turret_body, Vector3(0.04, 0.02, 0.06), Vector3(-0.22, 0.15, 0.1), dark)
+	
+	# Ammo feed system
+	_add_box(turret_body, Vector3(0.18, 0.15, 0.18), Vector3(-0.25, 0.0, -0.15), dark)
+	_add_cylinder(turret_body, 0.03, 0.2, Vector3(-0.15, 0.1, 0.05), dark.darkened(0.2))  # Ammo belt feed
+	
+	# Heat vents for sustained fire
+	_add_emissive_box(turret_body, Vector3(0.02, 0.08, 0.02), Vector3(0.15, 0.25, 0.2), Color(0.8, 0.4, 0.1), 1.0)
+	_add_emissive_box(turret_body, Vector3(0.02, 0.08, 0.02), Vector3(-0.15, 0.25, 0.2), Color(0.8, 0.4, 0.1), 1.0)
+	
+	# Targeting laser mount point
+	_add_cylinder(turret_body, 0.015, 0.08, Vector3(0, 0.35, 0.2), Color(0.7, 0.1, 0.1))
+	
+	# Animation metadata for future use
+	r.set_meta("turret_body_node", turret_body.get_path())
+	r.set_meta("barrel_assembly_node", barrel_assembly.get_path())
+	r.set_meta("barrel_spinner_node", barrel_spinner.get_path())
+	r.set_meta("supports_rotation", true)
+	r.set_meta("supports_elevation", true)
+	r.set_meta("supports_barrel_spin", true)
+	
 	return r
 
 
 static func _create_missile_battery(c: Color) -> Node3D:
-	## Missile launcher on pillar: 4 launch tubes + radar dish
+	## Missile launcher on pillar: 4 launch tubes with reload system and guidance radar
 	var r := Node3D.new()
 	r.name = "Visual"
 	var dark := c.darkened(0.3)
+	var lite := c.lightened(0.2)
 	var h := _add_tower_pedestal(r, 0.35, 0.7, c)
-	# Launcher housing
+	
+	# Launcher base housing
 	_add_box(r, Vector3(0.7, 0.4, 0.7), Vector3(0, h + 0.2, 0), c)
-	# 4 missile tubes
-	for tx in [-0.13, 0.13]:
-		for tz in [-0.13, 0.13]:
-			_add_cylinder(r, 0.07, 0.35, Vector3(tx, h + 0.575, tz), c.darkened(0.15))
-	# Tube openings (emissive)
-	for tx in [-0.13, 0.13]:
-		for tz in [-0.13, 0.13]:
-			_add_muzzle_sphere(r, 0.05, Vector3(tx, h + 0.75, tz), Color(0.9, 0.5, 0.1), 1.5)
-	# Small radar dish on back
-	_add_cylinder(r, 0.12, 0.03, Vector3(0, h + 0.55, -0.3), c.lightened(0.2))
-	_add_cylinder(r, 0.02, 0.15, Vector3(0, h + 0.48, -0.3), c.lightened(0.1))
+	
+	# Rotating launcher assembly (for target tracking)
+	var launcher_assembly := Node3D.new()
+	launcher_assembly.name = "LauncherAssembly"
+	launcher_assembly.position = Vector3(0, h + 0.4, 0)
+	r.add_child(launcher_assembly)
+	
+	# 4 missile tubes with individual missile visibility
+	var tube_positions := [Vector3(-0.13, 0.175, -0.13), Vector3(0.13, 0.175, -0.13), 
+						Vector3(-0.13, 0.175, 0.13), Vector3(0.13, 0.175, 0.13)]
+	
+	for i in range(4):
+		var tube_pos := tube_positions[i]
+		# Tube housing
+		_add_cylinder(launcher_assembly, 0.07, 0.35, tube_pos, dark)
+		
+		# Missile inside tube (will be hidden/shown during reload)
+		var missile := Node3D.new()
+		missile.name = "Missile_" + str(i)
+		missile.position = tube_pos + Vector3(0, 0.1, 0)
+		launcher_assembly.add_child(missile)
+		
+		# Missile body
+		_add_cylinder(missile, 0.04, 0.25, Vector3(0, 0, 0), Color(0.6, 0.6, 0.7))
+		# Missile warhead (red tip)
+		_add_cylinder(missile, 0.035, 0.08, Vector3(0, 0.16, 0), Color(0.8, 0.2, 0.1))
+		# Guidance fins
+		_add_box(missile, Vector3(0.08, 0.02, 0.02), Vector3(0, -0.08, 0), Color(0.4, 0.4, 0.5))
+		_add_box(missile, Vector3(0.02, 0.02, 0.08), Vector3(0, -0.08, 0), Color(0.4, 0.4, 0.5))
+		
+		# Launch sequence marker (glows when ready to fire)
+		_add_muzzle_sphere(launcher_assembly, 0.05, tube_pos + Vector3(0, 0.35, 0), Color(0.9, 0.5, 0.1), 1.5)
+	
+	# Reload mechanism (visible robotic arm)
+	var reload_arm := Node3D.new()
+	reload_arm.name = "ReloadArm"
+	reload_arm.position = Vector3(0.25, 0.15, -0.25)
+	launcher_assembly.add_child(reload_arm)
+	
+	_add_box(reload_arm, Vector3(0.04, 0.04, 0.15), Vector3(0, 0, 0), lite)
+	_add_cylinder(reload_arm, 0.02, 0.08, Vector3(0, 0, 0.12), lite.lightened(0.1))
+	
+	# Missile storage magazine
+	_add_box(launcher_assembly, Vector3(0.25, 0.2, 0.15), Vector3(-0.35, -0.1, -0.25), dark)
+	_add_emissive_sphere(launcher_assembly, 0.02, Vector3(-0.35, 0.05, -0.25), Color(0.2, 1.0, 0.2), 2.0)  # Ready indicator
+	
+	# Guidance radar system (rotating dish)
+	var radar_system := Node3D.new()
+	radar_system.name = "RadarSystem"
+	radar_system.position = Vector3(0, 0.15, -0.3)
+	launcher_assembly.add_child(radar_system)
+	
+	_add_cylinder(radar_system, 0.12, 0.03, Vector3(0, 0, 0), lite)
+	_add_cylinder(radar_system, 0.02, 0.15, Vector3(0, -0.075, 0), lite.darkened(0.1))
+	# Radar sweep indicator
+	_add_emissive_box(radar_system, Vector3(0.15, 0.01, 0.02), Vector3(0, 0.02, 0), Color(0.2, 0.8, 0.2), 2.0)
+	
+	# Status lights around base
+	_add_emissive_sphere(launcher_assembly, 0.03, Vector3(0.3, -0.15, 0.3), Color(0.2, 1.0, 0.2), 2.0)
+	_add_emissive_sphere(launcher_assembly, 0.03, Vector3(-0.3, -0.15, 0.3), Color(0.2, 1.0, 0.2), 2.0)
+	
+	# Exhaust vents for smoke trails
+	for i in range(4):
+		var vent_pos := tube_positions[i] + Vector3(0, 0.4, 0)
+		_add_cylinder(launcher_assembly, 0.02, 0.05, vent_pos, dark.darkened(0.3))
+	
+	# Animation metadata
+	r.set_meta("launcher_assembly_node", launcher_assembly.get_path())
+	r.set_meta("radar_system_node", radar_system.get_path())
+	r.set_meta("reload_arm_node", reload_arm.get_path())
+	r.set_meta("missile_count", 4)
+	r.set_meta("supports_rotation", true)
+	r.set_meta("supports_missile_visibility", true)
+	r.set_meta("supports_radar_sweep", true)
+	
 	return r
 
 
@@ -410,25 +526,99 @@ static func _create_missile_battery_t3(c: Color) -> Node3D:
 
 
 static func _create_rail_gun(c: Color) -> Node3D:
-	## Sleek sniper on pillar: tall spine + long barrel with coil rings
+	## Sleek sniper on pillar: energy conduit system with charging effects and recoil mechanics
 	var r := Node3D.new()
 	r.name = "Visual"
 	var dark := c.darkened(0.3)
 	var lite := c.lightened(0.2)
+	var energy_blue := Color(0.3, 0.6, 1.0)
 	var h := _add_tower_pedestal(r, 0.25, 0.5, c)
-	# Support spine
+	
+	# Support spine with energy conduit housing
 	_add_box(r, Vector3(0.15, 1.2, 0.15), Vector3(0, h + 0.6, 0), c)
-	# Barrel housing (extends forward along Z)
-	_add_box(r, Vector3(0.1, 0.1, 1.0), Vector3(0, h + 1.1, 0.5), lite)
-	# Coil rings around barrel
-	for i in range(3):
-		var z_pos: float = 0.2 + i * 0.3
-		_add_emissive_box(r, Vector3(0.16, 0.16, 0.03), Vector3(0, h + 1.1, z_pos), Color(0.3, 0.5, 0.8), 1.5)
-	# Emissive tip
-	_add_muzzle_sphere(r, 0.06, Vector3(0, h + 1.1, 1.0), Color(0.4, 0.6, 1.0), 3.0)
-	# Stabilizer fins
+	
+	# Energy conduit system (glows during charge-up)
+	var conduit_system := Node3D.new()
+	conduit_system.name = "ConduitSystem"
+	conduit_system.position = Vector3(0, h, 0)
+	r.add_child(conduit_system)
+	
+	# Main energy conduits running up the spine
+	_add_emissive_box(conduit_system, Vector3(0.02, 1.15, 0.02), Vector3(0.04, 0.625, 0.04), energy_blue, 1.0)
+	_add_emissive_box(conduit_system, Vector3(0.02, 1.15, 0.02), Vector3(-0.04, 0.625, 0.04), energy_blue, 1.0)
+	_add_emissive_box(conduit_system, Vector3(0.02, 1.15, 0.02), Vector3(0.04, 0.625, -0.04), energy_blue, 1.0)
+	_add_emissive_box(conduit_system, Vector3(0.02, 1.15, 0.02), Vector3(-0.04, 0.625, -0.04), energy_blue, 1.0)
+	
+	# Barrel assembly (will recoil backward on firing)
+	var barrel_assembly := Node3D.new()
+	barrel_assembly.name = "BarrelAssembly"
+	barrel_assembly.position = Vector3(0, h + 1.1, 0)
+	r.add_child(barrel_assembly)
+	
+	# Main barrel housing
+	_add_box(barrel_assembly, Vector3(0.1, 0.1, 1.0), Vector3(0, 0, 0.5), lite)
+	
+	# Energy acceleration coils (charge up sequentially)
+	var coil_positions := [0.15, 0.4, 0.65, 0.9]
+	for i in range(coil_positions.size()):
+		var z_pos: float = coil_positions[i]
+		var coil := Node3D.new()
+		coil.name = "AcceleratorCoil_" + str(i)
+		coil.position = Vector3(0, 0, z_pos)
+		barrel_assembly.add_child(coil)
+		
+		_add_emissive_box(coil, Vector3(0.16, 0.16, 0.03), Vector3(0, 0, 0), energy_blue, 1.5)
+		# Inner energy ring
+		_add_emissive_box(coil, Vector3(0.08, 0.08, 0.02), Vector3(0, 0, 0.01), energy_blue.lightened(0.3), 2.0)
+	
+	# Muzzle tip with focusing elements
+	_add_cylinder(barrel_assembly, 0.04, 0.08, Vector3(0, 0, 1.04), lite.lightened(0.2))
+	_add_muzzle_sphere(barrel_assembly, 0.06, Vector3(0, 0, 1.08), energy_blue.lightened(0.5), 3.0)
+	
+	# Recoil dampener system
+	var recoil_dampener := Node3D.new()
+	recoil_dampener.name = "RecoilDampener"
+	recoil_dampener.position = Vector3(0, h + 0.8, -0.1)
+	r.add_child(recoil_dampener)
+	
+	_add_cylinder(recoil_dampener, 0.04, 0.2, Vector3(0, 0, 0), dark.darkened(0.2))
+	_add_cylinder(recoil_dampener, 0.06, 0.05, Vector3(0, 0.1, 0), dark)
+	
+	# Capacitor bank (stores energy for shots)
+	var capacitor_bank := Node3D.new()
+	capacitor_bank.name = "CapacitorBank"
+	capacitor_bank.position = Vector3(0, h + 0.3, -0.2)
+	r.add_child(capacitor_bank)
+	
+	_add_box(capacitor_bank, Vector3(0.2, 0.15, 0.12), Vector3(0, 0, 0), dark)
+	_add_emissive_sphere(capacitor_bank, 0.03, Vector3(0.08, 0.08, 0.06), energy_blue, 2.0)
+	_add_emissive_sphere(capacitor_bank, 0.03, Vector3(-0.08, 0.08, 0.06), energy_blue, 2.0)
+	
+	# Energy transfer relays
+	_add_emissive_box(conduit_system, Vector3(0.04, 0.02, 0.08), Vector3(0, 0.35, -0.1), energy_blue, 1.5)
+	_add_emissive_box(conduit_system, Vector3(0.04, 0.02, 0.08), Vector3(0, 0.6, 0), energy_blue, 1.5)
+	_add_emissive_box(conduit_system, Vector3(0.04, 0.02, 0.08), Vector3(0, 0.9, 0.1), energy_blue, 1.5)
+	
+	# Stabilizer fins with micro-adjusters
 	_add_box(r, Vector3(0.4, 0.06, 0.06), Vector3(0, h + 0.15, 0), dark)
 	_add_box(r, Vector3(0.06, 0.06, 0.4), Vector3(0, h + 0.15, 0), dark)
+	_add_cylinder(r, 0.01, 0.04, Vector3(0.2, h + 0.18, 0), lite)
+	_add_cylinder(r, 0.01, 0.04, Vector3(-0.2, h + 0.18, 0), lite)
+	
+	# Targeting computer housing
+	_add_box(r, Vector3(0.12, 0.08, 0.08), Vector3(-0.1, h + 0.9, -0.08), dark.lightened(0.1))
+	_add_emissive_sphere(r, 0.02, Vector3(-0.1, h + 0.94, -0.04), Color(0.8, 0.2, 0.2), 2.0)  # Targeting laser
+	
+	# Animation metadata
+	r.set_meta("conduit_system_node", conduit_system.get_path())
+	r.set_meta("barrel_assembly_node", barrel_assembly.get_path())
+	r.set_meta("recoil_dampener_node", recoil_dampener.get_path())
+	r.set_meta("capacitor_bank_node", capacitor_bank.get_path())
+	r.set_meta("coil_count", coil_positions.size())
+	r.set_meta("supports_energy_charging", true)
+	r.set_meta("supports_recoil", true)
+	r.set_meta("supports_sequential_coil_activation", true)
+	
 	return r
 
 
