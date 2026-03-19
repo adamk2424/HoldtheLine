@@ -1,0 +1,63 @@
+{
+  "units": [
+    {
+      "id": "sentinel",
+      "name": "Sentinel",
+      "building": "mech",
+      "role": "combat",
+      "hp": 450,
+      "armor": 3,
+      "speed": 1.4,
+      "damage": 28,
+      "attack_rate": 0.667,
+      "attack_range": 8,
+      "attack_type": "projectile",
+      "can_target_air": true,
+      "flying": false,
+      "cost_energy": 50,
+      "cost_materials": 40,
+      "build_time": 12,
+      "pop_cost": 2,
+      "required_tech_level": "none",
+      "default_behavior": "patrol_walls",
+      "mesh_color": "#5A5A6A",
+      "mesh_shape": "box",
+      "mesh_scale": [0.7, 1.2, 0.7],
+      "specials": []
+    },
+    {
+      "id": "juggernaut",
+      "name": "Juggernaut",
+      "building": "mech",
+      "role": "tank",
+      "hp": 800,
+      "armor": 6,
+      "speed": 0.9,
+      "damage": 65,
+      "attack_rate": 1.25,
+      "attack_range": 2,
+      "attack_type": "melee",
+      "aoe_radius": 1,
+      "splash_damage_percent": 40,
+      "can_target_air": false,
+      "flying": false,
+      "cost_energy": 90,
+      "cost_materials": 75,
+      "build_time": 22,
+      "pop_cost": 4,
+      "required_tech_level": "tier_1",
+      "default_behavior": "patrol_walls",
+      "mesh_color": "#6A3A2A",
+      "mesh_shape": "box",
+      "mesh_scale": [1.0, 1.5, 1.0],
+      "specials": [
+        {
+          "type": "fortify",
+          "stationary_delay": 3.0,
+          "armor_bonus": 3,
+          "damage_reduction": 0.15
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,366 @@
+<h2>Live Audio Tool — Detailed UI</h2>
+<p class="subtitle">Full mockup with all Tier 1 + Tier 2 features. Review the layout and feature placement.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Live Audio Tool — Connected</div>
+  <div class="mockup-body" style="padding:0;">
+    <div style="background:#0d1117;padding:0;font-family:'Segoe UI',monospace;font-size:11px;color:#c9d1d9;line-height:1.5;">
+
+      <!-- Top toolbar -->
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#161b22;border-bottom:1px solid #30363d;">
+        <div style="display:flex;gap:12px;align-items:center;">
+          <span style="color:#4de680;font-weight:bold;font-size:14px;">LIVE AUDIO TOOL</span>
+          <span style="background:#1f6feb;color:white;padding:2px 10px;border-radius:10px;font-size:10px;">● CONNECTED — localhost:8090</span>
+          <span style="color:#8b949e;font-size:10px;">|</span>
+          <span style="color:#8b949e;font-size:10px;cursor:pointer;">Manual Connect ▾</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <span style="background:#1f3d28;color:#4de680;padding:4px 14px;border-radius:4px;font-size:11px;cursor:pointer;font-weight:bold;">💾 SAVE</span>
+          <span style="color:#f0883e;font-size:10px;">3 unsaved changes</span>
+        </div>
+      </div>
+
+      <!-- Bus mixer strip -->
+      <div style="display:flex;gap:0;padding:6px 12px;background:#0d1117;border-bottom:1px solid #30363d;align-items:center;">
+        <span style="color:#8b949e;font-size:10px;width:50px;">BUSES</span>
+        <div style="display:flex;gap:16px;flex:1;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="color:#c9d1d9;font-size:10px;width:45px;">Master</span>
+            <div style="background:#161b22;height:6px;width:100px;border-radius:3px;"><div style="background:#4de680;height:6px;width:85%;border-radius:3px;"></div></div>
+            <span style="color:#4de680;font-size:10px;width:35px;">-3dB</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="color:#c9d1d9;font-size:10px;width:45px;">Music</span>
+            <div style="background:#161b22;height:6px;width:100px;border-radius:3px;"><div style="background:#1f6feb;height:6px;width:40%;border-radius:3px;"></div></div>
+            <span style="color:#1f6feb;font-size:10px;width:35px;">-12dB</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="color:#c9d1d9;font-size:10px;width:45px;">SFX</span>
+            <div style="background:#161b22;height:6px;width:100px;border-radius:3px;"><div style="background:#4de680;height:6px;width:100%;border-radius:3px;"></div></div>
+            <span style="color:#4de680;font-size:10px;width:35px;">0dB</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Three panel layout -->
+      <div style="display:flex;height:520px;">
+
+        <!-- LEFT: Entity tree -->
+        <div style="width:210px;background:#0f1218;border-right:1px solid #30363d;padding:8px;overflow-y:auto;flex-shrink:0;">
+          <input style="width:100%;box-sizing:border-box;background:#161b22;border:1px solid #30363d;color:#c9d1d9;padding:4px 8px;border-radius:4px;font-size:10px;margin-bottom:8px;" placeholder="🔍 Filter entities..." />
+
+          <div style="color:#4de680;font-size:10px;font-weight:bold;margin:6px 0 3px;cursor:pointer;">▾ TOWERS — Offensive</div>
+          <div style="color:#c9d1d9;font-size:10px;padding:3px 4px 3px 14px;background:#1f3d28;border-radius:3px;border-left:2px solid #4de680;margin-bottom:1px;">Autocannon</div>
+          <div style="color:#8b949e;font-size:10px;padding:3px 4px 3px 14px;margin-bottom:1px;">Missile Battery</div>
+          <div style="color:#8b949e;font-size:10px;padding:3px 4px 3px 14px;margin-bottom:1px;">Rail Gun</div>
+          <div style="color:#8b949e;font-size:10px;padding:3px 4px 3px 14px;margin-bottom:1px;">Plasma Mortar</div>
+          <div style="color:#8b949e;font-size:10px;padding:3px 4px 3px 14px;margin-bottom:1px;">Tesla Coil</div>
+          <div style="color:#8b949e;font-size:10px;padding:3px 4px 3px 14px;margin-bottom:1px;">Inferno Tower</div>
+
+          <div style="color:#4de680;font-size:10px;font-weight:bold;margin:8px 0 3px;cursor:pointer;">▾ TOWERS — Support</div>
+          <div style="color:#8b949e;font-size:10px;padding:3px 4px 3px 14px;margin-bottom:1px;">Leach Tower</div>
+          <div style="color:#8b949e;font-size:10px;padding:3px 4px 3px 14px;margin-bottom:1px;">Repair Tower</div>
+          <div style="color:#8b949e;font-size:10px;padding:3px 4px 3px 14px;margin-bottom:1px;">Shield Pylon</div>
+
+          <div style="color:#4de680;font-size:10px;font-weight:bold;margin:8px 0 3px;cursor:pointer;">▸ TOWERS — Resource</div>
+          <div style="color:#4de680;font-size:10px;font-weight:bold;margin:8px 0 3px;cursor:pointer;">▸ ENEMIES</div>
+          <div style="color:#4de680;font-size:10px;font-weight:bold;margin:8px 0 3px;cursor:pointer;">▸ UNITS — Drone</div>
+          <div style="color:#4de680;font-size:10px;font-weight:bold;margin:8px 0 3px;cursor:pointer;">▸ UNITS — Mech</div>
+          <div style="color:#4de680;font-size:10px;font-weight:bold;margin:8px 0 3px;cursor:pointer;">▸ PRODUCTION</div>
+          <div style="color:#4de680;font-size:10px;font-weight:bold;margin:8px 0 3px;cursor:pointer;">▸ BARRIERS</div>
+        </div>
+
+        <!-- CENTER: Cue editor -->
+        <div style="flex:1;background:#0d1117;padding:10px;overflow-y:auto;">
+          <!-- Entity header -->
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div>
+              <span style="color:#4de680;font-size:15px;font-weight:bold;">Autocannon</span>
+              <span style="color:#8b949e;font-size:11px;margin-left:8px;">Tower — Offensive</span>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <span style="background:#1f3d28;color:#4de680;padding:3px 10px;border-radius:3px;font-size:10px;cursor:pointer;border:1px solid #4de680;">SOLO</span>
+              <span style="background:#21262d;color:#8b949e;padding:3px 10px;border-radius:3px;font-size:10px;cursor:pointer;border:1px solid #30363d;">MUTE</span>
+            </div>
+          </div>
+
+          <!-- Attenuation preset assignment -->
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:6px 8px;background:#161b22;border-radius:4px;border:1px solid #30363d;">
+            <span style="color:#8b949e;font-size:10px;">Attenuation Preset:</span>
+            <select style="background:#0d1117;color:#c9d1d9;border:1px solid #30363d;padding:2px 6px;border-radius:3px;font-size:10px;">
+              <option>heavy_weapon</option>
+              <option>default</option>
+              <option>small_effect</option>
+              <option>ambient_loop</option>
+            </select>
+            <span style="color:#8b949e;font-size:9px;margin-left:4px;">unit:25 | max:200 | filter:8kHz</span>
+          </div>
+
+          <!-- Cue: Attack (standard) -->
+          <div style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:10px;margin-bottom:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="color:#4de680;font-size:12px;font-weight:bold;">Attack</span>
+                <span style="background:#21262d;color:#8b949e;padding:1px 6px;border-radius:3px;font-size:9px;">Standard</span>
+              </div>
+              <div style="display:flex;gap:4px;align-items:center;">
+                <span style="background:#1f3d28;color:#4de680;padding:2px 6px;border-radius:3px;font-size:9px;cursor:pointer;">S</span>
+                <span style="background:#21262d;color:#8b949e;padding:2px 6px;border-radius:3px;font-size:9px;cursor:pointer;">M</span>
+                <span style="color:#30363d;margin:0 2px;">|</span>
+                <span style="background:#1f3044;color:#bc8cff;padding:2px 8px;border-radius:3px;font-size:9px;cursor:pointer;">▶ Test</span>
+              </div>
+            </div>
+            <!-- WAV slots -->
+            <div style="display:flex;gap:4px;margin-bottom:8px;">
+              <div style="flex:1;background:#0d1117;border:1px solid #30363d;border-radius:3px;padding:4px 6px;font-size:9px;">
+                <span style="color:#8b949e;">[1]</span> <span style="color:#c9d1d9;">heavy_thunk_01.wav</span>
+              </div>
+              <div style="flex:1;background:#0d1117;border:1px solid #30363d;border-radius:3px;padding:4px 6px;font-size:9px;">
+                <span style="color:#8b949e;">[2]</span> <span style="color:#c9d1d9;">heavy_thunk_02.wav</span>
+              </div>
+              <div style="flex:1;background:#0d1117;border:1px solid #30363d;border-radius:3px;padding:4px 6px;font-size:9px;">
+                <span style="color:#8b949e;">[3]</span> <span style="color:#c9d1d9;">heavy_thunk_03.wav</span>
+              </div>
+            </div>
+            <!-- Controls row -->
+            <div style="display:flex;gap:16px;align-items:center;">
+              <div style="flex:1;">
+                <div style="display:flex;justify-content:space-between;font-size:9px;color:#8b949e;margin-bottom:2px;">
+                  <span>Volume</span><span style="color:#c9d1d9;">-3.0 dB</span>
+                </div>
+                <div style="background:#0d1117;height:8px;border-radius:4px;cursor:pointer;"><div style="background:#4de680;height:8px;width:70%;border-radius:4px;"></div></div>
+              </div>
+              <div style="width:1px;height:20px;background:#30363d;"></div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="color:#4de680;font-size:10px;">☑</span>
+                <span style="color:#c9d1d9;font-size:10px;">Pitch</span>
+                <span style="color:#8b949e;font-size:10px;">±</span>
+                <span style="background:#0d1117;color:#c9d1d9;border:1px solid #30363d;padding:1px 4px;border-radius:2px;font-size:10px;width:30px;text-align:center;">50</span>
+                <span style="color:#8b949e;font-size:10px;">cents</span>
+              </div>
+              <div style="width:1px;height:20px;background:#30363d;"></div>
+              <div style="display:flex;align-items:center;gap:4px;">
+                <span style="color:#8b949e;font-size:10px;">Voices:</span>
+                <span style="background:#0d1117;color:#c9d1d9;border:1px solid #30363d;padding:1px 4px;border-radius:2px;font-size:10px;width:20px;text-align:center;">3</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cue: Attack on Inferno (looping example) -->
+          <div style="background:#161b22;border:1px solid #30363d;border-left:3px solid #f0883e;border-radius:6px;padding:10px;margin-bottom:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="color:#4de680;font-size:12px;font-weight:bold;">Attack</span>
+                <span style="background:#3d2a1f;color:#f0883e;padding:1px 6px;border-radius:3px;font-size:9px;">🔁 Looping</span>
+              </div>
+              <div style="display:flex;gap:4px;align-items:center;">
+                <span style="background:#21262d;color:#8b949e;padding:2px 6px;border-radius:3px;font-size:9px;">S</span>
+                <span style="background:#21262d;color:#8b949e;padding:2px 6px;border-radius:3px;font-size:9px;">M</span>
+                <span style="color:#30363d;margin:0 2px;">|</span>
+                <span style="background:#1f3044;color:#bc8cff;padding:2px 8px;border-radius:3px;font-size:9px;">▶ Test</span>
+              </div>
+            </div>
+            <!-- START section -->
+            <div style="margin-bottom:6px;">
+              <div style="color:#8b949e;font-size:9px;text-transform:uppercase;margin-bottom:3px;letter-spacing:1px;">▶ Start (one-shot)</div>
+              <div style="display:flex;gap:4px;">
+                <div style="flex:1;background:#0d1117;border:1px solid #30363d;border-radius:3px;padding:3px 6px;font-size:9px;">
+                  <span style="color:#8b949e;">[1]</span> <span style="color:#c9d1d9;">flame_start_01.wav</span>
+                </div>
+                <div style="flex:1;background:#0d1117;border:1px solid #30363d;border-radius:3px;padding:3px 6px;font-size:9px;">
+                  <span style="color:#8b949e;">[2]</span> <span style="color:#555;">— empty —</span>
+                </div>
+                <div style="flex:1;background:#0d1117;border:1px solid #30363d;border-radius:3px;padding:3px 6px;font-size:9px;">
+                  <span style="color:#8b949e;">[3]</span> <span style="color:#555;">— empty —</span>
+                </div>
+              </div>
+            </div>
+            <!-- LOOP section -->
+            <div style="margin-bottom:6px;">
+              <div style="color:#f0883e;font-size:9px;text-transform:uppercase;margin-bottom:3px;letter-spacing:1px;">🔁 Loop (continuous)</div>
+              <div style="display:flex;gap:4px;">
+                <div style="flex:1;background:#0d1117;border:1px solid #30363d;border-radius:3px;padding:3px 6px;font-size:9px;">
+                  <span style="color:#8b949e;">[1]</span> <span style="color:#c9d1d9;">Flame_longshot.wav</span>
+                </div>
+                <div style="flex:1;background:#0d1117;border:1px solid #30363d;border-radius:3px;padding:3px 6px;font-size:9px;">
+                  <span style="color:#8b949e;">[2]</span> <span style="color:#555;">— empty —</span>
+                </div>
+                <div style="flex:1;background:#0d1117;border:1px solid #30363d;border-radius:3px;padding:3px 6px;font-size:9px;">
+                  <span style="color:#8b949e;">[3]</span> <span style="color:#555;">— empty —</span>
+                </div>
+              </div>
+            </div>
+            <!-- END section -->
+            <div style="margin-bottom:8px;">
+              <div style="color:#8b949e;font-size:9px;text-transform:uppercase;margin-bottom:3px;letter-spacing:1px;">⏹ End (one-shot)</div>
+              <div style="display:flex;gap:4px;">
+                <div style="flex:1;background:#0d1117;border:1px solid #30363d;border-radius:3px;padding:3px 6px;font-size:9px;">
+                  <span style="color:#8b949e;">[1]</span> <span style="color:#c9d1d9;">Flame_end.wav</span>
+                </div>
+                <div style="flex:1;background:#0d1117;border:1px solid #30363d;border-radius:3px;padding:3px 6px;font-size:9px;">
+                  <span style="color:#8b949e;">[2]</span> <span style="color:#555;">— empty —</span>
+                </div>
+                <div style="flex:1;background:#0d1117;border:1px solid #30363d;border-radius:3px;padding:3px 6px;font-size:9px;">
+                  <span style="color:#8b949e;">[3]</span> <span style="color:#555;">— empty —</span>
+                </div>
+              </div>
+            </div>
+            <!-- Controls -->
+            <div style="display:flex;gap:16px;align-items:center;">
+              <div style="flex:1;">
+                <div style="display:flex;justify-content:space-between;font-size:9px;color:#8b949e;margin-bottom:2px;">
+                  <span>Volume</span><span style="color:#c9d1d9;">0.0 dB</span>
+                </div>
+                <div style="background:#0d1117;height:8px;border-radius:4px;"><div style="background:#4de680;height:8px;width:100%;border-radius:4px;"></div></div>
+              </div>
+              <div style="width:1px;height:20px;background:#30363d;"></div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="color:#4de680;font-size:10px;">☑</span>
+                <span style="color:#c9d1d9;font-size:10px;">Pitch ±30 cents</span>
+              </div>
+              <div style="width:1px;height:20px;background:#30363d;"></div>
+              <span style="color:#8b949e;font-size:10px;">Voices: 3</span>
+            </div>
+          </div>
+
+          <!-- Cue: Death (collapsed) -->
+          <div style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:8px 10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="color:#8b949e;cursor:pointer;">▸</span>
+              <span style="color:#4de680;font-size:12px;">Death</span>
+              <span style="color:#8b949e;font-size:9px;">Building_Explode_01.wav +1 more</span>
+            </div>
+            <div style="display:flex;gap:4px;">
+              <span style="background:#21262d;color:#8b949e;padding:2px 6px;border-radius:3px;font-size:9px;">S</span>
+              <span style="background:#21262d;color:#8b949e;padding:2px 6px;border-radius:3px;font-size:9px;">M</span>
+            </div>
+          </div>
+
+          <!-- Cue: Placement (collapsed, empty) -->
+          <div style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:8px 10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="color:#8b949e;cursor:pointer;">▸</span>
+              <span style="color:#4de680;font-size:12px;">Placement</span>
+              <span style="color:#555;font-size:9px;">No files assigned</span>
+            </div>
+            <div style="display:flex;gap:4px;">
+              <span style="background:#21262d;color:#8b949e;padding:2px 6px;border-radius:3px;font-size:9px;">S</span>
+              <span style="background:#21262d;color:#8b949e;padding:2px 6px;border-radius:3px;font-size:9px;">M</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Live monitor + presets -->
+        <div style="width:200px;background:#0f1218;border-left:1px solid #30363d;padding:8px;overflow-y:auto;flex-shrink:0;">
+
+          <!-- Live Activity -->
+          <div style="margin-bottom:14px;">
+            <div style="color:#8b949e;font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:bold;">Live Activity</div>
+            <div style="font-size:9px;margin-bottom:3px;padding:2px 4px;background:#161b22;border-radius:2px;">
+              <span style="color:#4de680;">●</span> <span style="color:#c9d1d9;">autocannon.attack</span>
+              <span style="color:#8b949e;float:right;">x12</span>
+            </div>
+            <div style="font-size:9px;margin-bottom:3px;padding:2px 4px;background:#161b22;border-radius:2px;">
+              <span style="color:#4de680;">●</span> <span style="color:#c9d1d9;">rail_gun.attack</span>
+              <span style="color:#8b949e;float:right;">x5</span>
+            </div>
+            <div style="font-size:9px;margin-bottom:3px;padding:2px 4px;">
+              <span style="color:#f0883e;">●</span> <span style="color:#c9d1d9;">thrasher.death</span>
+              <span style="color:#8b949e;float:right;">x3</span>
+            </div>
+            <div style="font-size:9px;margin-bottom:3px;padding:2px 4px;">
+              <span style="color:#f0883e;">●</span> <span style="color:#c9d1d9;">brute.roar</span>
+              <span style="color:#8b949e;float:right;">x1</span>
+            </div>
+            <div style="font-size:9px;margin-bottom:3px;padding:2px 4px;">
+              <span style="color:#f0883e;">●</span> <span style="color:#c9d1d9;">inferno.attack</span>
+              <span style="color:#4de680;float:right;">🔁 loop</span>
+            </div>
+          </div>
+
+          <!-- Attenuation Presets -->
+          <div style="border-top:1px solid #30363d;padding-top:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <div style="color:#8b949e;font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">Attn Presets</div>
+              <span style="color:#4de680;font-size:10px;cursor:pointer;">+ New</span>
+            </div>
+
+            <!-- Preset: heavy_weapon (selected) -->
+            <div style="background:#161b22;border:1px solid #4de680;border-radius:4px;padding:6px;margin-bottom:6px;">
+              <div style="color:#4de680;font-size:10px;font-weight:bold;margin-bottom:4px;">heavy_weapon</div>
+              <div style="font-size:9px;color:#8b949e;margin-bottom:2px;">Model: <span style="color:#c9d1d9;">Inv. Square</span></div>
+              <div style="font-size:9px;color:#8b949e;margin-bottom:2px;">Unit Size: <span style="color:#c9d1d9;">25.0</span></div>
+              <div style="font-size:9px;color:#8b949e;margin-bottom:2px;">Max Dist: <span style="color:#c9d1d9;">200.0</span></div>
+              <div style="font-size:9px;color:#8b949e;margin-bottom:2px;">Filter: <span style="color:#c9d1d9;">8000 Hz</span></div>
+              <div style="font-size:9px;color:#8b949e;margin-bottom:2px;">Filter dB: <span style="color:#c9d1d9;">-24.0</span></div>
+              <div style="font-size:9px;color:#8b949e;">Pan Str: <span style="color:#c9d1d9;">0.9</span></div>
+              <div style="margin-top:4px;font-size:9px;color:#555;">Used by: autocannon, rail_gun, missile_battery</div>
+            </div>
+
+            <!-- Preset: default -->
+            <div style="background:#161b22;border:1px solid #30363d;border-radius:4px;padding:6px;margin-bottom:6px;">
+              <div style="color:#c9d1d9;font-size:10px;font-weight:bold;margin-bottom:2px;">default</div>
+              <div style="font-size:9px;color:#555;">unit:15 | max:120 | 10kHz</div>
+              <div style="font-size:9px;color:#555;">Used by: 28 entities</div>
+            </div>
+
+            <!-- Preset: small_effect -->
+            <div style="background:#161b22;border:1px solid #30363d;border-radius:4px;padding:6px;margin-bottom:6px;">
+              <div style="color:#c9d1d9;font-size:10px;font-weight:bold;margin-bottom:2px;">small_effect</div>
+              <div style="font-size:9px;color:#555;">unit:8 | max:60 | 12kHz</div>
+              <div style="font-size:9px;color:#555;">Used by: scrit, blight_mite</div>
+            </div>
+
+            <!-- Preset: ambient_loop -->
+            <div style="background:#161b22;border:1px solid #30363d;border-radius:4px;padding:6px;">
+              <div style="color:#c9d1d9;font-size:10px;font-weight:bold;margin-bottom:2px;">ambient_loop</div>
+              <div style="font-size:9px;color:#555;">unit:40 | max:300 | 6kHz</div>
+              <div style="font-size:9px;color:#555;">Used by: none</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:20px;">
+  <h3>Features shown in this mockup:</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:14px;">
+    <div>
+      <strong style="color:#c9d1d9;">Top Bar</strong>
+      <ul style="color:#8b949e;margin-top:4px;">
+        <li>Connection status + auto-discover</li>
+        <li>Manual connect option</li>
+        <li>Save button with unsaved change count</li>
+      </ul>
+    </div>
+    <div>
+      <strong style="color:#c9d1d9;">Bus Mixer Strip</strong>
+      <ul style="color:#8b949e;margin-top:4px;">
+        <li>Master/Music/SFX volume sliders</li>
+        <li>Always visible below toolbar</li>
+      </ul>
+    </div>
+    <div>
+      <strong style="color:#c9d1d9;">Center — Cue Editor</strong>
+      <ul style="color:#8b949e;margin-top:4px;">
+        <li>Entity solo/mute at top</li>
+        <li>Attenuation preset dropdown</li>
+        <li>Standard cues (random container + controls)</li>
+        <li>Looping cues (Start → Loop → End sections)</li>
+        <li>Collapsible cue cards</li>
+        <li>Per-cue solo/mute/test buttons</li>
+      </ul>
+    </div>
+    <div>
+      <strong style="color:#c9d1d9;">Right Panel</strong>
+      <ul style="color:#8b949e;margin-top:4px;">
+        <li>Live activity feed (shows looping state)</li>
+        <li>Attenuation preset library</li>
+        <li>Create/edit/assign presets</li>
+        <li>"Used by" shows which entities use each</li>
+      </ul>
+    </div>
+  </div>
+</div>

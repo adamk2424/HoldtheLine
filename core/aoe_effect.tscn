@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c2aoeeffect01"]
+
+[ext_resource type="Script" path="res://core/aoe_effect.gd" id="1_aoe"]
+
+[node name="AoEEffect" type="Node3D"]
+script = ExtResource("1_aoe")

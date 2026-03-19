@@ -1,0 +1,67 @@
+{
+  "barriers": [
+    {
+      "id": "wall_basic",
+      "name": "Basic Structure",
+      "hp": 200,
+      "armor": 3,
+      "damage_on_contact": 0,
+      "slow_effect": 0,
+      "slow_radius": 0,
+      "cost_energy": 1,
+      "cost_materials": 5,
+      "build_time": 0.2,
+      "required_tech_level": "none",
+      "grid_size": [1, 1],
+      "connects_to_adjacent": true,
+      "mesh_color": "#7A7A7A",
+      "mesh_shape": "box",
+      "mesh_scale": [0.95, 1.5, 0.95],
+      "specials": []
+    },
+    {
+      "id": "wall_reinforced",
+      "name": "Reinforced Barrier",
+      "hp": 400,
+      "armor": 6,
+      "damage_on_contact": 0,
+      "slow_effect": 0,
+      "slow_radius": 0,
+      "cost_energy": 2,
+      "cost_materials": 20,
+      "build_time": 0.5,
+      "required_tech_level": "none",
+      "grid_size": [1, 2],
+      "connects_to_adjacent": true,
+      "mesh_color": "#5A5A5A",
+      "mesh_shape": "box",
+      "mesh_scale": [1.0, 2.0, 2.0],
+      "specials": []
+    },
+    {
+      "id": "barrier_energy",
+      "name": "Energy Barrier",
+      "hp": 250,
+      "armor": 4,
+      "damage_on_contact": 10,
+      "slow_effect": 15,
+      "slow_radius": 0,
+      "cost_energy": 20,
+      "cost_materials": 10,
+      "build_time": 3,
+      "required_tech_level": "tier_1",
+      "grid_size": [1, 2],
+      "connects_to_adjacent": true,
+      "mesh_color": "#3A7ABA",
+      "mesh_shape": "box",
+      "mesh_scale": [1.0, 2.0, 2.0],
+      "specials": [
+        {
+          "type": "recharge",
+          "no_damage_delay": 5.0,
+          "regen_per_sec": 50
+        }
+      ]
+    }
+  ]
+}

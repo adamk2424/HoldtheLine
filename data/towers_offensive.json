@@ -1,0 +1,385 @@
+{
+  "towers": [
+    {
+      "id": "autocannon",
+      "name": "Autocannon Turret",
+      "category": "offensive",
+      "hp": 200.0,
+      "armor": 2,
+      "damage": 15,
+      "attack_rate": 0.5,
+      "attack_range": 16,
+      "attack_type": "projectile",
+      "can_target_air": true,
+      "cost_energy": 25,
+      "cost_materials": 20,
+      "build_time": 2,
+      "required_tech_level": "none",
+      "grid_size": [
+        2,
+        2
+      ],
+      "mesh_color": "#5A5A5A",
+      "mesh_shape": "cylinder",
+      "mesh_scale": [
+        1.0,
+        3.75,
+        1.0
+      ],
+      "specials": [],
+      "upgrades": [
+        {
+          "name": "Tier 2",
+          "stat_changes": "2.5x damage, +30% range, 2x HP",
+          "cost_energy": 20,
+          "cost_materials": 50,
+          "required_tech_level": "none",
+          "modifications": {
+            "damage": 31.875,
+            "attack_range": 19.6,
+            "hp": 400.0
+          }
+        },
+        {
+          "name": "Tier 3",
+          "stat_changes": "+75% damage, +30% range, 2x HP, 2x regen, +50% attack speed",
+          "cost_energy": 30,
+          "cost_materials": 100,
+          "required_tech_level": "none",
+          "modifications": {
+            "damage": 57.188,
+            "attack_range": 25.18,
+            "hp": 800.0,
+            "regen_percent": 2.0,
+            "attack_rate": 0.333
+          }
+        }
+      ],
+      "sequential_upgrades": true,
+      "branch_at_level": 0,
+      "branch_a_name": "",
+      "branch_b_name": ""
+    },
+    {
+      "id": "missile_battery",
+      "name": "Missile Battery",
+      "category": "offensive",
+      "hp": 250.0,
+      "armor": 3,
+      "damage": 45,
+      "attack_rate": 1.5625,
+      "attack_range": 24,
+      "attack_type": "missile",
+      "aoe_radius": 2,
+      "splash_damage_percent": 60,
+      "can_target_air": true,
+      "cost_energy": 45,
+      "cost_materials": 35,
+      "build_time": 3,
+      "required_tech_level": "none",
+      "grid_size": [
+        2,
+        2
+      ],
+      "mesh_color": "#4A5A3A",
+      "mesh_shape": "box",
+      "mesh_scale": [
+        1.25,
+        3.0,
+        1.25
+      ],
+      "specials": [],
+      "upgrades": [
+        {
+          "name": "Tier 2",
+          "stat_changes": "2.5x damage, +30% range, 2x HP",
+          "cost_energy": 20,
+          "cost_materials": 50,
+          "required_tech_level": "none",
+          "modifications": {
+            "damage": 95.625,
+            "attack_range": 29.4,
+            "hp": 500.0
+          }
+        },
+        {
+          "name": "Tier 3",
+          "stat_changes": "+75% damage, +30% range, 2x HP, 2x regen, +50% attack speed",
+          "cost_energy": 30,
+          "cost_materials": 100,
+          "required_tech_level": "none",
+          "modifications": {
+            "damage": 171.562,
+            "attack_range": 37.77,
+            "hp": 1000.0,
+            "regen_percent": 2.0,
+            "attack_rate": 1.042
+          }
+        }
+      ],
+      "sequential_upgrades": true,
+      "branch_at_level": 0,
+      "branch_a_name": "",
+      "branch_b_name": ""
+    },
+    {
+      "id": "rail_gun",
+      "name": "Rail Gun",
+      "category": "offensive",
+      "hp": 175.0,
+      "armor": 2,
+      "damage": 90,
+      "attack_rate": 2.5,
+      "attack_range": 36,
+      "attack_type": "projectile",
+      "can_target_air": true,
+      "cost_energy": 60,
+      "cost_materials": 50,
+      "build_time": 4,
+      "required_tech_level": "tier_1",
+      "grid_size": [
+        2,
+        2
+      ],
+      "mesh_color": "#3A4A6A",
+      "mesh_shape": "cylinder",
+      "mesh_scale": [
+        0.75,
+        5.0,
+        0.75
+      ],
+      "specials": [],
+      "upgrades": [
+        {
+          "name": "Tier 2",
+          "stat_changes": "2.5x damage, +30% range, 2x HP",
+          "cost_energy": 20,
+          "cost_materials": 50,
+          "required_tech_level": "none",
+          "modifications": {
+            "damage": 191.25,
+            "attack_range": 44.1,
+            "hp": 350.0
+          }
+        },
+        {
+          "name": "Tier 3",
+          "stat_changes": "+75% damage, +30% range, 2x HP, 2x regen, +50% attack speed",
+          "cost_energy": 30,
+          "cost_materials": 100,
+          "required_tech_level": "none",
+          "modifications": {
+            "damage": 343.125,
+            "attack_range": 56.655,
+            "hp": 700.0,
+            "regen_percent": 2.0,
+            "attack_rate": 1.667
+          }
+        }
+      ],
+      "sequential_upgrades": true,
+      "branch_at_level": 0,
+      "branch_a_name": "",
+      "branch_b_name": ""
+    },
+    {
+      "id": "plasma_mortar",
+      "name": "Plasma Mortar",
+      "category": "offensive",
+      "hp": 300.0,
+      "armor": 4,
+      "damage": 70,
+      "attack_rate": 3.125,
+      "attack_range": 32,
+      "attack_type": "aoe",
+      "aoe_radius": 3,
+      "splash_damage_percent": 50,
+      "can_target_air": true,
+      "cost_energy": 75,
+      "cost_materials": 60,
+      "build_time": 5,
+      "required_tech_level": "tier_2",
+      "grid_size": [
+        2,
+        2
+      ],
+      "mesh_color": "#6A3A5A",
+      "mesh_shape": "cylinder",
+      "mesh_scale": [
+        1.5,
+        2.5,
+        1.5
+      ],
+      "specials": [],
+      "upgrades": [
+        {
+          "name": "Tier 2",
+          "stat_changes": "2.5x damage, +30% range, 2x HP",
+          "cost_energy": 20,
+          "cost_materials": 50,
+          "required_tech_level": "none",
+          "modifications": {
+            "damage": 148.75,
+            "attack_range": 39.2,
+            "hp": 600.0
+          }
+        },
+        {
+          "name": "Tier 3",
+          "stat_changes": "+75% damage, +30% range, 2x HP, 2x regen, +50% attack speed",
+          "cost_energy": 30,
+          "cost_materials": 100,
+          "required_tech_level": "none",
+          "modifications": {
+            "damage": 266.875,
+            "attack_range": 50.36,
+            "hp": 1200.0,
+            "regen_percent": 2.0,
+            "attack_rate": 2.084
+          }
+        }
+      ],
+      "sequential_upgrades": true,
+      "branch_at_level": 0,
+      "branch_a_name": "",
+      "branch_b_name": ""
+    },
+    {
+      "id": "tesla_coil",
+      "name": "Tesla Coil",
+      "category": "offensive",
+      "hp": 150.0,
+      "armor": 2,
+      "damage": 25,
+      "attack_rate": 0.834,
+      "attack_range": 20,
+      "attack_type": "beam",
+      "can_target_air": true,
+      "cost_energy": 55,
+      "cost_materials": 40,
+      "build_time": 4,
+      "required_tech_level": "tier_1",
+      "grid_size": [
+        2,
+        2
+      ],
+      "mesh_color": "#2A5A7A",
+      "mesh_shape": "cylinder",
+      "mesh_scale": [
+        0.625,
+        6.25,
+        0.625
+      ],
+      "specials": [
+        {
+          "type": "chain_lightning",
+          "chain_count": 3,
+          "chain_range": 4,
+          "chain_damage_falloff": 0.25
+        }
+      ],
+      "upgrades": [
+        {
+          "name": "Tier 2",
+          "stat_changes": "2.5x damage, +30% range, 2x HP",
+          "cost_energy": 20,
+          "cost_materials": 50,
+          "required_tech_level": "none",
+          "modifications": {
+            "damage": 53.125,
+            "attack_range": 24.5,
+            "hp": 300.0
+          }
+        },
+        {
+          "name": "Tier 3",
+          "stat_changes": "+75% damage, +30% range, 2x HP, 2x regen, +50% attack speed",
+          "cost_energy": 30,
+          "cost_materials": 100,
+          "required_tech_level": "none",
+          "modifications": {
+            "damage": 95.312,
+            "attack_range": 31.475,
+            "hp": 600.0,
+            "regen_percent": 2.0,
+            "attack_rate": 0.556
+          }
+        }
+      ],
+      "sequential_upgrades": true,
+      "branch_at_level": 0,
+      "branch_a_name": "",
+      "branch_b_name": ""
+    },
+    {
+      "id": "inferno_tower",
+      "name": "Inferno Tower",
+      "category": "offensive",
+      "hp": 250.0,
+      "armor": 3,
+      "damage": 8,
+      "attack_rate": 0.25,
+      "attack_range": 12,
+      "attack_type": "beam",
+      "can_target_air": true,
+      "cost_energy": 45,
+      "cost_materials": 35,
+      "build_time": 3,
+      "required_tech_level": "none",
+      "grid_size": [
+        2,
+        2
+      ],
+      "mesh_color": "#7A2A1A",
+      "mesh_shape": "cylinder",
+      "mesh_scale": [
+        0.875,
+        5.0,
+        0.875
+      ],
+      "specials": [
+        {
+          "type": "heat_ramp",
+          "ramp_percent_per_sec": 10,
+          "max_ramp_percent": 100,
+          "armor_melt_delay": 3.0,
+          "armor_melt_interval": 2.0,
+          "armor_melt_amount": 1,
+          "armor_melt_persist": 5.0
+        }
+      ],
+      "upgrades": [
+        {
+          "name": "Tier 2",
+          "stat_changes": "2.5x damage, +30% range, 2x HP",
+          "cost_energy": 20,
+          "cost_materials": 50,
+          "required_tech_level": "none",
+          "modifications": {
+            "damage": 17.0,
+            "attack_range": 14.7,
+            "hp": 500.0
+          }
+        },
+        {
+          "name": "Tier 3",
+          "stat_changes": "+75% damage, +30% range, 2x HP, 2x regen, +50% attack speed",
+          "cost_energy": 30,
+          "cost_materials": 100,
+          "required_tech_level": "none",
+          "modifications": {
+            "damage": 30.5,
+            "attack_range": 18.885,
+            "hp": 1000.0,
+            "regen_percent": 2.0,
+            "attack_rate": 0.167
+          }
+        }
+      ],
+      "sequential_upgrades": true,
+      "branch_at_level": 0,
+      "branch_a_name": "",
+      "branch_b_name": ""
+    }
+  ]
+}

@@ -1,0 +1,1673 @@
+{
+	"autocannon": {
+		"attack": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 100,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/Building_Explode_01.wav",
+				"res://audio/sfx/Building_Explode_02.wav",
+				"res://audio/sfx/Building_Explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 50
+		},
+		"placement": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"upgrade": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"sell": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"missile_battery": {
+		"attack": {
+			"files": [
+				"res://audio/sfx/Rocket_Fire_01.wav",
+				"res://audio/sfx/rocket_fire_02.wav",
+				"res://audio/sfx/rocket_fire_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 80,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/Building_Explode_01.wav",
+				"res://audio/sfx/Building_Explode_02.wav",
+				"res://audio/sfx/Building_Explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 50
+		},
+		"placement": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"upgrade": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"sell": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"rail_gun": {
+		"attack": {
+			"files": [
+				"res://audio/sfx/Rail_Gun_fire_01.wav",
+				"res://audio/sfx/Rail_Gun_Fire_02.wav",
+				"res://audio/sfx/Rail_Gun_fire_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 60,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/Building_Explode_01.wav",
+				"res://audio/sfx/Building_Explode_02.wav",
+				"res://audio/sfx/Building_Explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 50
+		},
+		"placement": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"upgrade": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"sell": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"tesla_coil": {
+		"attack": {
+			"files": [
+				"res://audio/sfx/Tesla_fire_01.wav",
+				"res://audio/sfx/Tesla_fire_02.wav",
+				"res://audio/sfx/Tesla_fire_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 80,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/Building_Explode_01.wav",
+				"res://audio/sfx/Building_Explode_02.wav",
+				"res://audio/sfx/Building_Explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 50
+		},
+		"placement": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"upgrade": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"sell": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"plasma_mortar": {
+		"attack": {
+			"files": [
+				"res://audio/sfx/heavy_thunk_01.wav",
+				"res://audio/sfx/Heavy_thunk_02.wav",
+				"res://audio/sfx/heavy_thunk_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 80,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/Building_Explode_01.wav",
+				"res://audio/sfx/Building_Explode_02.wav",
+				"res://audio/sfx/Building_Explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 50
+		},
+		"placement": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"upgrade": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"sell": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"inferno_tower": {
+		"attack": {
+			"files": [
+				"res://audio/sfx/Flame_longshot.wav",
+				"",
+				""
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 60,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/Building_Explode_01.wav",
+				"res://audio/sfx/Building_Explode_02.wav",
+				"res://audio/sfx/Building_Explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 50
+		},
+		"placement": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"upgrade": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"sell": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"leach_tower": {
+		"attack": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 100,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/Building_Explode_01.wav",
+				"res://audio/sfx/Building_Explode_02.wav",
+				"res://audio/sfx/Building_Explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 50
+		},
+		"placement": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"upgrade": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"sell": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"thermal_siphon": {
+		"attack": {
+			"files": [
+				"res://audio/sfx/Flame_end.wav",
+				"",
+				""
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 80,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/Building_Explode_01.wav",
+				"res://audio/sfx/Building_Explode_02.wav",
+				"res://audio/sfx/Building_Explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 50
+		},
+		"placement": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"upgrade": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"sell": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"repair_tower": {
+		"attack": {
+			"files": [
+				"res://audio/sfx/healing_beam_loop.wav",
+				"",
+				""
+			],
+			"pitch_randomize": false
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/Building_Explode_01.wav",
+				"res://audio/sfx/Building_Explode_02.wav",
+				"res://audio/sfx/Building_Explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 50
+		},
+		"placement": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"upgrade": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"sell": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"shield_pylon": {
+		"attack": {
+			"files": [
+				"res://audio/sfx/shield_active_long.wav",
+				"",
+				""
+			],
+			"pitch_randomize": false
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/Building_Explode_01.wav",
+				"res://audio/sfx/Building_Explode_02.wav",
+				"res://audio/sfx/Building_Explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 50
+		},
+		"placement": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"upgrade": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"sell": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"war_beacon": {
+		"death": {
+			"files": [
+				"res://audio/sfx/Building_Explode_01.wav",
+				"res://audio/sfx/Building_Explode_02.wav",
+				"res://audio/sfx/Building_Explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 50
+		},
+		"placement": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"upgrade": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"attack": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"sell": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"targeting_array": {
+		"death": {
+			"files": [
+				"res://audio/sfx/Building_Explode_01.wav",
+				"res://audio/sfx/Building_Explode_02.wav",
+				"res://audio/sfx/Building_Explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 50
+		},
+		"placement": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"upgrade": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"attack": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"sell": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"central_tower": {
+		"attack": {
+			"files": [
+				"res://audio/sfx/heavy_thunk_01.wav",
+				"res://audio/sfx/Heavy_thunk_02.wav",
+				"res://audio/sfx/heavy_thunk_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 60,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/Central_tower_death.wav",
+				"",
+				""
+			],
+			"pitch_randomize": false
+		},
+		"upgrade": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"hp_50": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"hp_10": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"repair_drone": {
+		"ability_1": {
+			"files": [
+				"res://audio/sfx/healing_beam_loop.wav",
+				"",
+				""
+			],
+			"pitch_randomize": false
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/smaller_explode_01.wav",
+				"res://audio/sfx/smaller_explode_02.wav",
+				"res://audio/sfx/smaller_explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 80
+		},
+		"spawn": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"order_received": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"attack": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"ability_2": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"ability_3": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"shield_drone": {
+		"ability_1": {
+			"files": [
+				"res://audio/sfx/shield_active_long.wav",
+				"",
+				""
+			],
+			"pitch_randomize": false
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/smaller_explode_01.wav",
+				"res://audio/sfx/smaller_explode_02.wav",
+				"res://audio/sfx/smaller_explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 80
+		},
+		"spawn": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"order_received": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"attack": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"ability_2": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"ability_3": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"disruptor_drone": {
+		"attack": {
+			"files": [
+				"res://audio/sfx/small_bot_gun_fire-001.wav",
+				"res://audio/sfx/small_bot_gun_fire-002.wav",
+				"res://audio/sfx/small_bot_gun_fire-003.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 100,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/smaller_explode_01.wav",
+				"res://audio/sfx/smaller_explode_02.wav",
+				"res://audio/sfx/smaller_explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 80
+		},
+		"spawn": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"order_received": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"ability_1": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"ability_2": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"ability_3": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"sentinel": {
+		"attack": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 100,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/smaller_explode_01.wav",
+				"res://audio/sfx/smaller_explode_02.wav",
+				"res://audio/sfx/smaller_explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 80
+		},
+		"spawn": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"order_received": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"ability_1": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"ability_2": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"ability_3": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"juggernaut": {
+		"attack": {
+			"files": [
+				"res://audio/sfx/heavy_thunk_01.wav",
+				"res://audio/sfx/Heavy_thunk_02.wav",
+				"res://audio/sfx/heavy_thunk_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 60,
+			"volume_db": -12
+		},
+		"ability_1": {
+			"files": [
+				"res://audio/sfx/heavy_thunk_01.wav",
+				"res://audio/sfx/Heavy_thunk_02.wav",
+				"res://audio/sfx/heavy_thunk_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 40,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/Building_Explode_01.wav",
+				"res://audio/sfx/Building_Explode_02.wav",
+				"res://audio/sfx/Building_Explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 50
+		},
+		"spawn": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"order_received": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"ability_2": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"ability_3": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"striker": {
+		"attack": {
+			"files": [
+				"res://audio/sfx/small_bot_gun_fire-001.wav",
+				"res://audio/sfx/small_bot_gun_fire-002.wav",
+				"res://audio/sfx/small_bot_gun_fire-003.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 100,
+			"volume_db": -12
+		},
+		"ability_1": {
+			"files": [
+				"res://audio/sfx/small_bot_gun_fire-001.wav",
+				"res://audio/sfx/small_bot_gun_fire-002.wav",
+				"res://audio/sfx/small_bot_gun_fire-003.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 150,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/smaller_explode_01.wav",
+				"res://audio/sfx/smaller_explode_02.wav",
+				"res://audio/sfx/smaller_explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 80
+		},
+		"spawn": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"order_received": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"ability_2": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"ability_3": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"siege_walker": {
+		"attack": {
+			"files": [
+				"res://audio/sfx/heavy_thunk_01.wav",
+				"res://audio/sfx/Heavy_thunk_02.wav",
+				"res://audio/sfx/heavy_thunk_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 50,
+			"volume_db": -12
+		},
+		"ability_1": {
+			"files": [
+				"res://audio/sfx/heavy_thunk_01.wav",
+				"res://audio/sfx/Heavy_thunk_02.wav",
+				"res://audio/sfx/heavy_thunk_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 40,
+			"volume_db": -12
+		},
+		"ability_2": {
+			"files": [
+				"res://audio/sfx/heavy_thunk_01.wav",
+				"res://audio/sfx/Heavy_thunk_02.wav",
+				"res://audio/sfx/heavy_thunk_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 40,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/Building_Explode_01.wav",
+				"res://audio/sfx/Building_Explode_02.wav",
+				"res://audio/sfx/Building_Explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 50
+		},
+		"spawn": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"order_received": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"ability_3": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"wall_basic": {
+		"death": {
+			"files": [
+				"res://audio/sfx/smaller_explode_01.wav",
+				"res://audio/sfx/smaller_explode_02.wav",
+				"res://audio/sfx/smaller_explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 80
+		}
+	},
+	"wall_reinforced": {
+		"death": {
+			"files": [
+				"res://audio/sfx/smaller_explode_01.wav",
+				"res://audio/sfx/smaller_explode_02.wav",
+				"res://audio/sfx/smaller_explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 60
+		}
+	},
+	"barrier_energy": {
+		"death": {
+			"files": [
+				"res://audio/sfx/smaller_explode_01.wav",
+				"res://audio/sfx/smaller_explode_02.wav",
+				"res://audio/sfx/smaller_explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 80
+		}
+	},
+	"thrasher": {
+		"attack": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 120,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/smaller_explode_01.wav",
+				"res://audio/sfx/smaller_explode_02.wav",
+				"res://audio/sfx/smaller_explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 100
+		},
+		"roar": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50,
+			"roar_chance": 10,
+			"roar_interval": 10.0
+		}
+	},
+	"brute": {
+		"attack": {
+			"files": [
+				"res://audio/sfx/heavy_thunk_01.wav",
+				"res://audio/sfx/Heavy_thunk_02.wav",
+				"res://audio/sfx/heavy_thunk_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 80,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/smaller_explode_01.wav",
+				"res://audio/sfx/smaller_explode_02.wav",
+				"res://audio/sfx/smaller_explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 60
+		},
+		"roar": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50,
+			"roar_chance": 10,
+			"roar_interval": 10.0
+		}
+	},
+	"clugg": {
+		"attack": {
+			"files": [
+				"res://audio/sfx/heavy_thunk_01.wav",
+				"res://audio/sfx/Heavy_thunk_02.wav",
+				"res://audio/sfx/heavy_thunk_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 60,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/Building_Explode_01.wav",
+				"res://audio/sfx/Building_Explode_02.wav",
+				"res://audio/sfx/Building_Explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 60
+		},
+		"roar": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50,
+			"roar_chance": 10,
+			"roar_interval": 10.0
+		}
+	},
+	"scrit": {
+		"attack": {
+			"files": [
+				"res://audio/sfx/small_bot_gun_fire-001.wav",
+				"res://audio/sfx/small_bot_gun_fire-002.wav",
+				"res://audio/sfx/small_bot_gun_fire-003.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 120,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/smaller_explode_01.wav",
+				"res://audio/sfx/smaller_explode_02.wav",
+				"res://audio/sfx/smaller_explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 100
+		},
+		"roar": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50,
+			"roar_chance": 10,
+			"roar_interval": 10.0
+		}
+	},
+	"slinker": {
+		"attack": {
+			"files": [
+				"res://audio/sfx/small_bot_gun_fire-001.wav",
+				"res://audio/sfx/small_bot_gun_fire-002.wav",
+				"res://audio/sfx/small_bot_gun_fire-003.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 100,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/smaller_explode_01.wav",
+				"res://audio/sfx/smaller_explode_02.wav",
+				"res://audio/sfx/smaller_explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 80
+		},
+		"roar": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50,
+			"roar_chance": 10,
+			"roar_interval": 10.0
+		}
+	},
+	"polus": {
+		"attack": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 100,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/smaller_explode_01.wav",
+				"res://audio/sfx/smaller_explode_02.wav",
+				"res://audio/sfx/smaller_explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 80
+		},
+		"roar": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50,
+			"roar_chance": 10,
+			"roar_interval": 10.0
+		}
+	},
+	"terror_bringer": {
+		"attack": {
+			"files": [
+				"res://audio/sfx/heavy_thunk_01.wav",
+				"res://audio/sfx/Heavy_thunk_02.wav",
+				"res://audio/sfx/heavy_thunk_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 50,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/Building_Explode_01.wav",
+				"res://audio/sfx/Building_Explode_02.wav",
+				"res://audio/sfx/Building_Explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 40
+		},
+		"roar": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50,
+			"roar_chance": 10,
+			"roar_interval": 10.0
+		}
+	},
+	"blight_mite": {
+		"death": {
+			"files": [
+				"res://audio/sfx/smaller_explode_01.wav",
+				"res://audio/sfx/smaller_explode_02.wav",
+				"res://audio/sfx/smaller_explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 120
+		},
+		"attack": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50,
+			"volume_db": -12
+		},
+		"roar": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50,
+			"roar_chance": 10,
+			"roar_interval": 10.0
+		}
+	},
+	"gorger": {
+		"attack": {
+			"files": [
+				"res://audio/sfx/heavy_thunk_01.wav",
+				"res://audio/sfx/Heavy_thunk_02.wav",
+				"res://audio/sfx/heavy_thunk_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 80,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/smaller_explode_01.wav",
+				"res://audio/sfx/smaller_explode_02.wav",
+				"res://audio/sfx/smaller_explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 60
+		},
+		"roar": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50,
+			"roar_chance": 10,
+			"roar_interval": 10.0
+		}
+	},
+	"gloom_wing": {
+		"death": {
+			"files": [
+				"res://audio/sfx/smaller_explode_01.wav",
+				"res://audio/sfx/smaller_explode_02.wav",
+				"res://audio/sfx/smaller_explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 80
+		},
+		"attack": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50,
+			"volume_db": -12
+		},
+		"roar": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50,
+			"roar_chance": 10,
+			"roar_interval": 10.0
+		}
+	},
+	"bile_spitter": {
+		"attack": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 100,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/smaller_explode_01.wav",
+				"res://audio/sfx/smaller_explode_02.wav",
+				"res://audio/sfx/smaller_explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 80
+		},
+		"roar": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50,
+			"roar_chance": 10,
+			"roar_interval": 10.0
+		}
+	},
+	"howler": {
+		"death": {
+			"files": [
+				"res://audio/sfx/smaller_explode_01.wav",
+				"res://audio/sfx/smaller_explode_02.wav",
+				"res://audio/sfx/smaller_explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 80
+		},
+		"attack": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50,
+			"volume_db": -12
+		},
+		"roar": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50,
+			"roar_chance": 10,
+			"roar_interval": 10.0
+		}
+	},
+	"behemoth": {
+		"attack": {
+			"files": [
+				"res://audio/sfx/heavy_thunk_01.wav",
+				"res://audio/sfx/Heavy_thunk_02.wav",
+				"res://audio/sfx/heavy_thunk_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 40,
+			"volume_db": -12
+		},
+		"ground_slam": {
+			"files": [
+				"res://audio/sfx/Building_Explode_01.wav",
+				"res://audio/sfx/Building_Explode_02.wav",
+				"res://audio/sfx/Building_Explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 40,
+			"volume_db": -12
+		},
+		"death": {
+			"files": [
+				"res://audio/sfx/Building_Explode_01.wav",
+				"res://audio/sfx/Building_Explode_02.wav",
+				"res://audio/sfx/Building_Explode_03.wav"
+			],
+			"pitch_randomize": false
+		},
+		"roar": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50,
+			"roar_chance": 10,
+			"roar_interval": 10.0
+		}
+	},
+	"drone_printer": {
+		"death": {
+			"files": [
+				"res://audio/sfx/Building_Explode_01.wav",
+				"res://audio/sfx/Building_Explode_02.wav",
+				"res://audio/sfx/Building_Explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 50
+		},
+		"placement": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"sell": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"mech_bay": {
+		"death": {
+			"files": [
+				"res://audio/sfx/Building_Explode_01.wav",
+				"res://audio/sfx/Building_Explode_02.wav",
+				"res://audio/sfx/Building_Explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 50
+		},
+		"placement": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"sell": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"war_factory": {
+		"death": {
+			"files": [
+				"res://audio/sfx/Building_Explode_01.wav",
+				"res://audio/sfx/Building_Explode_02.wav",
+				"res://audio/sfx/Building_Explode_03.wav"
+			],
+			"pitch_randomize": true,
+			"pitch_cents": 50
+		},
+		"placement": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"sell": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	},
+	"solar_array": {
+		"placement": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"upgrade": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"attack": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"death": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		},
+		"sell": {
+			"files": [
+				"",
+				"",
+				""
+			],
+			"pitch_randomize": false,
+			"pitch_cents": 50
+		}
+	}
+}

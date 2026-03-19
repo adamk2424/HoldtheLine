@@ -1,0 +1,121 @@
+{
+  "buildings": [
+    {
+      "id": "drone_printer",
+      "name": "Drone Printer",
+      "hp": 300,
+      "armor": 2,
+      "cost_energy": 75,
+      "cost_materials": 60,
+      "build_time": 15,
+      "required_tech_level": "none",
+      "grid_size": [2, 2],
+      "produces": ["repair_drone", "shield_drone", "disruptor_drone"],
+      "hotkey": "1",
+      "mesh_color": "#4A6A4A",
+      "mesh_shape": "box",
+      "mesh_scale": [3.0, 2.25, 3.0],
+      "upgrades": [
+        {
+          "name": "Quick Fabrication",
+          "description": "Reduces drone build time by 20%.",
+          "cost_energy": 40,
+          "cost_materials": 30,
+          "required_tech_level": "none"
+        },
+        {
+          "name": "Reinforced Chassis",
+          "description": "All drones gain +15 HP and +1 armor.",
+          "cost_energy": 60,
+          "cost_materials": 50,
+          "required_tech_level": "tier_1"
+        },
+        {
+          "name": "Advanced Optics",
+          "description": "Repair 7 HP/sec. Shield +5 armor. Disruptor 35% slow.",
+          "cost_energy": 100,
+          "cost_materials": 80,
+          "required_tech_level": "tier_2"
+        }
+      ]
+    },
+    {
+      "id": "mech_bay",
+      "name": "Mech Bay",
+      "hp": 450,
+      "armor": 4,
+      "cost_energy": 120,
+      "cost_materials": 100,
+      "build_time": 22,
+      "required_tech_level": "none",
+      "grid_size": [3, 2],
+      "produces": ["sentinel", "juggernaut"],
+      "hotkey": "2",
+      "mesh_color": "#4A4A6A",
+      "mesh_shape": "box",
+      "mesh_scale": [4.5, 3.0, 3.0],
+      "upgrades": [
+        {
+          "name": "Streamlined Assembly",
+          "description": "Reduces mech build time by 20%.",
+          "cost_energy": 50,
+          "cost_materials": 40,
+          "required_tech_level": "none"
+        },
+        {
+          "name": "Hardened Plating",
+          "description": "All mechs gain +50 HP and +1 armor.",
+          "cost_energy": 80,
+          "cost_materials": 65,
+          "required_tech_level": "tier_1"
+        },
+        {
+          "name": "Overclocked Servos",
+          "description": "+10% attack speed, +10% move speed. Fortify grants +4 armor.",
+          "cost_energy": 120,
+          "cost_materials": 100,
+          "required_tech_level": "tier_2"
+        }
+      ]
+    },
+    {
+      "id": "war_factory",
+      "name": "War Factory",
+      "hp": 600,
+      "armor": 5,
+      "cost_energy": 160,
+      "cost_materials": 130,
+      "build_time": 28,
+      "required_tech_level": "none",
+      "grid_size": [3, 3],
+      "produces": ["striker", "siege_walker"],
+      "hotkey": "3",
+      "mesh_color": "#6A4A3A",
+      "mesh_shape": "box",
+      "mesh_scale": [4.5, 3.0, 4.5],
+      "upgrades": [
+        {
+          "name": "Rapid Deployment",
+          "description": "Reduces vehicle build time by 20%.",
+          "cost_energy": 60,
+          "cost_materials": 50,
+          "required_tech_level": "none"
+        },
+        {
+          "name": "Composite Armor",
+          "description": "All vehicles gain +75 HP and +1 armor.",
+          "cost_energy": 100,
+          "cost_materials": 80,
+          "required_tech_level": "tier_1"
+        },
+        {
+          "name": "Weapons Research",
+          "description": "Overdrive 12s. Shatter Shell every 3rd shot. +15% damage.",
+          "cost_energy": 150,
+          "cost_materials": 120,
+          "required_tech_level": "tier_2"
+        }
+      ]
+    }
+  ]
+}

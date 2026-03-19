@@ -1,0 +1,48 @@
+{
+  "id": "central_tower",
+  "name": "Central Tower",
+  "hp": 750,
+  "armor": 5,
+  "damage": 0,
+  "attack_rate": 0,
+  "attack_range": 0,
+  "attack_type": "none",
+  "can_target_air": false,
+  "grid_size": [3, 3],
+  "regen_percent": 0.01,
+  "mesh_color": "#3A3A5A",
+  "mesh_shape": "box",
+  "mesh_scale": [4.5, 4.5, 4.5],
+  "upgrades": [
+    {
+      "name": "Tier 1 Tech",
+      "description": "Doubles income (2x base). Unlocks Tier 1 towers/units. Requires: 1 Boss Kill.",
+      "cost_energy": 100,
+      "cost_materials": 100,
+      "required_boss_kills": 1,
+      "hp_bonus": 500,
+      "armor_bonus": 2,
+      "income_multiplier": 2
+    },
+    {
+      "name": "Tier 2 Tech",
+      "description": "Doubles income again (4x base). Unlocks Tier 2 towers/units. Requires: 3 Boss Kills.",
+      "cost_energy": 250,
+      "cost_materials": 250,
+      "required_boss_kills": 3,
+      "hp_bonus": 500,
+      "armor_bonus": 3,
+      "income_multiplier": 4
+    },
+    {
+      "name": "Tier 3 Tech",
+      "description": "Doubles income again (8x base). Unlocks Tier 3. Requires: 25 Boss Kills.",
+      "cost_energy": 500,
+      "cost_materials": 500,
+      "required_boss_kills": 25,
+      "hp_bonus": 500,
+      "armor_bonus": 5,
+      "income_multiplier": 8
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://c2buildmenu01"]
+
+[ext_resource type="Script" path="res://ui/build_menu/build_menu.gd" id="1_build_menu"]
+
+[node name="BuildMenu" type="CanvasLayer"]
+layer = 11
+script = ExtResource("1_build_menu")

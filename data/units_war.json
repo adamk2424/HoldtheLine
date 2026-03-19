@@ -1,0 +1,79 @@
+{
+  "units": [
+    {
+      "id": "striker",
+      "name": "Striker",
+      "building": "war",
+      "role": "combat",
+      "hp": 350,
+      "armor": 2,
+      "speed": 2.2,
+      "damage": 20,
+      "attack_rate": 0.333,
+      "attack_range": 7,
+      "attack_type": "projectile",
+      "can_target_air": true,
+      "flying": false,
+      "cost_energy": 60,
+      "cost_materials": 50,
+      "build_time": 15,
+      "pop_cost": 3,
+      "required_tech_level": "none",
+      "default_behavior": "patrol_walls",
+      "mesh_color": "#3A5A3A",
+      "mesh_shape": "box",
+      "mesh_scale": [1.0, 0.6, 0.6],
+      "specials": [
+        {
+          "type": "overdrive",
+          "move_speed_bonus": 0.5,
+          "attack_speed_bonus": 0.25,
+          "duration": 8,
+          "cooldown": 30
+        }
+      ]
+    },
+    {
+      "id": "siege_walker",
+      "name": "Siege Walker",
+      "building": "war",
+      "role": "ranged",
+      "hp": 600,
+      "armor": 4,
+      "speed": 0.7,
+      "damage": 120,
+      "attack_rate": 3.333,
+      "attack_range": 18,
+      "attack_type": "aoe",
+      "aoe_radius": 3,
+      "splash_damage_percent": 50,
+      "can_target_air": false,
+      "flying": false,
+      "cost_energy": 130,
+      "cost_materials": 110,
+      "build_time": 28,
+      "pop_cost": 5,
+      "required_tech_level": "tier_2",
+      "default_behavior": "guard_towers",
+      "mesh_color": "#5A4A3A",
+      "mesh_shape": "box",
+      "mesh_scale": [1.2, 1.4, 1.2],
+      "specials": [
+        {
+          "type": "deploy",
+          "deploy_time": 2.0,
+          "undeploy_time": 1.5,
+          "range_bonus": 4,
+          "damage_bonus": 0.2
+        },
+        {
+          "type": "shatter_shell",
+          "every_nth_shot": 4,
+          "damage_bonus": 0.5,
+          "armor_reduction": 2,
+          "armor_duration": 8
+        }
+      ]
+    }
+  ]
+}

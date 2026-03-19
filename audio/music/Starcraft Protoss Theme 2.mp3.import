@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://b3653u3kgfy4p"
+path="res://.godot/imported/Starcraft Protoss Theme 2.mp3-9f6bec09a72579f4354822318d6899be.mp3str"
+
+[deps]
+
+source_file="res://audio/music/Starcraft Protoss Theme 2.mp3"
+dest_files=["res://.godot/imported/Starcraft Protoss Theme 2.mp3-9f6bec09a72579f4354822318d6899be.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

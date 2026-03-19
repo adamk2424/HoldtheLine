@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://c2mainscene01"]
+
+[ext_resource type="PackedScene" uid="uid://c2gamesession01" path="res://scenes/game_session.tscn" id="1_session"]
+
+[node name="Main" type="Node"]
+
+[node name="GameSession" parent="." instance=ExtResource("1_session")]
