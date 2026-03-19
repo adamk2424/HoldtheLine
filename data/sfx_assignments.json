@@ -2,13 +2,13 @@
 	"autocannon": {
 		"attack": {
 			"files": [
-				"",
-				"",
-				""
+				"res://audio/sfx/railgun_fire-001.wav",
+				"res://audio/sfx/railgun_fire-002.wav",
+				"res://audio/sfx/railgun_fire-003.wav"
 			],
 			"pitch_randomize": true,
 			"pitch_cents": 100,
-			"volume_db": -12
+			"volume_db": -24
 		},
 		"death": {
 			"files": [
@@ -56,7 +56,7 @@
 			],
 			"pitch_randomize": true,
 			"pitch_cents": 80,
-			"volume_db": -12
+			"volume_db": -9
 		},
 		"death": {
 			"files": [
@@ -98,9 +98,9 @@
 	"rail_gun": {
 		"attack": {
 			"files": [
-				"res://audio/sfx/railgun_fire-001.wav",
-				"res://audio/sfx/railgun_fire-002.wav",
-				"res://audio/sfx/railgun_fire-003.wav"
+				"res://audio/sfx/Rail_Gun_fire_01.wav",
+				"res://audio/sfx/Rail_Gun_Fire_02.wav",
+				"res://audio/sfx/Rail_Gun_fire_03.wav"
 			],
 			"pitch_randomize": true,
 			"pitch_cents": 60,

@@ -1,6 +1,6 @@
 {
   "enemy_hp_scale_per_minute": 0.01,
-  "enemy_damage_scale_per_minute": 0.01,
+  "enemy_damage_scale_per_minute": 0.0125,
   "enemy_armor_scale_per_minute": 0.0,
   "armor_scaling": {
     "small": {"amount": 1, "interval_minutes": 10},

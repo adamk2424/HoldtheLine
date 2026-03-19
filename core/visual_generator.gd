@@ -1218,103 +1218,190 @@ static func _create_recycler_t3(c: Color) -> Node3D:
 # =============================================================================
 
 static func _create_drone_printer(c: Color) -> Node3D:
-	## Drone factory (2x2): base + main building + conveyor opening + arm + chimney
+	## Drone factory (2x2): Compact industrial fabrication unit with landing pad, robotic arms, green status lights
 	var r := Node3D.new()
 	r.name = "Visual"
 	var dark := c.darkened(0.3)
 	var lite := c.lightened(0.15)
-	var status := Color(0.2, 1.0, 0.3)
+	var green := Color(0.2, 1.0, 0.3)  # Green accent lighting
+	var military_grey := Color(0.25, 0.25, 0.25)
+	
 	# Foundation
-	_add_box(r, Vector3(1.8, 0.2, 1.8), Vector3(0, 0.1, 0), dark)
-	# Main building
-	_add_box(r, Vector3(1.5, 0.8, 1.5), Vector3(0, 0.6, 0), c)
-	# Roof
-	_add_box(r, Vector3(1.6, 0.08, 1.6), Vector3(0, 1.04, 0), dark)
-	# Conveyor opening (dark recessed area on front)
-	_add_box(r, Vector3(0.6, 0.4, 0.08), Vector3(0, 0.4, 0.76), dark.darkened(0.3))
-	# Assembly arm on top
-	_add_box(r, Vector3(0.08, 0.35, 0.08), Vector3(0.3, 1.26, 0), lite)
-	_add_box(r, Vector3(0.4, 0.06, 0.06), Vector3(0.3, 1.42, 0.15), lite)
-	# Chimney
-	_add_cylinder(r, 0.08, 0.4, Vector3(-0.5, 1.28, -0.5), dark)
-	# Status lights
-	_add_emissive_sphere(r, 0.04, Vector3(0.6, 0.7, 0.76), status, 2.0)
-	_add_emissive_sphere(r, 0.04, Vector3(-0.6, 0.7, 0.76), status, 2.0)
-	# Window strip
-	_add_emissive_box(r, Vector3(0.8, 0.12, 0.04), Vector3(0, 0.75, 0.76), Color(0.8, 0.7, 0.3), 1.0)
+	_add_box(r, Vector3(1.8, 0.15, 1.8), Vector3(0, 0.075, 0), dark)
+	# Main building (compact industrial unit)
+	_add_box(r, Vector3(1.5, 0.7, 1.5), Vector3(0, 0.525, 0), military_grey)
+	
+	# Top landing pad (flat fabrication surface)
+	_add_box(r, Vector3(1.6, 0.05, 1.6), Vector3(0, 0.925, 0), lite)
+	_add_box(r, Vector3(1.2, 0.02, 1.2), Vector3(0, 0.96, 0), green.darkened(0.4))  # Landing grid
+	
+	# Transparent panels showing robotic arms inside
+	_add_emissive_box(r, Vector3(0.6, 0.3, 0.04), Vector3(0, 0.65, 0.76), Color(0.4, 0.8, 0.9), 0.8)
+	_add_emissive_box(r, Vector3(0.6, 0.3, 0.04), Vector3(0, 0.65, -0.76), Color(0.4, 0.8, 0.9), 0.8)
+	
+	# Robotic arms visible through panels
+	_add_box(r, Vector3(0.06, 0.2, 0.06), Vector3(0.2, 0.6, 0.4), lite)
+	_add_box(r, Vector3(0.15, 0.04, 0.04), Vector3(0.275, 0.7, 0.42), lite)
+	_add_box(r, Vector3(0.06, 0.2, 0.06), Vector3(-0.2, 0.6, 0.4), lite)
+	_add_box(r, Vector3(0.15, 0.04, 0.04), Vector3(-0.275, 0.7, 0.42), lite)
+	
+	# Antenna array for drone commands
+	_add_cylinder(r, 0.02, 0.25, Vector3(0.6, 1.075, 0.6), lite)
+	_add_cylinder(r, 0.02, 0.2, Vector3(0.5, 1.05, 0.7), lite)
+	_add_cylinder(r, 0.02, 0.18, Vector3(0.7, 1.04, 0.5), lite)
+	# Small dishes on antennas
+	_add_box(r, Vector3(0.08, 0.08, 0.02), Vector3(0.6, 1.2, 0.6), lite)
+	
+	# Green status lights along base (operational indicators)
+	_add_emissive_sphere(r, 0.03, Vector3(0.6, 0.3, 0.6), green, 2.0)
+	_add_emissive_sphere(r, 0.03, Vector3(-0.6, 0.3, 0.6), green, 2.0)
+	_add_emissive_sphere(r, 0.03, Vector3(0.6, 0.3, -0.6), green, 2.0)
+	_add_emissive_sphere(r, 0.03, Vector3(-0.6, 0.3, -0.6), green, 2.0)
+	
+	# Green accent lighting strips
+	_add_emissive_box(r, Vector3(1.5, 0.02, 0.04), Vector3(0, 0.25, 0.76), green, 1.5)
+	_add_emissive_box(r, Vector3(0.04, 0.02, 1.5), Vector3(0.76, 0.25, 0), green, 1.5)
+	
+	# Landing pad edge lights
+	for i in range(8):
+		var angle: float = i * TAU / 8.0
+		var lx: float = cos(angle) * 0.65
+		var lz: float = sin(angle) * 0.65
+		_add_emissive_sphere(r, 0.02, Vector3(lx, 0.97, lz), green, 1.8)
+	
 	return r
 
 
 static func _create_mech_bay(c: Color) -> Node3D:
-	## Heavy factory (3x2): large building + bay doors + crane arm + smoke stack
+	## Heavy factory (3x2): Large industrial hangar with bay door, assembly gantries, blue status lights
 	var r := Node3D.new()
 	r.name = "Visual"
 	var dark := c.darkened(0.3)
 	var lite := c.lightened(0.15)
-	var warn := Color(1.0, 0.6, 0.1)
-	# Foundation
-	_add_box(r, Vector3(2.8, 0.2, 1.8), Vector3(0, 0.1, 0), dark)
-	# Main building
-	_add_box(r, Vector3(2.5, 1.2, 1.5), Vector3(0, 0.8, 0), c)
-	# Roof
-	_add_box(r, Vector3(2.6, 0.1, 1.6), Vector3(0, 1.45, 0), dark)
-	# Bay door (large dark opening on front)
-	_add_box(r, Vector3(1.0, 0.9, 0.08), Vector3(0, 0.65, 0.76), dark.darkened(0.4))
-	# Door frame
-	_add_box(r, Vector3(1.1, 0.06, 0.1), Vector3(0, 1.12, 0.76), lite)
-	_add_box(r, Vector3(0.06, 0.9, 0.1), Vector3(-0.53, 0.65, 0.76), lite)
-	_add_box(r, Vector3(0.06, 0.9, 0.1), Vector3(0.53, 0.65, 0.76), lite)
-	# Crane arm extending from roof
-	_add_box(r, Vector3(0.08, 0.6, 0.08), Vector3(0.8, 1.75, 0), lite)
-	_add_box(r, Vector3(0.8, 0.06, 0.06), Vector3(0.8, 2.03, 0.3), lite)
-	# Smoke stack
-	_add_cylinder(r, 0.1, 0.6, Vector3(-0.9, 1.75, -0.5), dark)
-	# Armored side plates
-	_add_box(r, Vector3(0.06, 0.5, 1.2), Vector3(1.28, 0.65, 0), dark)
-	_add_box(r, Vector3(0.06, 0.5, 1.2), Vector3(-1.28, 0.65, 0), dark)
-	# Warning lights
-	_add_emissive_sphere(r, 0.05, Vector3(0.53, 1.15, 0.76), warn, 2.5)
-	_add_emissive_sphere(r, 0.05, Vector3(-0.53, 1.15, 0.76), warn, 2.5)
-	# Window strip
-	_add_emissive_box(r, Vector3(0.5, 0.1, 0.04), Vector3(0.8, 1.1, 0.76), Color(0.7, 0.7, 0.3), 1.0)
+	var dark_steel := Color(0.2, 0.2, 0.25)
+	var blue := Color(0.2, 0.4, 1.0)  # Blue accent lighting matching Sentinel visors
+	
+	# Foundation (reinforced)
+	_add_box(r, Vector3(2.8, 0.25, 1.8), Vector3(0, 0.125, 0), dark_steel)
+	
+	# Main hangar building (heavy reinforced walls)
+	_add_box(r, Vector3(2.5, 1.3, 1.5), Vector3(0, 0.9, 0), dark_steel)
+	
+	# External armor plating
+	_add_box(r, Vector3(0.08, 1.0, 1.4), Vector3(1.29, 0.75, 0), dark_steel.darkened(0.2))
+	_add_box(r, Vector3(0.08, 1.0, 1.4), Vector3(-1.29, 0.75, 0), dark_steel.darkened(0.2))
+	_add_box(r, Vector3(2.4, 0.08, 1.4), Vector3(0, 1.55, 0), dark_steel.darkened(0.2))
+	
+	# Wide bay door (open, showing interior)
+	_add_box(r, Vector3(1.8, 1.1, 0.08), Vector3(0, 0.8, 0.76), Color(0.1, 0.1, 0.1))
+	
+	# Assembly gantries visible inside
+	_add_box(r, Vector3(0.06, 0.8, 0.06), Vector3(0.4, 0.7, 0.5), lite)
+	_add_box(r, Vector3(0.06, 0.8, 0.06), Vector3(-0.4, 0.7, 0.5), lite)
+	_add_box(r, Vector3(0.8, 0.06, 0.06), Vector3(0, 1.1, 0.5), lite)
+	
+	# Welding sparks effect points (emissive spots for animation)
+	_add_emissive_sphere(r, 0.03, Vector3(0.3, 0.8, 0.5), Color(1.0, 0.8, 0.4), 2.0)
+	_add_emissive_sphere(r, 0.03, Vector3(-0.2, 0.6, 0.5), Color(1.0, 0.8, 0.4), 2.0)
+	
+	# Mech frames in various stages (simplified representations)
+	_add_box(r, Vector3(0.3, 0.5, 0.2), Vector3(0.5, 0.5, 0.3), dark_steel.lightened(0.1))
+	_add_box(r, Vector3(0.25, 0.4, 0.18), Vector3(-0.5, 0.45, 0.3), dark_steel.lightened(0.1))
+	
+	# Heavy door frame
+	_add_box(r, Vector3(1.9, 0.08, 0.1), Vector3(0, 1.37, 0.76), dark_steel)
+	_add_box(r, Vector3(0.08, 1.1, 0.1), Vector3(-0.95, 0.8, 0.76), dark_steel)
+	_add_box(r, Vector3(0.08, 1.1, 0.1), Vector3(0.95, 0.8, 0.76), dark_steel)
+	
+	# Heavy crane arm with lifting capability
+	_add_box(r, Vector3(0.12, 0.7, 0.12), Vector3(0.8, 1.9, 0), dark_steel)
+	_add_box(r, Vector3(1.0, 0.08, 0.08), Vector3(0.8, 2.25, 0.4), dark_steel)
+	_add_box(r, Vector3(0.06, 0.15, 0.06), Vector3(1.3, 2.18, 0.4), lite)  # Hook
+	
+	# Exhaust ports with steam/smoke
+	_add_cylinder(r, 0.12, 0.5, Vector3(-0.8, 1.9, -0.5), dark_steel)
+	_add_cylinder(r, 0.1, 0.5, Vector3(-1.0, 1.9, -0.3), dark_steel)
+	_add_emissive_sphere(r, 0.08, Vector3(-0.8, 2.15, -0.5), Color(0.8, 0.8, 0.9), 1.0)  # Steam
+	
+	# Blue operational status lights
+	_add_emissive_sphere(r, 0.05, Vector3(0.8, 1.4, 0.76), blue, 3.0)
+	_add_emissive_sphere(r, 0.05, Vector3(-0.8, 1.4, 0.76), blue, 3.0)
+	_add_emissive_sphere(r, 0.05, Vector3(0, 1.6, 0.76), blue, 3.0)
+	
+	# Blue accent lighting strips
+	_add_emissive_box(r, Vector3(2.4, 0.03, 0.04), Vector3(0, 0.4, 0.76), blue, 2.0)
+	_add_emissive_box(r, Vector3(0.04, 1.0, 0.04), Vector3(1.25, 0.75, 0.76), blue, 2.0)
+	_add_emissive_box(r, Vector3(0.04, 1.0, 0.04), Vector3(-1.25, 0.75, 0.76), blue, 2.0)
+	
 	return r
 
 
 static func _create_war_factory(c: Color) -> Node3D:
-	## Massive factory (3x3): huge building + chimneys + vehicle ramp + armored walls
+	## Massive factory (3x3): Industrial complex with vehicle ramp, heavy machinery, orange accent lighting
 	var r := Node3D.new()
 	r.name = "Visual"
 	var dark := c.darkened(0.3)
-	var lite := c.lightened(0.15)
-	var warn := Color(1.0, 0.3, 0.1)
-	# Foundation
-	_add_box(r, Vector3(2.8, 0.2, 2.8), Vector3(0, 0.1, 0), dark)
-	# Main building
-	_add_box(r, Vector3(2.5, 1.3, 2.5), Vector3(0, 0.85, 0), c)
-	# Roof
-	_add_box(r, Vector3(2.6, 0.1, 2.6), Vector3(0, 1.55, 0), dark)
-	# Vehicle exit (large opening + ramp)
-	_add_box(r, Vector3(1.2, 1.0, 0.08), Vector3(0, 0.7, 1.26), dark.darkened(0.4))
-	_add_box(r, Vector3(1.2, 0.06, 0.5), Vector3(0, 0.22, 1.5), dark)
-	# Door frame
-	_add_box(r, Vector3(1.3, 0.08, 0.1), Vector3(0, 1.22, 1.26), lite)
-	# Multiple chimneys
-	_add_cylinder(r, 0.1, 0.5, Vector3(-0.8, 1.8, -0.8), dark)
-	_add_cylinder(r, 0.1, 0.5, Vector3(-0.5, 1.8, -0.8), dark)
-	_add_cylinder(r, 0.08, 0.4, Vector3(0.8, 1.75, -0.7), dark)
-	# Armored wall panels
-	_add_box(r, Vector3(0.08, 0.6, 2.0), Vector3(1.28, 0.7, 0), dark)
-	_add_box(r, Vector3(0.08, 0.6, 2.0), Vector3(-1.28, 0.7, 0), dark)
-	# Heavy reinforcement ribs
-	for i in range(3):
-		var z_pos: float = -0.8 + i * 0.8
-		_add_box(r, Vector3(2.55, 0.06, 0.08), Vector3(0, 1.0, z_pos), dark)
-	# Warning lights at entrance
-	_add_emissive_sphere(r, 0.06, Vector3(0.65, 1.25, 1.26), warn, 3.0)
-	_add_emissive_sphere(r, 0.06, Vector3(-0.65, 1.25, 1.26), warn, 3.0)
-	# Window strips on sides
-	_add_emissive_box(r, Vector3(0.04, 0.1, 1.5), Vector3(1.28, 1.1, 0), Color(0.7, 0.6, 0.3), 1.0)
-	_add_emissive_box(r, Vector3(0.04, 0.1, 1.5), Vector3(-1.28, 1.1, 0), Color(0.7, 0.6, 0.3), 1.0)
+	var industrial_metal := Color(0.15, 0.15, 0.18)
+	var orange := Color(1.0, 0.5, 0.1)  # Orange accent lighting
+	
+	# Foundation (blast-resistant)
+	_add_box(r, Vector3(2.8, 0.3, 2.8), Vector3(0, 0.15, 0), industrial_metal.darkened(0.3))
+	
+	# Massive main complex (thick armored walls)
+	_add_box(r, Vector3(2.5, 1.4, 2.5), Vector3(0, 1.0, 0), industrial_metal)
+	
+	# Thick armored walls with blast resistance
+	_add_box(r, Vector3(0.12, 1.2, 2.3), Vector3(1.31, 0.9, 0), industrial_metal.darkened(0.2))
+	_add_box(r, Vector3(0.12, 1.2, 2.3), Vector3(-1.31, 0.9, 0), industrial_metal.darkened(0.2))
+	_add_box(r, Vector3(2.3, 0.12, 1.2), Vector3(0, 0.9, -1.31), industrial_metal.darkened(0.2))
+	
+	# Reinforced vehicle ramp exit
+	_add_box(r, Vector3(1.5, 1.2, 0.1), Vector3(0, 0.9, 1.35), industrial_metal.darkened(0.4))
+	_add_box(r, Vector3(1.5, 0.08, 0.6), Vector3(0, 0.24, 1.65), industrial_metal.darkened(0.2))
+	
+	# Tank treads and heavy machinery visible inside
+	_add_box(r, Vector3(0.8, 0.3, 0.15), Vector3(0.3, 0.45, 0.8), industrial_metal.lightened(0.1))
+	_add_box(r, Vector3(0.8, 0.3, 0.15), Vector3(-0.3, 0.45, 0.8), industrial_metal.lightened(0.1))
+	
+	# Large industrial gears/machinery
+	_add_cylinder(r, 0.3, 0.1, Vector3(0.6, 0.8, 0.2), industrial_metal.lightened(0.15))
+	_add_cylinder(r, 0.25, 0.1, Vector3(-0.6, 0.8, 0.2), industrial_metal.lightened(0.15))
+	
+	# Heavy crane arm (extends from roof for lifting components)
+	_add_box(r, Vector3(0.15, 0.8, 0.15), Vector3(0.9, 2.0, 0), industrial_metal)
+	_add_box(r, Vector3(1.2, 0.1, 0.1), Vector3(0.9, 2.4, 0.5), industrial_metal)
+	_add_cylinder(r, 0.04, 0.3, Vector3(1.5, 2.25, 0.5), industrial_metal.lightened(0.2))  # Cable
+	
+	# Multiple exhaust stacks releasing steam
+	_add_cylinder(r, 0.12, 0.6, Vector3(-0.8, 2.0, -0.8), industrial_metal)
+	_add_cylinder(r, 0.1, 0.5, Vector3(-0.5, 2.0, -0.9), industrial_metal)
+	_add_cylinder(r, 0.1, 0.5, Vector3(0.8, 2.0, -0.8), industrial_metal)
+	
+	# Steam bursts during production
+	_add_emissive_sphere(r, 0.1, Vector3(-0.8, 2.3, -0.8), Color(0.9, 0.9, 1.0), 1.5)
+	_add_emissive_sphere(r, 0.08, Vector3(-0.5, 2.25, -0.9), Color(0.9, 0.9, 1.0), 1.5)
+	
+	# Orange warning lights and hazard striping around deployment ramp
+	_add_emissive_sphere(r, 0.08, Vector3(0.75, 1.5, 1.35), orange, 3.0)
+	_add_emissive_sphere(r, 0.08, Vector3(-0.75, 1.5, 1.35), orange, 3.0)
+	_add_emissive_sphere(r, 0.06, Vector3(0.75, 0.8, 1.35), orange, 2.5)
+	_add_emissive_sphere(r, 0.06, Vector3(-0.75, 0.8, 1.35), orange, 2.5)
+	
+	# Hazard striping (orange and black stripes)
+	for i in range(5):
+		var stripe_x: float = -0.6 + i * 0.3
+		_add_box(r, Vector3(0.08, 0.04, 0.1), Vector3(stripe_x, 0.28, 1.35), orange if i % 2 == 0 else industrial_metal.darkened(0.4))
+	
+	# Orange accent lighting strips
+	_add_emissive_box(r, Vector3(2.4, 0.04, 0.04), Vector3(0, 0.5, 1.35), orange, 2.0)
+	_add_emissive_box(r, Vector3(0.04, 1.2, 0.04), Vector3(1.27, 0.9, 1.35), orange, 2.0)
+	_add_emissive_box(r, Vector3(0.04, 1.2, 0.04), Vector3(-1.27, 0.9, 1.35), orange, 2.0)
+	
+	# Heavy reinforcement ribs (structural)
+	for i in range(4):
+		var z_pos: float = -1.0 + i * 0.65
+		_add_box(r, Vector3(2.6, 0.08, 0.1), Vector3(0, 1.2, z_pos), industrial_metal.darkened(0.1))
+	
 	return r
 
 
