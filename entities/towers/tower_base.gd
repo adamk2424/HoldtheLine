@@ -37,6 +37,32 @@ var health_bar_width: float = 1.0
 var _muzzle_nodes: Array = []
 var _muzzle_flash_active: bool = false
 
+# Turret animation components
+var turret_body_node: Node3D = null
+var barrel_assembly_node: Node3D = null
+var barrel_spinner_node: Node3D = null
+var supports_rotation: bool = false
+var supports_elevation: bool = false
+var supports_barrel_spin: bool = false
+
+# Animation state
+var _target_rotation: float = 0.0
+var _current_rotation: float = 0.0
+var _target_elevation: float = 0.0
+var _current_elevation: float = 0.0
+var _barrel_spin_velocity: float = 0.0
+var _is_firing: bool = false
+
+# Idle animation state
+var _idle_scan_direction: int = 1  # 1 for right, -1 for left
+var _idle_scan_timer: float = 0.0
+var _idle_scan_speed: float = 30.0  # degrees per second
+var _idle_scan_range: float = 60.0  # total scan range in degrees
+
+# Animation tweens
+var _rotation_tween: Tween = null
+var _elevation_tween: Tween = null
+
 # Reference to the BuildGrid (set by whoever spawns the tower)
 var build_grid: BuildGrid = null
 
@@ -86,6 +112,15 @@ func initialize(p_entity_id: String, p_entity_type: String, p_data: Dictionary =
 func _process(delta: float) -> void:
 	if is_building:
 		_process_build(delta)
+	elif is_built:
+		# Handle animations when built
+		if combat_component and combat_component.current_target:
+			# Continuously track target while in combat
+			if supports_rotation:
+				_animate_turret_to_target(combat_component.current_target)
+		else:
+			# Idle scanning behavior
+			_process_idle_animations(delta)
 
 
 func _setup_health_bar() -> void:
@@ -173,10 +208,12 @@ func _complete_build() -> void:
 	# Enable combat
 	if combat_component:
 		combat_component.is_active = true
-		combat_component.attack_fired.connect(_trigger_muzzle_flash)
+		combat_component.attack_fired.connect(_on_attack_fired)
+		combat_component.target_acquired.connect(_on_target_acquired)
 
-	# Cache muzzle flash nodes
+	# Cache muzzle flash nodes and animation components
 	_cache_muzzle_nodes()
+	_cache_animation_components()
 
 	# Remove invulnerability
 	if health_component:
@@ -332,6 +369,249 @@ func _reset_muzzle_flash() -> void:
 		if mat:
 			mat.emission_energy_multiplier = node.get_meta("base_emission")
 		node.scale = node.get_meta("base_scale")
+
+
+func _cache_animation_components() -> void:
+	## Cache references to animatable components from visual metadata
+	if not visual_node:
+		return
+	
+	# Check for animation metadata
+	supports_rotation = visual_node.get_meta("supports_rotation", false)
+	supports_elevation = visual_node.get_meta("supports_elevation", false)
+	supports_barrel_spin = visual_node.get_meta("supports_barrel_spin", false)
+	
+	# Cache node references
+	if visual_node.has_meta("turret_body_node"):
+		var path: String = visual_node.get_meta("turret_body_node")
+		turret_body_node = visual_node.get_node_or_null(NodePath(path))
+	
+	if visual_node.has_meta("barrel_assembly_node"):
+		var path: String = visual_node.get_meta("barrel_assembly_node")
+		barrel_assembly_node = visual_node.get_node_or_null(NodePath(path))
+	
+	if visual_node.has_meta("barrel_spinner_node"):
+		var path: String = visual_node.get_meta("barrel_spinner_node")
+		barrel_spinner_node = visual_node.get_node_or_null(NodePath(path))
+
+
+func _animate_turret_to_target(target: Node) -> void:
+	## Animates turret rotation and elevation to track target
+	if not target or not supports_rotation:
+		return
+	
+	var target_pos: Vector3 = target.global_position
+	var turret_pos: Vector3 = global_position
+	
+	# Calculate horizontal rotation (Y-axis)
+	var direction: Vector3 = target_pos - turret_pos
+	direction.y = 0  # Remove vertical component for rotation
+	direction = direction.normalized()
+	
+	var target_rotation_rad: float = atan2(direction.x, direction.z)
+	_target_rotation = rad_to_deg(target_rotation_rad)
+	
+	# Calculate elevation angle if supported
+	if supports_elevation and barrel_assembly_node:
+		var distance_horizontal: float = Vector2(direction.x, direction.z).length()
+		var height_diff: float = target_pos.y - turret_pos.y
+		var elevation_rad: float = atan2(height_diff, distance_horizontal)
+		_target_elevation = rad_to_deg(elevation_rad)
+		_target_elevation = clamp(_target_elevation, -10.0, 45.0)  # Limit elevation range
+	
+	# Smooth rotation with tween
+	if turret_body_node:
+		if _rotation_tween:
+			_rotation_tween.kill()
+		_rotation_tween = create_tween()
+		_rotation_tween.tween_method(_set_turret_rotation, _current_rotation, _target_rotation, 0.2)
+	
+	# Smooth elevation with tween
+	if barrel_assembly_node and supports_elevation:
+		if _elevation_tween:
+			_elevation_tween.kill()
+		_elevation_tween = create_tween()
+		_elevation_tween.tween_method(_set_barrel_elevation, _current_elevation, _target_elevation, 0.15)
+
+
+func _set_turret_rotation(rotation_deg: float) -> void:
+	## Sets the turret body rotation
+	_current_rotation = rotation_deg
+	if turret_body_node:
+		turret_body_node.rotation_degrees.y = rotation_deg
+
+
+func _set_barrel_elevation(elevation_deg: float) -> void:
+	## Sets the barrel assembly elevation
+	_current_elevation = elevation_deg
+	if barrel_assembly_node:
+		barrel_assembly_node.rotation_degrees.x = -elevation_deg  # Negative for proper direction
+
+
+func _start_barrel_spin() -> void:
+	## Starts barrel spinning animation for gatling-type weapons
+	if not supports_barrel_spin or not barrel_spinner_node:
+		return
+	
+	_is_firing = true
+	_barrel_spin_velocity = 1800.0  # degrees per second
+	
+	# Create continuous spinning tween
+	var spin_tween := create_tween()
+	spin_tween.set_loops()
+	spin_tween.tween_method(_set_barrel_spin, 0.0, 360.0, 360.0 / _barrel_spin_velocity)
+
+
+func _stop_barrel_spin() -> void:
+	## Gradually stops barrel spinning
+	if not supports_barrel_spin or not barrel_spinner_node:
+		return
+	
+	_is_firing = false
+	
+	# Gradually slow down the spin
+	var slowdown_tween := create_tween()
+	slowdown_tween.tween_method(_set_barrel_spin_velocity, _barrel_spin_velocity, 0.0, 1.0)
+
+
+func _set_barrel_spin(rotation_deg: float) -> void:
+	## Sets barrel spinner rotation
+	if barrel_spinner_node:
+		barrel_spinner_node.rotation_degrees.z = rotation_deg
+
+
+func _set_barrel_spin_velocity(velocity: float) -> void:
+	## Updates barrel spin velocity during slowdown
+	_barrel_spin_velocity = velocity
+
+
+func _trigger_rail_gun_charge_sequence() -> void:
+	## Animates rail gun energy buildup before firing
+	if not visual_node or not visual_node.has_meta("supports_energy_charging"):
+		return
+	
+	# Find conduit system and coils for charging effect
+	if visual_node.has_meta("conduit_system_node"):
+		var conduit_path: String = visual_node.get_meta("conduit_system_node")
+		var conduit_node := visual_node.get_node_or_null(NodePath(conduit_path))
+		
+		if conduit_node:
+			# Animate energy buildup in conduits
+			var charge_tween := create_tween()
+			charge_tween.set_parallel(true)
+			
+			# Brighten conduits over 0.5 seconds
+			for child in conduit_node.get_children():
+				if child is MeshInstance3D and child.name.begins_with("AcceleratorCoil"):
+					var mat: StandardMaterial3D = child.mesh.material as StandardMaterial3D
+					if mat and mat.emission_enabled:
+						var base_emission: float = mat.emission_energy_multiplier
+						charge_tween.tween_method(
+							func(energy): mat.emission_energy_multiplier = energy,
+							base_emission, base_emission * 3.0, 0.5
+						)
+						# Return to normal after firing
+						charge_tween.tween_delay(0.1)
+						charge_tween.tween_method(
+							func(energy): mat.emission_energy_multiplier = energy,
+							base_emission * 3.0, base_emission, 0.2
+						)
+
+
+func _trigger_missile_reload_sequence() -> void:
+	## Animates missile battery reload after firing
+	if not visual_node or not visual_node.has_meta("supports_missile_visibility"):
+		return
+	
+	# Hide missiles briefly then show them again (reload effect)
+	if visual_node.has_meta("launcher_assembly_node"):
+		var launcher_path: String = visual_node.get_meta("launcher_assembly_node")
+		var launcher_node := visual_node.get_node_or_null(NodePath(launcher_path))
+		
+		if launcher_node:
+			var missile_count: int = visual_node.get_meta("missile_count", 4)
+			
+			# Hide missiles
+			for i in range(missile_count):
+				var missile_node := launcher_node.get_node_or_null("Missile_" + str(i))
+				if missile_node:
+					missile_node.visible = false
+			
+			# Show them again after reload delay
+			get_tree().create_timer(1.0).timeout.connect(func():
+				for i in range(missile_count):
+					var missile_node := launcher_node.get_node_or_null("Missile_" + str(i))
+					if missile_node:
+						missile_node.visible = true
+			)
+
+
+func _trigger_tesla_discharge_effects() -> void:
+	## Creates brief electrical discharge effects for tesla coil
+	if not visual_node:
+		return
+	
+	# Find all emissive spheres (coil rings and discharge points) and flash them
+	for child in visual_node.get_children():
+		if child is MeshInstance3D:
+			var mat: StandardMaterial3D = child.mesh.material as StandardMaterial3D
+			if mat and mat.emission_enabled:
+				var base_emission: float = mat.emission_energy_multiplier
+				
+				# Create brief flash effect
+				var flash_tween := create_tween()
+				flash_tween.tween_method(
+					func(energy): mat.emission_energy_multiplier = energy,
+					base_emission, base_emission * 4.0, 0.1
+				)
+				flash_tween.tween_method(
+					func(energy): mat.emission_energy_multiplier = energy,
+					base_emission * 4.0, base_emission, 0.2
+				)
+
+
+func _process_idle_animations(delta: float) -> void:
+	## Handles idle scanning and ambient animations when not in combat
+	if not supports_rotation or not turret_body_node:
+		return
+	
+	_idle_scan_timer += delta
+	
+	# Slow scanning behavior - sweep back and forth
+	var scan_progress: float = _idle_scan_timer * _idle_scan_speed * _idle_scan_direction
+	var current_scan_angle: float = sin(scan_progress * 0.01) * _idle_scan_range * 0.5
+	
+	# Apply smooth idle rotation
+	if not _rotation_tween or not _rotation_tween.is_valid():
+		_set_turret_rotation(current_scan_angle)
+
+
+func _on_target_acquired(target: Node) -> void:
+	## Called when combat component acquires a new target
+	_animate_turret_to_target(target)
+
+
+func _on_attack_fired(target: Node) -> void:
+	## Called when tower fires at target - triggers muzzle flash and animations
+	_trigger_muzzle_flash(target)
+	
+	# Tower-specific animations
+	match entity_id:
+		"autocannon":
+			if supports_barrel_spin:
+				_start_barrel_spin()
+				# Stop spinning after a short burst
+				get_tree().create_timer(0.5).timeout.connect(_stop_barrel_spin)
+		"rail_gun":
+			_trigger_rail_gun_charge_sequence()
+		"missile_battery":
+			_trigger_missile_reload_sequence()
+		"tesla_coil":
+			_trigger_tesla_discharge_effects()
+	
+	# Update turret tracking during combat
+	if target:
+		_animate_turret_to_target(target)
 
 
 func _apply_item_effects() -> void:
