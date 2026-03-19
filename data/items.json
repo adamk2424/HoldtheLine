@@ -1,0 +1,306 @@
+{
+	"items": {
+		"energy_capacitor": {
+			"id": "energy_capacitor",
+			"name": "Energy Capacitor",
+			"description": "Increases starting energy and energy capacity",
+			"rarity": "common",
+			"type": "resource",
+			"effects": {
+				"energy_bonus": 50,
+				"energy_rate_multiplier": 1.1
+			},
+			"unlock_conditions": {
+				"enemies_killed": 100
+			},
+			"icon": "res://assets/icons/items/energy_capacitor.png",
+			"cost": {
+				"tech_points": 25
+			}
+		},
+		"material_processor": {
+			"id": "material_processor",
+			"name": "Material Processor",
+			"description": "Boosts material income and starting materials",
+			"rarity": "common",
+			"type": "resource",
+			"effects": {
+				"materials_bonus": 50,
+				"material_rate_multiplier": 1.15
+			},
+			"unlock_conditions": {
+				"buildings_built": 50
+			},
+			"icon": "res://assets/icons/items/material_processor.png",
+			"cost": {
+				"tech_points": 25
+			}
+		},
+		"reinforced_armor": {
+			"id": "reinforced_armor",
+			"name": "Reinforced Armor",
+			"description": "All structures have increased health",
+			"rarity": "common",
+			"type": "defensive",
+			"effects": {
+				"structure_health_multiplier": 1.25
+			},
+			"unlock_conditions": {
+				"buildings_lost": 10
+			},
+			"icon": "res://assets/icons/items/reinforced_armor.png",
+			"cost": {
+				"tech_points": 30
+			}
+		},
+		"rapid_deployment": {
+			"id": "rapid_deployment",
+			"name": "Rapid Deployment",
+			"description": "Buildings construct 50% faster",
+			"rarity": "common",
+			"type": "utility",
+			"effects": {
+				"build_speed_multiplier": 1.5
+			},
+			"unlock_conditions": {
+				"survival_time": 600
+			},
+			"icon": "res://assets/icons/items/rapid_deployment.png",
+			"cost": {
+				"tech_points": 30
+			}
+		},
+		"targeting_computer": {
+			"id": "targeting_computer",
+			"name": "Targeting Computer",
+			"description": "All towers have increased range and accuracy",
+			"rarity": "uncommon",
+			"type": "offensive",
+			"effects": {
+				"tower_range_multiplier": 1.2,
+				"tower_accuracy_multiplier": 1.15
+			},
+			"unlock_conditions": {
+				"enemies_killed": 500
+			},
+			"icon": "res://assets/icons/items/targeting_computer.png",
+			"cost": {
+				"tech_points": 50
+			}
+		},
+		"armor_piercing_rounds": {
+			"id": "armor_piercing_rounds",
+			"name": "Armor Piercing Rounds",
+			"description": "Kinetic towers deal bonus damage to armored enemies",
+			"rarity": "uncommon",
+			"type": "offensive",
+			"effects": {
+				"kinetic_armor_pierce": 0.5
+			},
+			"tower_specific": ["kinetic_cannon", "railgun_tower"],
+			"unlock_conditions": {
+				"enemies_killed": 300,
+				"boss_kills": 1
+			},
+			"icon": "res://assets/icons/items/armor_piercing_rounds.png",
+			"cost": {
+				"tech_points": 60
+			}
+		},
+		"chain_lightning_module": {
+			"id": "chain_lightning_module",
+			"name": "Chain Lightning Module",
+			"description": "Energy weapons have 25% chance to chain to nearby enemies",
+			"rarity": "uncommon",
+			"type": "offensive",
+			"effects": {
+				"chain_lightning_chance": 0.25,
+				"chain_lightning_bounces": 2
+			},
+			"tower_specific": ["laser_tower", "tesla_coil", "ion_cannon"],
+			"unlock_conditions": {
+				"enemies_killed": 400,
+				"tech_points_earned": 100
+			},
+			"icon": "res://assets/icons/items/chain_lightning_module.png",
+			"cost": {
+				"tech_points": 75
+			}
+		},
+		"population_optimizer": {
+			"id": "population_optimizer",
+			"name": "Population Optimizer",
+			"description": "Increases population cap and reduces unit costs",
+			"rarity": "uncommon",
+			"type": "resource",
+			"effects": {
+				"population_cap_bonus": 50,
+				"unit_cost_multiplier": 0.85
+			},
+			"unlock_conditions": {
+				"population_cap_reached": 5
+			},
+			"icon": "res://assets/icons/items/population_optimizer.png",
+			"cost": {
+				"tech_points": 65
+			}
+		},
+		"emergency_reserves": {
+			"id": "emergency_reserves",
+			"name": "Emergency Reserves",
+			"description": "Gain resources when structures are destroyed",
+			"rarity": "uncommon",
+			"type": "utility",
+			"effects": {
+				"resource_on_death": 0.5
+			},
+			"unlock_conditions": {
+				"buildings_lost": 25
+			},
+			"icon": "res://assets/icons/items/emergency_reserves.png",
+			"cost": {
+				"tech_points": 55
+			}
+		},
+		"overclocker": {
+			"id": "overclocker",
+			"name": "Overclocker",
+			"description": "All towers attack 20% faster but consume energy",
+			"rarity": "rare",
+			"type": "offensive",
+			"effects": {
+				"tower_attack_speed_multiplier": 1.2,
+				"tower_energy_drain": 2.0
+			},
+			"unlock_conditions": {
+				"enemies_killed": 1000,
+				"survival_time": 1200
+			},
+			"icon": "res://assets/icons/items/overclocker.png",
+			"cost": {
+				"tech_points": 100
+			}
+		},
+		"quantum_core": {
+			"id": "quantum_core",
+			"name": "Quantum Core",
+			"description": "Central tower gains massive health and energy regeneration",
+			"rarity": "rare",
+			"type": "defensive",
+			"effects": {
+				"central_tower_health_multiplier": 2.0,
+				"central_tower_energy_regen": 10.0
+			},
+			"unlock_conditions": {
+				"central_tower_upgrades": 3,
+				"boss_kills": 3
+			},
+			"icon": "res://assets/icons/items/quantum_core.png",
+			"cost": {
+				"tech_points": 150
+			}
+		},
+		"adaptive_systems": {
+			"id": "adaptive_systems",
+			"name": "Adaptive Systems",
+			"description": "Gain bonuses based on enemy types killed",
+			"rarity": "rare",
+			"type": "utility",
+			"effects": {
+				"adaptive_damage_bonus": 0.02,
+				"adaptive_speed_bonus": 0.01
+			},
+			"unlock_conditions": {
+				"enemy_variety_killed": 10,
+				"enemies_killed": 800
+			},
+			"icon": "res://assets/icons/items/adaptive_systems.png",
+			"cost": {
+				"tech_points": 120
+			}
+		},
+		"nanobotic_swarm": {
+			"id": "nanobotic_swarm",
+			"name": "Nanobotic Swarm",
+			"description": "Structures slowly repair themselves over time",
+			"rarity": "epic",
+			"type": "defensive",
+			"effects": {
+				"structure_auto_repair": 0.02
+			},
+			"unlock_conditions": {
+				"survival_time": 1800,
+				"buildings_lost": 50,
+				"tech_points_earned": 300
+			},
+			"icon": "res://assets/icons/items/nanobotic_swarm.png",
+			"cost": {
+				"tech_points": 200
+			}
+		},
+		"dimensional_amplifier": {
+			"id": "dimensional_amplifier",
+			"name": "Dimensional Amplifier",
+			"description": "All damage and income scales with game time",
+			"rarity": "epic",
+			"type": "offensive",
+			"effects": {
+				"time_scaling_damage": 0.001,
+				"time_scaling_income": 0.0005
+			},
+			"unlock_conditions": {
+				"survival_time": 2400,
+				"enemies_killed": 2000
+			},
+			"icon": "res://assets/icons/items/dimensional_amplifier.png",
+			"cost": {
+				"tech_points": 250
+			}
+		},
+		"omega_protocol": {
+			"id": "omega_protocol",
+			"name": "Omega Protocol",
+			"description": "The ultimate upgrade: all systems enhanced",
+			"rarity": "legendary",
+			"type": "ultimate",
+			"effects": {
+				"all_multiplier": 1.5,
+				"tech_point_multiplier": 2.0,
+				"boss_damage_multiplier": 3.0
+			},
+			"unlock_conditions": {
+				"survival_time": 3600,
+				"enemies_killed": 5000,
+				"boss_kills": 10,
+				"tech_points_earned": 1000
+			},
+			"icon": "res://assets/icons/items/omega_protocol.png",
+			"cost": {
+				"tech_points": 500
+			}
+		}
+	},
+	"rarities": {
+		"common": {
+			"color": "#FFFFFF",
+			"glow_color": "#FFFFFF40"
+		},
+		"uncommon": {
+			"color": "#00FF00",
+			"glow_color": "#00FF0040"
+		},
+		"rare": {
+			"color": "#0080FF",
+			"glow_color": "#0080FF40"
+		},
+		"epic": {
+			"color": "#8000FF",
+			"glow_color": "#8000FF40"
+		},
+		"legendary": {
+			"color": "#FF8000",
+			"glow_color": "#FF800040"
+		}
+	},
+	"loadout_slots": 3
+}
