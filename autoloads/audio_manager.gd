@@ -53,6 +53,10 @@ var _sfx_assignments: Dictionary = {}
 var _attenuation_presets: Dictionary = {}
 var _entity_attenuation: Dictionary = {}  # entity_id -> preset_name
 
+# Solo/Mute: runtime-only, never saved. Keyed by entity_id or entity_id.cue_id
+var _soloed: Dictionary = {}
+var _muted: Dictionary = {}
+
 # Voice limiting: cue_key -> Array of AudioStreamPlayer3D currently playing that cue
 var _active_voices: Dictionary = {}
 
@@ -254,6 +258,18 @@ func _get_attenuation_for_entity(entity_id: String) -> Dictionary:
 	}
 
 
+func _is_cue_allowed(entity_id: String, cue_id: String) -> bool:
+	var cue_key := entity_id + "." + cue_id
+	# If anything is soloed, only allow soloed entries
+	if not _soloed.is_empty():
+		if not _soloed.has(entity_id) and not _soloed.has(cue_key):
+			return false
+	# Check mute
+	if _muted.has(entity_id) or _muted.has(cue_key):
+		return false
+	return true
+
+
 static func _atten_model_from_string(model_name: String) -> AudioStreamPlayer3D.AttenuationModel:
 	match model_name:
 		"inverse_distance": return AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
@@ -349,8 +365,9 @@ func _play_cue_data_3d(cue_data: Dictionary, world_pos: Vector3, cue_key: String
 	if not stream:
 		return false
 
-	# Voice limiting: enforce MAX_VOICES_PER_CUE per cue_key
-	var player := _acquire_3d_player(cue_key)
+	# Voice limiting: enforce per-cue voice limit
+	var max_v: int = cue_data.get("max_voices", MAX_VOICES_PER_CUE)
+	var player := _acquire_3d_player(cue_key, max_v)
 	if not player:
 		return false
 
@@ -365,7 +382,7 @@ func _play_cue_data_3d(cue_data: Dictionary, world_pos: Vector3, cue_key: String
 
 
 ## Get a free 3D player, enforcing the per-cue voice limit.
-func _acquire_3d_player(cue_key: String) -> AudioStreamPlayer3D:
+func _acquire_3d_player(cue_key: String, max_voices: int = MAX_VOICES_PER_CUE) -> AudioStreamPlayer3D:
 	# Clean up finished voices for this cue
 	if _active_voices.has(cue_key):
 		var voices: Array = _active_voices[cue_key]
@@ -381,7 +398,7 @@ func _acquire_3d_player(cue_key: String) -> AudioStreamPlayer3D:
 	var voices: Array = _active_voices[cue_key]
 
 	# If at voice limit, stop the oldest (first in array)
-	while voices.size() >= MAX_VOICES_PER_CUE:
+	while voices.size() >= max_voices:
 		var oldest: AudioStreamPlayer3D = voices[0]
 		voices.remove_at(0)
 		if is_instance_valid(oldest) and oldest.playing:
@@ -413,6 +430,13 @@ func _try_sfx_assignment_2d(hook_id: String) -> bool:
 
 	var entity_cues: Dictionary = _sfx_assignments[entity_id]
 
+	# Solo/mute check before playing
+	var resolved_cue := action
+	if not entity_cues.has(action):
+		resolved_cue = ACTION_TO_CUE.get(action, "")
+	if not _is_cue_allowed(entity_id, resolved_cue):
+		return true  # Return true to prevent fallback to audio_hooks, but don't play
+
 	if entity_cues.has(action) and _cue_has_files(entity_cues[action]):
 		return _play_cue_data_2d(entity_cues[action])
 
@@ -436,6 +460,13 @@ func _try_sfx_assignment_3d(hook_id: String, world_pos: Vector3) -> bool:
 
 	var entity_cues: Dictionary = _sfx_assignments[entity_id]
 	var cue_key: String = entity_id + "." + action
+
+	# Solo/mute check before playing
+	var resolved_cue := action
+	if not entity_cues.has(action):
+		resolved_cue = ACTION_TO_CUE.get(action, "")
+	if not _is_cue_allowed(entity_id, resolved_cue):
+		return true  # Return true to prevent fallback to audio_hooks, but don't play
 
 	if entity_cues.has(action) and _cue_has_files(entity_cues[action]):
 		return _play_cue_data_3d(entity_cues[action], world_pos, cue_key, entity_id)
