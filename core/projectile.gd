@@ -105,6 +105,10 @@ func setup(p_target: Node, p_damage: float, p_armor_pierce: float = 0.0, p_sourc
 	source = p_source
 	if target and is_instance_valid(target):
 		_target_last_pos = target.global_position
+	
+	# Play muzzle flash at source if available
+	if source and is_instance_valid(source):
+		VfxPool.play_muzzle_flash(source.global_position)
 
 
 func _process(delta: float) -> void:
@@ -132,6 +136,9 @@ func _process(delta: float) -> void:
 
 
 func _hit() -> void:
+	# Play impact VFX
+	VfxPool.play_impact_spark(global_position, Vector3.UP)
+	
 	if target and is_instance_valid(target):
 		var health: HealthComponent = null
 		if target is EntityBase:
