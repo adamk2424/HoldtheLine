@@ -135,14 +135,21 @@ func _perform_attack() -> void:
 	if current_target.is_in_group("building") and bonus_vs_buildings > 1.0:
 		final_damage *= bonus_vs_buildings
 
+	# Determine weapon type for VFX
+	var weapon_type := _get_weapon_type()
+	
 	match attack_type:
 		"melee", "beam":
 			_deal_direct_damage(current_target, final_damage)
 		"projectile":
 			_spawn_projectile(current_target, final_damage)
+			GameBus.projectile_fired.emit(entity, current_target, weapon_type)
 		"aoe":
 			_spawn_aoe(current_target.global_position, final_damage)
 
+	# Emit weapon fire signal for VFX
+	GameBus.weapon_fired.emit(entity.global_position, weapon_type, current_target.global_position)
+	
 	attack_fired.emit(current_target)
 	GameBus.audio_play_3d.emit("%s.%s.fire" % [entity.entity_type, entity.entity_id], entity.global_position)
 
@@ -165,7 +172,6 @@ func _spawn_projectile(target: Node, dmg: float) -> void:
 	var proj := Projectile.acquire(entity.get_tree().current_scene)
 	proj.global_position = entity.global_position + Vector3(0, 1, 0)
 	proj.setup(target, dmg, armor_pierce, entity)
-	GameBus.projectile_fired.emit(entity, target, attack_type)
 
 
 func _spawn_aoe(target_pos: Vector3, dmg: float) -> void:
@@ -194,3 +200,33 @@ func _get_health(node: Node) -> Node:
 		if child is HealthComponent:
 			return child
 	return null
+
+func _get_weapon_type() -> String:
+	if not entity:
+		return "generic"
+	
+	var entity_id: String = entity.entity_id
+	match entity_id:
+		"autocannon":
+			return "autocannon"
+		"missile_battery":
+			return "missile"
+		"rail_gun":
+			return "railgun"
+		"plasma_mortar":
+			return "plasma"
+		"tesla_coil":
+			return "tesla"
+		"inferno_tower":
+			return "flame"
+		_:
+			# Default based on attack type
+			match attack_type:
+				"projectile":
+					return "autocannon"
+				"beam":
+					return "railgun"
+				"aoe":
+					return "plasma"
+				_:
+					return "generic"

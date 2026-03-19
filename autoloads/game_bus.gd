@@ -11,6 +11,7 @@ signal entity_removed(entity: Node, entity_type: String)
 signal damage_dealt(target: Node, amount: float, source: Node)
 signal projectile_fired(source: Node, target: Node, projectile_type: String)
 signal aoe_triggered(position: Vector3, radius: float, damage: float, source: Node)
+signal weapon_fired(position: Vector3, weapon_type: String, target_position: Vector3)
 
 # --- Building / Placement ---
 signal build_requested(entity_id: String, grid_position: Vector2i, size: int)

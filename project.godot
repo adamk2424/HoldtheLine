@@ -25,6 +25,7 @@ AudioManager="*res://autoloads/audio_manager.gd"
 AudioDebugOverlay="*res://autoloads/audio_debug_overlay.gd"
 EntityRegistry="*res://autoloads/entity_registry.gd"
 MetaProgress="*res://autoloads/meta_progress.gd"
+VfxManager="*res://autoloads/vfx_manager.gd"
 
 [display]
 
