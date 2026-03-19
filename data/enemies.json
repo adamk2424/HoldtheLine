@@ -407,6 +407,332 @@
         }
       ],
       "first_appears_seconds": 90
+    },
+    {
+      "id": "phase_stalker",
+      "name": "Phase Stalker",
+      "role": "assassin",
+      "size": "small",
+      "spawn_group": 1,
+      "spawns_per_60s": 8,
+      "ramp_in": 0.2,
+      "hp": 375,
+      "armor": 0,
+      "speed": 7.5,
+      "damage": 65,
+      "attack_rate": 0.8,
+      "attack_range": 1,
+      "attack_type": "melee",
+      "can_target_air": false,
+      "flying": false,
+      "ignores_barriers": true,
+      "target_priority": "resource_towers",
+      "is_boss": false,
+      "mesh_color": "#9400D3",
+      "mesh_shape": "capsule",
+      "mesh_scale": [0.7, 1.3, 0.7],
+      "specials": [
+        {
+          "type": "phase_shift",
+          "teleport_range": 8,
+          "cooldown": 6,
+          "immunity_duration": 1.5
+        },
+        {
+          "type": "backstab",
+          "damage_multiplier": 2.0,
+          "crit_chance": 0.3
+        }
+      ],
+      "first_appears_seconds": 600
+    },
+    {
+      "id": "void_spawner",
+      "name": "Void Spawner",
+      "role": "spawner",
+      "size": "huge",
+      "spawn_group": 1,
+      "spawns_per_60s": 2,
+      "ramp_in": 0.1,
+      "hp": 2500,
+      "armor": 3,
+      "speed": 1.0,
+      "damage": 0,
+      "attack_rate": 0,
+      "attack_range": 1,
+      "attack_type": "none",
+      "can_target_air": false,
+      "flying": false,
+      "ignores_barriers": false,
+      "target_priority": "nearest",
+      "is_boss": false,
+      "mesh_color": "#301934",
+      "mesh_shape": "sphere",
+      "mesh_scale": [2.5, 2.0, 2.5],
+      "specials": [
+        {
+          "type": "spawn_minions",
+          "minion_type": "void_wraith",
+          "spawn_count": 3,
+          "spawn_interval": 8,
+          "max_minions": 6
+        },
+        {
+          "type": "death_spawn",
+          "minion_type": "void_wraith",
+          "spawn_count": 5
+        }
+      ],
+      "first_appears_seconds": 720
+    },
+    {
+      "id": "void_wraith",
+      "name": "Void Wraith",
+      "role": "minion",
+      "size": "small",
+      "spawn_group": 1,
+      "spawns_per_60s": 0,
+      "ramp_in": 0,
+      "hp": 150,
+      "armor": 0,
+      "speed": 6.0,
+      "damage": 25,
+      "attack_rate": 1.5,
+      "attack_range": 1,
+      "attack_type": "melee",
+      "can_target_air": false,
+      "flying": false,
+      "ignores_barriers": false,
+      "target_priority": "nearest",
+      "is_boss": false,
+      "mesh_color": "#483D8B",
+      "mesh_shape": "sphere",
+      "mesh_scale": [0.6, 0.8, 0.6],
+      "specials": [
+        {
+          "type": "life_drain",
+          "drain_amount": 5,
+          "heal_amount": 3
+        }
+      ],
+      "first_appears_seconds": -1
+    },
+    {
+      "id": "crystal_golem",
+      "name": "Crystal Golem",
+      "role": "tank",
+      "size": "huge",
+      "spawn_group": 1,
+      "spawns_per_60s": 3,
+      "ramp_in": 0.2,
+      "hp": 3750,
+      "armor": 8,
+      "speed": 1.5,
+      "damage": 95,
+      "attack_rate": 2.0,
+      "attack_range": 2,
+      "attack_type": "melee",
+      "can_target_air": false,
+      "flying": false,
+      "ignores_barriers": false,
+      "target_priority": "central_tower",
+      "is_boss": false,
+      "mesh_color": "#00CED1",
+      "mesh_shape": "box",
+      "mesh_scale": [2.2, 2.8, 2.2],
+      "specials": [
+        {
+          "type": "crystal_shield",
+          "damage_reduction": 0.5,
+          "reflect_chance": 0.3,
+          "duration": 8,
+          "cooldown": 15
+        },
+        {
+          "type": "shockwave",
+          "damage": 60,
+          "range": 5,
+          "stun_duration": 2,
+          "cooldown": 12
+        }
+      ],
+      "first_appears_seconds": 900
+    },
+    {
+      "id": "nightmare_drone",
+      "name": "Nightmare Drone",
+      "role": "flying",
+      "size": "small",
+      "spawn_group": 3,
+      "spawns_per_60s": 15,
+      "ramp_in": 0.3,
+      "hp": 280,
+      "armor": 1,
+      "speed": 8.0,
+      "damage": 35,
+      "attack_rate": 1.2,
+      "attack_range": 6,
+      "attack_type": "projectile",
+      "can_target_air": true,
+      "flying": true,
+      "ignores_barriers": true,
+      "target_priority": "anti_air",
+      "is_boss": false,
+      "mesh_color": "#FF4500",
+      "mesh_shape": "capsule",
+      "mesh_scale": [0.4, 0.8, 0.4],
+      "specials": [
+        {
+          "type": "emp_burst",
+          "disable_duration": 3,
+          "radius": 3,
+          "cooldown": 10
+        },
+        {
+          "type": "swarm_tactics",
+          "damage_per_nearby": 0.15,
+          "max_bonus": 1.0
+        }
+      ],
+      "first_appears_seconds": 1080
+    },
+    {
+      "id": "soul_reaver",
+      "name": "Soul Reaver",
+      "role": "elite",
+      "size": "large",
+      "spawn_group": 1,
+      "spawns_per_60s": 4,
+      "ramp_in": 0.1,
+      "hp": 1875,
+      "armor": 4,
+      "speed": 4.5,
+      "damage": 85,
+      "attack_rate": 1.0,
+      "attack_range": 3,
+      "attack_type": "ranged_melee",
+      "can_target_air": false,
+      "flying": false,
+      "ignores_barriers": false,
+      "target_priority": "units",
+      "is_boss": false,
+      "mesh_color": "#8B0000",
+      "mesh_shape": "cylinder",
+      "mesh_scale": [1.3, 2.0, 1.3],
+      "specials": [
+        {
+          "type": "soul_steal",
+          "damage_bonus_per_kill": 5,
+          "max_bonus": 50,
+          "hp_per_kill": 25
+        },
+        {
+          "type": "fear_aura",
+          "radius": 4,
+          "attack_speed_reduction": 0.3,
+          "move_speed_reduction": 0.2
+        },
+        {
+          "type": "execute",
+          "hp_threshold": 0.2,
+          "damage_multiplier": 10.0
+        }
+      ],
+      "first_appears_seconds": 1320
+    },
+    {
+      "id": "abyssal_lord",
+      "name": "Abyssal Lord",
+      "role": "boss",
+      "size": "huge",
+      "hp": 8750,
+      "armor": 10,
+      "speed": 3.5,
+      "damage": 150,
+      "attack_rate": 0.8,
+      "attack_range": 4,
+      "attack_type": "aoe",
+      "aoe_radius": 3,
+      "splash_damage_percent": 75,
+      "can_target_air": true,
+      "flying": false,
+      "ignores_barriers": false,
+      "target_priority": "central_tower",
+      "is_boss": true,
+      "mesh_color": "#000000",
+      "mesh_shape": "box",
+      "mesh_scale": [3.5, 4.0, 3.5],
+      "specials": [
+        {
+          "type": "void_portal",
+          "summon_count": 4,
+          "summon_type": "void_wraith",
+          "portal_hp": 500,
+          "cooldown": 20
+        },
+        {
+          "type": "dark_beam",
+          "damage": 200,
+          "range": 20,
+          "piercing": true,
+          "cooldown": 15
+        },
+        {
+          "type": "rage_mode",
+          "hp_threshold": 0.3,
+          "damage_multiplier": 1.5,
+          "speed_multiplier": 1.3,
+          "attack_speed_multiplier": 1.4
+        }
+      ],
+      "first_appears_seconds": 1800
+    },
+    {
+      "id": "omega_destroyer",
+      "name": "Omega Destroyer",
+      "role": "boss",
+      "size": "huge",
+      "hp": 12500,
+      "armor": 15,
+      "speed": 2.0,
+      "damage": 250,
+      "attack_rate": 1.5,
+      "attack_range": 6,
+      "attack_type": "ultimate",
+      "aoe_radius": 4,
+      "splash_damage_percent": 100,
+      "can_target_air": true,
+      "flying": false,
+      "ignores_barriers": true,
+      "target_priority": "central_tower",
+      "is_boss": true,
+      "mesh_color": "#FF0000",
+      "mesh_shape": "box",
+      "mesh_scale": [4.0, 5.0, 4.0],
+      "specials": [
+        {
+          "type": "apocalypse_beam",
+          "damage": 500,
+          "width": 6,
+          "length": 30,
+          "charge_time": 3,
+          "cooldown": 25
+        },
+        {
+          "type": "meteor_shower",
+          "meteors": 8,
+          "damage_per_meteor": 150,
+          "radius_per_meteor": 3,
+          "duration": 5,
+          "cooldown": 30
+        },
+        {
+          "type": "phase_transitions",
+          "phase_hp_thresholds": [0.75, 0.5, 0.25],
+          "abilities_per_phase": ["summon_army", "shield_phase", "berserker_phase"]
+        }
+      ],
+      "first_appears_seconds": 2100
     }
   ]
 }
