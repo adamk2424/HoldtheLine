@@ -1409,6 +1409,10 @@ static func _create_recycler_t3(c: Color) -> Node3D:
 
 static func _create_drone_printer(c: Color) -> Node3D:
 	## Drone factory (2x2): Compact industrial fabrication unit with landing pad, robotic arms, green status lights
+	## Based on design: "Compact industrial fabrication unit with a flat top landing pad where drones are assembled 
+	## and launched. Robotic arms visible through transparent panels assembling components. Green status lights along 
+	## the base. Drones lift off from the top pad when production completes. Antenna array on one side for drone 
+	## command signals. Military grey with green accent lighting. Hums with a soft mechanical whir when active."
 	var r := Node3D.new()
 	r.name = "Visual"
 	var dark := c.darkened(0.3)
@@ -1419,33 +1423,45 @@ static func _create_drone_printer(c: Color) -> Node3D:
 	# Foundation
 	_add_box(r, Vector3(1.8, 0.15, 1.8), Vector3(0, 0.075, 0), dark)
 	
-	# Main building (compact industrial unit)
+	# Main building (compact industrial unit) - military grey as specified
 	_add_box(r, Vector3(1.5, 0.7, 1.5), Vector3(0, 0.525, 0), military_grey)
 	
-	# Top landing pad (flat fabrication surface)
+	# Reinforced corners and structural details
+	for corner_x in [-0.7, 0.7]:
+		for corner_z in [-0.7, 0.7]:
+			_add_box(r, Vector3(0.08, 0.75, 0.08), Vector3(corner_x, 0.525, corner_z), dark)
+	
+	# Top landing pad (flat fabrication surface) where drones launch
 	_add_box(r, Vector3(1.6, 0.05, 1.6), Vector3(0, 0.925, 0), lite)
 	_add_box(r, Vector3(1.2, 0.02, 1.2), Vector3(0, 0.96, 0), green.darkened(0.4))  # Landing grid
 	
-	# Landing pad grid markings
+	# Landing pad grid markings for drone assembly positioning
 	for i in range(4):
 		var offset: float = -0.45 + i * 0.3
 		_add_emissive_box(r, Vector3(1.0, 0.005, 0.02), Vector3(0, 0.965, offset), green, 0.8)
 		_add_emissive_box(r, Vector3(0.02, 0.005, 1.0), Vector3(offset, 0.965, 0), green, 0.8)
 	
-	# Transparent panels showing robotic arms inside
+	# Transparent panels showing robotic arms inside assembling components
 	_add_emissive_box(r, Vector3(0.6, 0.3, 0.04), Vector3(0, 0.65, 0.76), Color(0.4, 0.8, 0.9), 0.8)
 	_add_emissive_box(r, Vector3(0.6, 0.3, 0.04), Vector3(0, 0.65, -0.76), Color(0.4, 0.8, 0.9), 0.8)
 	_add_emissive_box(r, Vector3(0.04, 0.3, 0.6), Vector3(0.76, 0.65, 0), Color(0.4, 0.8, 0.9), 0.8)
 	_add_emissive_box(r, Vector3(0.04, 0.3, 0.6), Vector3(-0.76, 0.65, 0), Color(0.4, 0.8, 0.9), 0.8)
 	
-	# Robotic arms visible through panels (with articulated joints)
+	# Panel frame details
+	_add_box(r, Vector3(0.65, 0.04, 0.04), Vector3(0, 0.5, 0.78), dark)
+	_add_box(r, Vector3(0.65, 0.04, 0.04), Vector3(0, 0.8, 0.78), dark)
+	_add_box(r, Vector3(0.04, 0.04, 0.65), Vector3(0.78, 0.5, 0), dark)
+	_add_box(r, Vector3(0.04, 0.04, 0.65), Vector3(0.78, 0.8, 0), dark)
+	
+	# Robotic arms visible through panels (with articulated joints for assembly)
 	var arm_1 := Node3D.new()
 	arm_1.name = "RoboticArm1"
 	arm_1.position = Vector3(0.2, 0.6, 0.4)
 	r.add_child(arm_1)
-	_add_box(arm_1, Vector3(0.06, 0.2, 0.06), Vector3(0, 0, 0), lite)
-	_add_box(arm_1, Vector3(0.15, 0.04, 0.04), Vector3(0.075, 0.1, 0.02), lite)
-	_add_cylinder(arm_1, 0.02, 0.08, Vector3(0.15, 0.1, 0.02), lite.lightened(0.1))
+	_add_box(arm_1, Vector3(0.06, 0.2, 0.06), Vector3(0, 0, 0), lite)  # Base joint
+	_add_box(arm_1, Vector3(0.15, 0.04, 0.04), Vector3(0.075, 0.1, 0.02), lite)  # Upper arm
+	_add_cylinder(arm_1, 0.02, 0.08, Vector3(0.15, 0.1, 0.02), lite.lightened(0.1))  # End effector
+	_add_emissive_sphere(arm_1, 0.015, Vector3(0.15, 0.14, 0.02), Color(0.9, 0.5, 0.2), 1.0)  # Work light
 	
 	var arm_2 := Node3D.new()
 	arm_2.name = "RoboticArm2"
@@ -1454,24 +1470,30 @@ static func _create_drone_printer(c: Color) -> Node3D:
 	_add_box(arm_2, Vector3(0.06, 0.2, 0.06), Vector3(0, 0, 0), lite)
 	_add_box(arm_2, Vector3(0.15, 0.04, 0.04), Vector3(-0.075, 0.1, 0.02), lite)
 	_add_cylinder(arm_2, 0.02, 0.08, Vector3(-0.15, 0.1, 0.02), lite.lightened(0.1))
+	_add_emissive_sphere(arm_2, 0.015, Vector3(-0.15, 0.14, 0.02), Color(0.9, 0.5, 0.2), 1.0)
 	
-	# Antenna array for drone commands (improved design)
+	# Antenna array on one side for drone command signals (as specified)
 	var antenna_base := Node3D.new()
 	antenna_base.name = "AntennaArray"
 	antenna_base.position = Vector3(0.6, 1.0, 0.6)
 	r.add_child(antenna_base)
 	
-	_add_cylinder(antenna_base, 0.04, 0.1, Vector3(0, 0.05, 0), dark)
-	_add_cylinder(antenna_base, 0.02, 0.25, Vector3(0, 0.175, 0), lite)
-	_add_cylinder(antenna_base, 0.015, 0.2, Vector3(-0.1, 0.15, 0.1), lite)
-	_add_cylinder(antenna_base, 0.015, 0.18, Vector3(0.1, 0.14, -0.1), lite)
+	_add_cylinder(antenna_base, 0.04, 0.1, Vector3(0, 0.05, 0), dark)  # Base mount
+	_add_cylinder(antenna_base, 0.02, 0.25, Vector3(0, 0.175, 0), lite)  # Main mast
+	_add_cylinder(antenna_base, 0.015, 0.2, Vector3(-0.1, 0.15, 0.1), lite)  # Side antenna
+	_add_cylinder(antenna_base, 0.015, 0.18, Vector3(0.1, 0.14, -0.1), lite)  # Side antenna
 	
-	# Small dishes on antennas
+	# Communication dishes on antennas
 	_add_box(antenna_base, Vector3(0.08, 0.08, 0.02), Vector3(0, 0.3, 0), lite)
 	_add_box(antenna_base, Vector3(0.06, 0.06, 0.015), Vector3(-0.1, 0.26, 0.1), lite.lightened(0.05))
 	_add_box(antenna_base, Vector3(0.06, 0.06, 0.015), Vector3(0.1, 0.25, -0.1), lite.lightened(0.05))
 	
-	# Green status lights along base (operational indicators)
+	# Antenna signal indicators
+	_add_emissive_sphere(antenna_base, 0.02, Vector3(0, 0.32, 0), green, 2.0)
+	_add_emissive_sphere(antenna_base, 0.015, Vector3(-0.1, 0.28, 0.1), green, 1.5)
+	_add_emissive_sphere(antenna_base, 0.015, Vector3(0.1, 0.27, -0.1), green, 1.5)
+	
+	# Green status lights along base (as specified)
 	_add_emissive_sphere(r, 0.03, Vector3(0.6, 0.3, 0.6), green, 2.0)
 	_add_emissive_sphere(r, 0.03, Vector3(-0.6, 0.3, 0.6), green, 2.0)
 	_add_emissive_sphere(r, 0.03, Vector3(0.6, 0.3, -0.6), green, 2.0)
@@ -1483,27 +1505,37 @@ static func _create_drone_printer(c: Color) -> Node3D:
 	_add_emissive_box(r, Vector3(0.08, 0.03, 0.08), Vector3(0.7, 0.42, -0.7), green, 1.5)
 	_add_emissive_box(r, Vector3(0.08, 0.03, 0.08), Vector3(-0.7, 0.42, -0.7), green, 1.5)
 	
-	# Green accent lighting strips
+	# Green accent lighting strips (as specified)
 	_add_emissive_box(r, Vector3(1.5, 0.02, 0.04), Vector3(0, 0.25, 0.76), green, 1.5)
 	_add_emissive_box(r, Vector3(0.04, 0.02, 1.5), Vector3(0.76, 0.25, 0), green, 1.5)
 	_add_emissive_box(r, Vector3(1.5, 0.02, 0.04), Vector3(0, 0.25, -0.76), green, 1.5)
 	_add_emissive_box(r, Vector3(0.04, 0.02, 1.5), Vector3(-0.76, 0.25, 0), green, 1.5)
 	
-	# Landing pad edge lights
+	# Landing pad edge lights for guidance
 	for i in range(8):
 		var angle: float = i * TAU / 8.0
 		var lx: float = cos(angle) * 0.65
 		var lz: float = sin(angle) * 0.65
 		_add_emissive_sphere(r, 0.02, Vector3(lx, 0.97, lz), green, 1.8)
 	
-	# Assembly components (drone parts visible on platform)
-	_add_box(r, Vector3(0.15, 0.03, 0.1), Vector3(0.2, 0.98, 0.15), lite.lightened(0.2))
-	_add_box(r, Vector3(0.1, 0.02, 0.08), Vector3(-0.18, 0.975, -0.12), Color(0.6, 0.6, 0.7))
-	_add_sphere(r, 0.03, Vector3(0.05, 1.0, -0.2), green)
+	# Drone components being assembled on platform
+	_add_box(r, Vector3(0.15, 0.03, 0.1), Vector3(0.2, 0.98, 0.15), lite.lightened(0.2))  # Hull piece
+	_add_box(r, Vector3(0.1, 0.02, 0.08), Vector3(-0.18, 0.975, -0.12), Color(0.6, 0.6, 0.7))  # Rotor assembly
+	_add_sphere(r, 0.03, Vector3(0.05, 1.0, -0.2), green)  # Control core
 	
-	# Fabrication heat signatures
+	# Assembly/fabrication work lights and heat signatures
 	_add_emissive_sphere(r, 0.02, Vector3(0.15, 0.985, 0.12), Color(1.0, 0.6, 0.2), 1.2)
 	_add_emissive_sphere(r, 0.015, Vector3(-0.12, 0.985, -0.08), Color(0.8, 0.4, 1.0), 0.8)
+	
+	# Internal machinery glimpsed through panels
+	_add_box(r, Vector3(0.25, 0.15, 0.25), Vector3(0, 0.4, 0), dark.lightened(0.2))  # Central processor
+	_add_emissive_sphere(r, 0.05, Vector3(0, 0.48, 0), green, 1.5)  # Core status
+	
+	# Ventilation grilles
+	for i in range(3):
+		var vent_y: float = 0.35 + i * 0.15
+		_add_box(r, Vector3(0.8, 0.02, 0.04), Vector3(0, vent_y, -0.78), dark)
+		_add_box(r, Vector3(0.04, 0.02, 0.8), Vector3(-0.78, vent_y, 0), dark)
 	
 	# Store animation nodes for future use
 	r.set_meta("robotic_arm1_node", arm_1.get_path())
@@ -1511,17 +1543,22 @@ static func _create_drone_printer(c: Color) -> Node3D:
 	r.set_meta("antenna_array_node", antenna_base.get_path())
 	r.set_meta("supports_arm_animation", true)
 	r.set_meta("supports_antenna_rotation", true)
+	r.set_meta("supports_assembly_glow", true)
 	
 	return r
 
 
 static func _create_mech_bay(c: Color) -> Node3D:
 	## Heavy factory (3x2): Large industrial hangar with bay door, assembly gantries, blue status lights
+	## Based on design: "Large industrial hangar-style building with a wide bay door that opens to deploy finished mechs. 
+	## Interior shows assembly gantries, welding sparks, and mech frames in various stages of completion. Heavy reinforced 
+	## walls with external armor plating. Blue operational status lights. Smoke and steam vent from exhaust ports during 
+	## production. Dark steel construction with blue accent lighting matching Sentinel visors."
 	var r := Node3D.new()
 	r.name = "Visual"
 	var dark := c.darkened(0.3)
 	var lite := c.lightened(0.15)
-	var dark_steel := Color(0.2, 0.2, 0.25)
+	var dark_steel := Color(0.2, 0.2, 0.25)  # Dark steel construction as specified
 	var blue := Color(0.2, 0.4, 1.0)  # Blue accent lighting matching Sentinel visors
 	
 	# Foundation (reinforced)
@@ -1662,11 +1699,15 @@ static func _create_mech_bay(c: Color) -> Node3D:
 
 static func _create_war_factory(c: Color) -> Node3D:
 	## Massive factory (3x3): Industrial complex with vehicle ramp, heavy machinery, orange accent lighting
+	## Based on design: "Massive industrial complex with a reinforced vehicle ramp exit. Tank treads and heavy machinery 
+	## visible inside. Thick armored walls with blast-resistant construction. Orange warning lights and hazard striping 
+	## around the deployment ramp. Heavy crane arm extends from the roof for lifting components. Exhaust stacks release 
+	## bursts of steam during production. Dark industrial metal with orange accent lighting matching Siege Walker plasma glow."
 	var r := Node3D.new()
 	r.name = "Visual"
 	var dark := c.darkened(0.3)
-	var industrial_metal := Color(0.15, 0.15, 0.18)
-	var orange := Color(1.0, 0.5, 0.1)  # Orange accent lighting
+	var industrial_metal := Color(0.15, 0.15, 0.18)  # Dark industrial metal as specified
+	var orange := Color(1.0, 0.5, 0.1)  # Orange accent lighting matching Siege Walker plasma glow
 	
 	# Foundation (blast-resistant)
 	_add_box(r, Vector3(2.8, 0.3, 2.8), Vector3(0, 0.15, 0), industrial_metal.darkened(0.3))
