@@ -74,16 +74,52 @@ func load_data() -> void:
 func record_game_result(survival_time: float, kills: int) -> void:
 	total_games_played += 1
 	total_enemies_killed += kills
+	
+	# Calculate tech points earned
+	var tech_earned := _calculate_tech_points(survival_time, kills)
+	var item_multiplier := 1.0
+	if ItemSystem.has_effect("tech_point_multiplier"):
+		item_multiplier = ItemSystem.get_effect_value("tech_point_multiplier", 1.0)
+	tech_earned = int(tech_earned * item_multiplier)
+	
+	tech_points += tech_earned
+	
 	var entry := {
 		"time": survival_time,
 		"kills": kills,
+		"tech_points_earned": tech_earned,
 		"date": Time.get_datetime_string_from_system()
 	}
 	high_scores.append(entry)
 	high_scores.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["time"] > b["time"])
 	if high_scores.size() > 10:
 		high_scores.resize(10)
+	
+	print("[MetaProgress] Game completed: +%d tech points (%.1fx multiplier)" % [tech_earned, item_multiplier])
 	save_data()
+
+
+func _calculate_tech_points(survival_time: float, kills: int) -> int:
+	# Base tech points: 1 per minute survived + 1 per 10 kills
+	var time_points := int(survival_time / 60.0)
+	var kill_points := int(kills / 10.0)
+	
+	# Bonus for milestones
+	var milestone_bonus := 0
+	if survival_time >= 1800:  # 30 minutes
+		milestone_bonus += 20
+	if survival_time >= 3600:  # 60 minutes
+		milestone_bonus += 50
+	if kills >= 1000:
+		milestone_bonus += 25
+	if kills >= 2000:
+		milestone_bonus += 50
+	
+	# Boss kill bonus
+	var boss_bonus := GameState.boss_kills * 10
+	
+	var total := max(1, time_points + kill_points + milestone_bonus + boss_bonus)
+	return total
 
 
 func get_best_time() -> float:

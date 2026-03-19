@@ -75,8 +75,14 @@ func _process(delta: float) -> void:
 
 
 func _tick_resources() -> void:
-	var total_energy_rate := (energy_rate + energy_bonus_rate) * income_multiplier
-	var total_material_rate := (material_rate + material_bonus_rate) * income_multiplier
+	# Apply item multipliers to rates
+	var item_multipliers := ItemSystem.get_resource_multipliers()
+	var energy_multiplier := item_multipliers.get("energy_rate_multiplier", 1.0)
+	var material_multiplier := item_multipliers.get("material_rate_multiplier", 1.0)
+	
+	var total_energy_rate := (energy_rate + energy_bonus_rate) * income_multiplier * energy_multiplier
+	var total_material_rate := (material_rate + material_bonus_rate) * income_multiplier * material_multiplier
+	
 	energy += total_energy_rate
 	materials += total_material_rate
 	GameBus.resources_changed.emit(energy, materials)
@@ -151,11 +157,13 @@ func set_game_speed(speed: float) -> void:
 
 
 func get_total_energy_rate() -> float:
-	return (energy_rate + energy_bonus_rate) * income_multiplier
+	var item_multiplier := ItemSystem.get_resource_multipliers().get("energy_rate_multiplier", 1.0)
+	return (energy_rate + energy_bonus_rate) * income_multiplier * item_multiplier
 
 
 func get_total_material_rate() -> float:
-	return (material_rate + material_bonus_rate) * income_multiplier
+	var item_multiplier := ItemSystem.get_resource_multipliers().get("material_rate_multiplier", 1.0)
+	return (material_rate + material_bonus_rate) * income_multiplier * item_multiplier
 
 
 func get_game_time_formatted() -> String:
@@ -200,6 +208,27 @@ func reset_state() -> void:
 func _on_game_started() -> void:
 	is_game_active = true
 	is_paused = false
+	_apply_item_starting_bonuses()
+
+
+func _apply_item_starting_bonuses() -> void:
+	var item_multipliers := ItemSystem.get_resource_multipliers()
+	
+	# Apply starting resource bonuses
+	var energy_bonus := item_multipliers.get("energy_bonus", 0.0)
+	var material_bonus := item_multipliers.get("materials_bonus", 0.0)
+	var population_bonus := int(item_multipliers.get("population_cap_bonus", 0.0))
+	
+	energy += energy_bonus
+	materials += material_bonus
+	population_max += population_bonus
+	
+	if energy_bonus > 0 or material_bonus > 0 or population_bonus > 0:
+		print("[GameState] Applied item starting bonuses: +%.0f energy, +%.0f materials, +%d pop cap" % [
+			energy_bonus, material_bonus, population_bonus
+		])
+		GameBus.resources_changed.emit(energy, materials)
+		GameBus.population_changed.emit(population_current, population_max)
 
 
 func _on_game_over(_survival_time: float) -> void:

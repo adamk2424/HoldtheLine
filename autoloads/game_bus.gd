@@ -104,6 +104,11 @@ signal audio_play(hook_id: String)
 signal audio_play_3d(hook_id: String, world_position: Vector3)
 signal audio_stop(hook_id: String)
 
+# --- Items ---
+signal item_unlocked(item_id: String)
+signal item_purchased(item_id: String)
+signal loadout_changed()
+
 # --- Navigation ---
 signal navmesh_needs_rebake()
 signal navmesh_rebaked()

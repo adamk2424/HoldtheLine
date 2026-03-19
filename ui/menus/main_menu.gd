@@ -7,6 +7,7 @@ var _subtitle_label: Label
 var _buttons_vbox: VBoxContainer
 var _settings_menu: Control = null
 var _upgrades_menu: Control = null
+var _loadout_menu: Control = null
 var _leaderboard: Control = null
 var _pre_game_menu: Control = null
 var _level_select_menu: Control = null
@@ -78,6 +79,7 @@ func _build_ui() -> void:
 
 	_add_menu_button("Select Level", _on_level_select)
 	_add_menu_button("Quick Game", _on_new_game)
+	_add_menu_button("Loadout", _on_loadout)
 	_add_menu_button("Leaderboard", _on_leaderboard)
 	_add_menu_button("Settings", _on_settings)
 	_add_menu_button("Upgrades", _on_upgrades)
@@ -182,6 +184,18 @@ func _start_game() -> void:
 	GameState.reset_state()
 	GameState.selected_level_id = ""  # Empty means default/quick game
 	get_tree().change_scene_to_file("res://scenes/main.tscn")
+
+
+func _on_loadout() -> void:
+	var LoadoutScript := preload("res://ui/menus/loadout_screen.gd")
+	var loadout_menu := Control.new()
+	loadout_menu.set_script(LoadoutScript)
+	add_child(loadout_menu)
+	loadout_menu.loadout_screen_closed.connect(func() -> void:
+		loadout_menu.queue_free()
+		_buttons_vbox.visible = true
+	)
+	_buttons_vbox.visible = false
 
 
 func _on_leaderboard() -> void:

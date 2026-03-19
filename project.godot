@@ -27,6 +27,7 @@ EntityRegistry="*res://autoloads/entity_registry.gd"
 MetaProgress="*res://autoloads/meta_progress.gd"
 VfxManager="*res://autoloads/vfx_manager.gd"
 LevelSystem="*res://systems/level_system.gd"
+ItemSystem="*res://systems/item_system.gd"
 
 [display]
 
