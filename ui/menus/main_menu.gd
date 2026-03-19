@@ -9,6 +9,7 @@ var _settings_menu: Control = null
 var _upgrades_menu: Control = null
 var _leaderboard: Control = null
 var _pre_game_menu: Control = null
+var _level_select_menu: Control = null
 
 
 func _ready() -> void:
@@ -75,7 +76,8 @@ func _build_ui() -> void:
 	_buttons_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	center.add_child(_buttons_vbox)
 
-	_add_menu_button("New Game", _on_new_game)
+	_add_menu_button("Select Level", _on_level_select)
+	_add_menu_button("Quick Game", _on_new_game)
 	_add_menu_button("Leaderboard", _on_leaderboard)
 	_add_menu_button("Settings", _on_settings)
 	_add_menu_button("Upgrades", _on_upgrades)
@@ -131,8 +133,27 @@ func _add_menu_button(text: String, callback: Callable) -> void:
 	_buttons_vbox.add_child(btn)
 
 
+func _on_level_select() -> void:
+	# Show level select menu
+	var LevelSelectScript := preload("res://ui/menus/level_select_menu.gd")
+	_level_select_menu = Control.new()
+	_level_select_menu.set_script(LevelSelectScript)
+	add_child(_level_select_menu)
+	_level_select_menu.level_selected.connect(_start_level)
+	_level_select_menu.back_pressed.connect(func() -> void:
+		_level_select_menu.queue_free()
+		_level_select_menu = null
+		_buttons_vbox.visible = true
+		_title_label.visible = true
+		_subtitle_label.visible = true
+	)
+	_buttons_vbox.visible = false
+	_title_label.visible = false
+	_subtitle_label.visible = false
+
+
 func _on_new_game() -> void:
-	# Show pre-game menu
+	# Show pre-game menu (quick game with default settings)
 	var PreGameScript := preload("res://ui/menus/pre_game_menu.gd")
 	_pre_game_menu = Control.new()
 	_pre_game_menu.set_script(PreGameScript)
@@ -141,14 +162,25 @@ func _on_new_game() -> void:
 	_pre_game_menu.back_requested.connect(func() -> void:
 		_pre_game_menu.queue_free()
 		_pre_game_menu = null
+		_buttons_vbox.visible = true
+		_title_label.visible = true
+		_subtitle_label.visible = true
 	)
 	_buttons_vbox.visible = false
 	_title_label.visible = false
 	_subtitle_label.visible = false
 
 
+func _start_level(level_id: String) -> void:
+	# Store selected level in GameState and start the game
+	GameState.reset_state()
+	GameState.selected_level_id = level_id
+	get_tree().change_scene_to_file("res://scenes/main.tscn")
+
+
 func _start_game() -> void:
 	GameState.reset_state()
+	GameState.selected_level_id = ""  # Empty means default/quick game
 	get_tree().change_scene_to_file("res://scenes/main.tscn")
 
 
