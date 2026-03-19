@@ -65,6 +65,12 @@ signal central_tower_destroyed()
 signal central_tower_upgraded(tier: int)
 signal boss_killed(total_boss_kills: int)
 
+# --- Level System ---
+signal level_modifiers_applied(modifiers: Dictionary)
+signal level_objective_completed(objective_type: String)
+signal level_completed(level_id: String, rewards: Dictionary)
+signal level_failed(reason: String)
+
 # --- Buffs / Debuffs ---
 signal buff_applied(target: Node, buff_id: String, duration: float)
 signal buff_removed(target: Node, buff_id: String)

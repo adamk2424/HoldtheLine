@@ -42,6 +42,11 @@ var central_tower_tier: int = 0
 var boss_kills: int = 0
 var income_multiplier: float = 1.0
 
+# --- Level System ---
+var selected_level_id: String = ""
+var current_level_data: Dictionary = {}
+var level_objectives_completed: bool = false
+
 # --- Resource tick timer ---
 var _resource_tick_timer: float = 0.0
 const RESOURCE_TICK_INTERVAL: float = 1.0
@@ -181,6 +186,9 @@ func reset_state() -> void:
 	central_tower_tier = 0
 	boss_kills = 0
 	income_multiplier = 1.0
+	selected_level_id = ""
+	current_level_data = {}
+	level_objectives_completed = false
 	tech_levels = {
 		"drone_printer": 0,
 		"mech_bay": 0,

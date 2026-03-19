@@ -327,24 +327,8 @@ func _create_level_card(level_data: Dictionary) -> Control:
 
 
 func _is_level_unlocked(level_data: Dictionary) -> bool:
-	# Check if level requirements are met
-	var requirements: Array = level_data.get("unlock_requirements", [])
-	
-	# No requirements means it's unlocked
-	if requirements.is_empty():
-		return true
-	
-	# Check MetaProgress for completed levels
-	# For now, assume tutorial is always unlocked and others follow progression
 	var level_id: String = level_data.get("id", "")
-	
-	if level_id == "tutorial":
-		return true
-	
-	# TODO: Integrate with MetaProgress save system
-	# For demo purposes, unlock first few levels
-	var demo_unlocked := ["tutorial", "outpost", "supply_depot", "mining_station"]
-	return level_id in demo_unlocked
+	return LevelSystem.is_level_unlocked(level_id)
 
 
 func _get_difficulty_color(difficulty: String) -> Color:
