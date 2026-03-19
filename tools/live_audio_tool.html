@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Audio Tool</title>
+<style>
+/* --- Reset & Base --- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0d1117;
+  --bg-panel: #0f1218;
+  --bg-card: #161b22;
+  --accent: #4de680;
+  --accent-dim: #1f3d28;
+  --blue: #1f6feb;
+  --orange: #f0883e;
+  --purple: #bc8cff;
+  --text: #c9d1d9;
+  --dim: #8b949e;
+  --border: #30363d;
+  --red: #f85149;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', -apple-system, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+input, select, button { font-family: inherit; }
+input:focus, select:focus { outline: 1px solid var(--accent); outline-offset: -1px; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--dim); }
+
+/* --- Layout Shell --- */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* --- Top Bar --- */
+#top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+#top-bar .left { display: flex; gap: 12px; align-items: center; }
+#top-bar .right { display: flex; gap: 10px; align-items: center; }
+
+.title {
+  color: var(--accent);
+  font-weight: bold;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+.conn-badge {
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 10px;
+  color: white;
+  white-space: nowrap;
+}
+.conn-badge.connected { background: var(--blue); }
+.conn-badge.disconnected { background: var(--red); }
+
+.manual-connect-link {
+  color: var(--dim);
+  font-size: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+.manual-connect-link:hover { color: var(--text); }
+
+#manual-connect-panel {
+  display: none;
+  align-items: center;
+  gap: 6px;
+}
+#manual-connect-panel.visible { display: flex; }
+#manual-connect-panel input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  width: 140px;
+}
+#manual-connect-panel button {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.save-btn {
+  background: var(--accent-dim);
+  color: var(--accent);
+  padding: 4px 14px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  user-select: none;
+}
+.save-btn:hover { background: #2a5035; }
+.save-btn:active { transform: scale(0.97); }
+.save-btn.saved { animation: flash-saved 1.2s ease-out; }
+
+@keyframes flash-saved {
+  0% { background: var(--accent); color: var(--bg); }
+  100% { background: var(--accent-dim); color: var(--accent); }
+}
+
+.unsaved-count {
+  color: var(--orange);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+/* --- Bus Mixer Strip --- */
+#bus-mixer {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  gap: 0;
+}
+#bus-mixer .bus-label {
+  color: var(--dim);
+  font-size: 10px;
+  width: 50px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: bold;
+}
+#bus-mixer .bus-sliders {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+}
+.bus-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.bus-item .bus-name {
+  color: var(--text);
+  font-size: 10px;
+  width: 45px;
+  flex-shrink: 0;
+}
+.bus-item .db-readout {
+  font-size: 10px;
+  width: 40px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* --- Slider --- */
+.slider-track {
+  background: var(--bg-card);
+  height: 10px;
+  border-radius: 5px;
+  position: relative;
+  cursor: pointer;
+  flex: 1;
+  min-width: 80px;
+}
+.slider-track.bus-slider { width: 120px; min-width: 120px; flex: none; }
+
+.slider-fill {
+  height: 10px;
+  border-radius: 5px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+.slider-fill.green { background: var(--accent); }
+.slider-fill.blue { background: var(--blue); }
+
+.slider-knob {
+  width: 16px;
+  height: 16px;
+  background: #e6edf3;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  position: absolute;
+  top: -3px;
+  transform: translateX(-50%);
+  cursor: grab;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  transition: transform 0.1s;
+  z-index: 2;
+}
+.slider-knob:hover { transform: translateX(-50%) scale(1.2); background: #ffffff; }
+.slider-knob.dragging { cursor: grabbing; transform: translateX(-50%) scale(1.15); }
+.slider-knob.blue-knob { border-color: var(--blue); }
+
+/* --- Three Panels --- */
+#panels {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Left Panel */
+#left-panel {
+  width: 210px;
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+#entity-filter {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  margin: 8px;
+  width: calc(100% - 16px);
+}
+#entity-tree {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 8px 8px;
+}
+.category-header {
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: bold;
+  margin: 8px 0 3px;
+  cursor: pointer;
+  user-select: none;
+}
+.category-header:first-child { margin-top: 2px; }
+.entity-item {
+  font-size: 10px;
+  padding: 3px 4px 3px 14px;
+  margin-bottom: 1px;
+  cursor: pointer;
+  border-radius: 3px;
+  color: var(--dim);
+  user-select: none;
+}
+.entity-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+.entity-item.selected {
+  color: var(--text);
+  background: var(--accent-dim);
+  border-left: 2px solid var(--accent);
+  padding-left: 12px;
+}
+
+/* Center Panel */
+#center-panel {
+  flex: 1;
+  background: var(--bg);
+  overflow-y: auto;
+  padding: 10px;
+}
+#center-placeholder {
+  color: var(--dim);
+  text-align: center;
+  margin-top: 80px;
+  font-size: 13px;
+}
+
+.entity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.entity-header .name { color: var(--accent); font-size: 15px; font-weight: bold; }
+.entity-header .type { color: var(--dim); font-size: 11px; margin-left: 8px; }
+
+.sm-btn {
+  padding: 3px 10px;
+  border-radius: 3px;
+  font-size: 10px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: #21262d;
+  color: var(--dim);
+  user-select: none;
+}
+.sm-btn:hover { border-color: var(--dim); }
+.sm-btn.active-solo { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+.sm-btn.active-mute { background: #3d2020; color: var(--red); border-color: var(--red); }
+.sm-btn-small { padding: 2px 6px; font-size: 9px; }
+
+.attn-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 6px 8px;
+  background: var(--bg-card);
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+.attn-bar label { color: var(--dim); font-size: 10px; }
+.attn-bar select {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+}
+.attn-bar .attn-info { color: var(--dim); font-size: 9px; margin-left: 4px; }
+
+/* Cue Card */
+.cue-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 8px;
+}
+.cue-card.looping { border-left: 3px solid var(--orange); }
+.cue-card.collapsed { padding: 8px 10px; }
+
+.cue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+.cue-card.collapsed .cue-header { margin-bottom: 0; }
+
+.cue-name { color: var(--accent); font-size: 12px; font-weight: bold; }
+.cue-badge {
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 9px;
+}
+.cue-badge.standard { background: #21262d; color: var(--dim); }
+.cue-badge.loop-badge { background: #3d2a1f; color: var(--orange); }
+
+.cue-collapsed-info { color: var(--dim); font-size: 9px; }
+
+.test-btn {
+  background: #1f3044;
+  color: var(--purple);
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 9px;
+  cursor: pointer;
+  border: none;
+  user-select: none;
+}
+.test-btn:hover { background: #2a3d55; }
+
+/* WAV slots */
+.wav-slots { display: flex; gap: 4px; margin-bottom: 10px; }
+.wav-slot {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 4px 6px;
+  font-size: 9px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wav-slot:hover { border-color: var(--dim); }
+.wav-slot .slot-num { color: var(--dim); }
+.wav-slot .slot-file { color: var(--text); }
+.wav-slot .slot-empty { color: #555; }
+
+.loop-section-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+  letter-spacing: 1px;
+}
+.loop-section-label.start { color: var(--dim); }
+.loop-section-label.loop { color: var(--orange); }
+.loop-section-label.end { color: var(--dim); }
+.loop-section { margin-bottom: 6px; }
+
+/* Cue controls row */
+.cue-controls {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.cue-vol-wrap { flex: 1; }
+.cue-vol-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--dim);
+  margin-bottom: 4px;
+}
+.cue-vol-header .db-val { color: var(--text); }
+
+.ctrl-divider { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; }
+
+.pitch-group, .voices-group { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.pitch-group label, .voices-group label { color: var(--text); font-size: 10px; }
+.pitch-group input[type="checkbox"] { accent-color: var(--accent); }
+.pitch-group .cents-input, .voices-group .voices-input {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-size: 10px;
+  width: 34px;
+  text-align: center;
+}
+.pitch-group .unit { color: var(--dim); font-size: 10px; }
+.voices-group .unit { color: var(--dim); font-size: 10px; }
+
+.looping-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.looping-toggle label { color: var(--dim); font-size: 10px; }
+.looping-toggle input[type="checkbox"] { accent-color: var(--orange); }
+
+/* Right Panel */
+#right-panel {
+  width: 200px;
+  background: var(--bg-panel);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.panel-section-title {
+  color: var(--dim);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+/* Live Activity */
+#live-activity { margin-bottom: 14px; }
+.activity-item {
+  font-size: 9px;
+  margin-bottom: 3px;
+  padding: 2px 4px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: opacity 0.5s;
+}
+.activity-item.active { background: var(--bg-card); }
+.activity-item .dot { margin-right: 4px; }
+.activity-item .dot.green { color: var(--accent); }
+.activity-item .dot.orange { color: var(--orange); }
+.activity-item .dot.faded { color: var(--dim); }
+.activity-item .cue-label { color: var(--text); }
+.activity-item .count { color: var(--dim); }
+.activity-item .loop-label { color: var(--accent); font-size: 8px; }
+
+/* Attenuation Presets */
+#presets-section { border-top: 1px solid var(--border); padding-top: 10px; }
+.presets-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.new-preset-btn {
+  color: var(--accent);
+  font-size: 10px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  user-select: none;
+}
+.new-preset-btn:hover { text-decoration: underline; }
+
+.preset-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+.preset-card:hover { border-color: var(--dim); }
+.preset-card.selected { border-color: var(--accent); }
+.preset-card .preset-name { font-size: 10px; font-weight: bold; margin-bottom: 2px; }
+.preset-card.selected .preset-name { color: var(--accent); }
+.preset-card .preset-summary { font-size: 9px; color: #555; }
+.preset-card .preset-used { font-size: 9px; color: #555; margin-top: 2px; }
+
+.preset-detail { margin-top: 4px; }
+.preset-detail .field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 3px;
+  font-size: 9px;
+}
+.preset-detail .field label { color: var(--dim); width: 70px; flex-shrink: 0; }
+.preset-detail .field input, .preset-detail .field select {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-size: 9px;
+  width: 70px;
+}
+.preset-detail .field select { width: 80px; }
+
+.preset-delete-btn {
+  background: #3d2020;
+  color: var(--red);
+  border: 1px solid var(--red);
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 9px;
+  cursor: pointer;
+  margin-top: 4px;
+}
+.preset-delete-btn:hover { background: #4d2525; }
+
+/* --- WAV Picker Modal --- */
+#wav-modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 100;
+  justify-content: center;
+  align-items: center;
+}
+#wav-modal-overlay.visible { display: flex; }
+
+#wav-modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 450px;
+  max-height: 500px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+}
+#wav-modal .modal-header {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#wav-modal .modal-header .modal-title { color: var(--accent); font-weight: bold; font-size: 12px; }
+#wav-modal .modal-header .modal-close {
+  color: var(--dim);
+  cursor: pointer;
+  font-size: 14px;
+  background: none;
+  border: none;
+}
+#wav-modal .modal-header .modal-close:hover { color: var(--text); }
+
+#wav-search {
+  margin: 8px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  width: calc(100% - 24px);
+}
+
+#wav-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 12px 8px;
+}
+.wav-list-item {
+  padding: 4px 8px;
+  font-size: 10px;
+  color: var(--text);
+  cursor: pointer;
+  border-radius: 3px;
+  margin-bottom: 1px;
+}
+.wav-list-item:hover { background: rgba(255,255,255,0.05); }
+.wav-list-item.highlighted { background: var(--accent-dim); color: var(--accent); }
+
+#wav-modal .modal-footer {
+  padding: 8px 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+#wav-modal .modal-footer button {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 10px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+}
+.modal-clear-btn { background: #3d2020; color: var(--red); border-color: var(--red) !important; }
+.modal-clear-btn:hover { background: #4d2525; }
+.modal-cancel-btn { background: #21262d; color: var(--dim); }
+.modal-cancel-btn:hover { background: #2d333b; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- Top Bar -->
+  <div id="top-bar">
+    <div class="left">
+      <span class="title">LIVE AUDIO TOOL</span>
+      <span id="conn-badge" class="conn-badge disconnected">&#9679; DISCONNECTED</span>
+      <span style="color:var(--dim);font-size:10px;">|</span>
+      <span class="manual-connect-link" id="manual-connect-toggle">Manual Connect &#9662;</span>
+      <div id="manual-connect-panel">
+        <input id="manual-host" type="text" placeholder="localhost:8090" />
+        <button id="manual-connect-btn">Connect</button>
+      </div>
+    </div>
+    <div class="right">
+      <button class="save-btn" id="save-btn">SAVE</button>
+      <span class="unsaved-count" id="unsaved-count" style="display:none;"></span>
+    </div>
+  </div>
+
+  <!-- Bus Mixer -->
+  <div id="bus-mixer">
+    <span class="bus-label">Buses</span>
+    <div class="bus-sliders" id="bus-sliders"></div>
+  </div>
+
+  <!-- Three Panels -->
+  <div id="panels">
+    <!-- Left: Entity Tree -->
+    <div id="left-panel">
+      <input id="entity-filter" type="text" placeholder="Filter entities..." />
+      <div id="entity-tree"></div>
+    </div>
+
+    <!-- Center: Cue Editor -->
+    <div id="center-panel">
+      <div id="center-placeholder">Select an entity from the left panel to edit its cues.</div>
+      <div id="cue-editor" style="display:none;"></div>
+    </div>
+
+    <!-- Right: Live Monitor + Presets -->
+    <div id="right-panel">
+      <div id="live-activity">
+        <div class="panel-section-title">Live Activity</div>
+        <div id="activity-list">
+          <div style="color:var(--dim);font-size:9px;">Waiting for data...</div>
+        </div>
+      </div>
+      <div id="presets-section">
+        <div class="presets-header">
+          <div class="panel-section-title" style="margin-bottom:0;">Attn Presets</div>
+          <button class="new-preset-btn" id="new-preset-btn">+ New</button>
+        </div>
+        <div id="presets-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WAV Picker Modal -->
+<div id="wav-modal-overlay">
+  <div id="wav-modal">
+    <div class="modal-header">
+      <span class="modal-title">Select WAV File</span>
+      <button class="modal-close" id="wav-modal-close">&times;</button>
+    </div>
+    <input id="wav-search" type="text" placeholder="Search WAV files..." />
+    <div id="wav-list"></div>
+    <div class="modal-footer">
+      <button class="modal-clear-btn" id="wav-clear-btn">Clear</button>
+      <button class="modal-cancel-btn" id="wav-cancel-btn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================================
+// --- State ---
+// ============================================================================
+const state = {
+  entities: {},
+  attenuation_presets: {},
+  entity_attenuation: {},
+  bus_volumes: { master: 0.85, music: 0.4, sfx: 1.0 },
+  wav_files: [],
+  soloed: [],
+  muted: [],
+  categories: null
+};
+
+let selectedEntity = null;
+let expandedCues = {};       // { "entity.cue": true }
+let selectedPreset = null;
+let unsavedCount = 0;
+let voiceCounts = {};        // { "entity.cue": count }
+let voiceTimers = {};        // fade timers
+
+// WAV picker state
+let wavPickerCallback = null;
+let wavHighlightIndex = -1;
+
+// ============================================================================
+// --- Connection ---
+// ============================================================================
+let ws = null;
+let reconnectTimer = null;
+let wsUrl = 'ws://localhost:8090';
+
+function connect(url) {
+  if (url) wsUrl = url;
+  if (ws) {
+    ws.onclose = null;
+    ws.close();
+  }
+  try {
+    ws = new WebSocket(wsUrl);
+  } catch (e) {
+    setConnected(false);
+    scheduleReconnect();
+    return;
+  }
+
+  ws.onopen = () => {
+    setConnected(true);
+    if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+  };
+
+  ws.onclose = () => {
+    setConnected(false);
+    scheduleReconnect();
+  };
+
+  ws.onerror = () => {
+    // onclose will fire after this
+  };
+
+  ws.onmessage = (evt) => {
+    try {
+      const msg = JSON.parse(evt.data);
+      handleMessage(msg);
+    } catch (e) {
+      console.warn('Bad WS message:', e);
+    }
+  };
+}
+
+function scheduleReconnect() {
+  if (reconnectTimer) return;
+  reconnectTimer = setTimeout(() => {
+    reconnectTimer = null;
+    connect();
+  }, 2000);
+}
+
+function setConnected(connected) {
+  const badge = document.getElementById('conn-badge');
+  if (connected) {
+    const host = wsUrl.replace('ws://', '').replace('wss://', '');
+    badge.className = 'conn-badge connected';
+    badge.innerHTML = '&#9679; CONNECTED &mdash; ' + escHtml(host);
+  } else {
+    badge.className = 'conn-badge disconnected';
+    badge.innerHTML = '&#9679; DISCONNECTED';
+  }
+}
+
+function send(obj) {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify(obj));
+  }
+}
+
+// Manual connect UI
+document.getElementById('manual-connect-toggle').addEventListener('click', () => {
+  document.getElementById('manual-connect-panel').classList.toggle('visible');
+});
+document.getElementById('manual-connect-btn').addEventListener('click', () => {
+  const val = document.getElementById('manual-host').value.trim();
+  if (val) {
+    const url = val.startsWith('ws://') || val.startsWith('wss://') ? val : 'ws://' + val;
+    connect(url);
+  }
+  document.getElementById('manual-connect-panel').classList.remove('visible');
+});
+
+// ============================================================================
+// --- Message Handling ---
+// ============================================================================
+function handleMessage(msg) {
+  switch (msg.event) {
+    case 'state':
+      state.entities = msg.entities || {};
+      state.attenuation_presets = msg.attenuation_presets || {};
+      state.entity_attenuation = msg.entity_attenuation || {};
+      state.bus_volumes = msg.bus_volumes || { master: 0.85, music: 0.4, sfx: 1.0 };
+      state.wav_files = msg.wav_files || [];
+      state.soloed = msg.soloed || [];
+      state.muted = msg.muted || [];
+      if (msg.categories) state.categories = msg.categories;
+      renderAll();
+      break;
+
+    case 'cue_fired':
+      addActivity(msg.entity, msg.cue, msg.file, false);
+      break;
+
+    case 'cue_stopped':
+      removeActivity(msg.entity + '.' + msg.cue);
+      break;
+
+    case 'voice_count':
+      voiceCounts = msg.counts || {};
+      renderActivity();
+      break;
+
+    case 'saved':
+      unsavedCount = 0;
+      updateUnsavedBadge();
+      const btn = document.getElementById('save-btn');
+      btn.textContent = 'Saved!';
+      btn.classList.add('saved');
+      setTimeout(() => { btn.textContent = 'SAVE'; btn.classList.remove('saved'); }, 1200);
+      break;
+  }
+}
+
+// ============================================================================
+// --- Dirty State ---
+// ============================================================================
+function markDirty() {
+  unsavedCount++;
+  updateUnsavedBadge();
+}
+
+function updateUnsavedBadge() {
+  const el = document.getElementById('unsaved-count');
+  if (unsavedCount > 0) {
+    el.textContent = unsavedCount + ' unsaved change' + (unsavedCount !== 1 ? 's' : '');
+    el.style.display = '';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+document.getElementById('save-btn').addEventListener('click', () => {
+  send({ cmd: 'save' });
+});
+
+// ============================================================================
+// --- Render All ---
+// ============================================================================
+function renderAll() {
+  renderBusMixer();
+  renderEntityTree();
+  renderCueEditor();
+  renderPresets();
+}
+
+// ============================================================================
+// --- Bus Mixer ---
+// ============================================================================
+function renderBusMixer() {
+  const container = document.getElementById('bus-sliders');
+  container.innerHTML = '';
+
+  const buses = [
+    { key: 'master', label: 'Master', color: 'green', knobClass: '' },
+    { key: 'music',  label: 'Music',  color: 'blue',  knobClass: 'blue-knob' },
+    { key: 'sfx',    label: 'SFX',    color: 'green', knobClass: '' }
+  ];
+
+  buses.forEach(bus => {
+    const val = state.bus_volumes[bus.key] || 0;
+    const pct = Math.max(0, Math.min(100, val * 100));
+    const db = val > 0.0001 ? (20 * Math.log10(val)).toFixed(1) : '-inf';
+
+    const item = document.createElement('div');
+    item.className = 'bus-item';
+    item.innerHTML = `
+      <span class="bus-name">${bus.label}</span>
+      <div class="slider-track bus-slider" data-bus="${bus.key}">
+        <div class="slider-fill ${bus.color}" style="width:${pct}%"></div>
+        <div class="slider-knob ${bus.knobClass}" style="left:${pct}%"></div>
+      </div>
+      <span class="db-readout" style="color:var(--${bus.color === 'blue' ? 'blue' : 'accent'})">${db} dB</span>
+    `;
+    container.appendChild(item);
+
+    // Attach slider drag
+    const track = item.querySelector('.slider-track');
+    setupSlider(track, val, 0, 1, (v) => {
+      state.bus_volumes[bus.key] = v;
+      const newPct = v * 100;
+      track.querySelector('.slider-fill').style.width = newPct + '%';
+      track.querySelector('.slider-knob').style.left = newPct + '%';
+      const newDb = v > 0.0001 ? (20 * Math.log10(v)).toFixed(1) : '-inf';
+      item.querySelector('.db-readout').textContent = newDb + ' dB';
+    }, (v) => {
+      send({ cmd: 'set_bus_volume', bus: bus.key, value: v });
+      markDirty();
+    });
+  });
+}
+
+// ============================================================================
+// --- Slider Utility ---
+// ============================================================================
+function setupSlider(trackEl, initialValue, minVal, maxVal, onChange, onCommit) {
+  const knob = trackEl.querySelector('.slider-knob');
+  let dragging = false;
+
+  function posToValue(clientX) {
+    const rect = trackEl.getBoundingClientRect();
+    let ratio = (clientX - rect.left) / rect.width;
+    ratio = Math.max(0, Math.min(1, ratio));
+    return minVal + ratio * (maxVal - minVal);
+  }
+
+  function startDrag(e) {
+    e.preventDefault();
+    dragging = true;
+    knob.classList.add('dragging');
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('mouseup', endDrag);
+  }
+
+  function onDrag(e) {
+    if (!dragging) return;
+    const v = posToValue(e.clientX);
+    onChange(v);
+  }
+
+  function endDrag(e) {
+    if (!dragging) return;
+    dragging = false;
+    knob.classList.remove('dragging');
+    document.removeEventListener('mousemove', onDrag);
+    document.removeEventListener('mouseup', endDrag);
+    const v = posToValue(e.clientX);
+    onChange(v);
+    if (onCommit) onCommit(v);
+  }
+
+  knob.addEventListener('mousedown', startDrag);
+
+  trackEl.addEventListener('mousedown', (e) => {
+    if (e.target === knob) return;
+    const v = posToValue(e.clientX);
+    onChange(v);
+    if (onCommit) onCommit(v);
+    // Start drag from track click
+    dragging = true;
+    knob.classList.add('dragging');
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('mouseup', endDrag);
+  });
+}
+
+// ============================================================================
+// --- Entity Tree ---
+// ============================================================================
+function inferCategory(entityId, cues) {
+  const cueNames = Object.keys(cues || {});
+  const joined = cueNames.join(' ').toLowerCase();
+  if (joined.includes('roar') || joined.includes('screech') || joined.includes('growl') || joined.includes('spit')) return 'Enemies';
+  if (joined.includes('attack') || joined.includes('death') || joined.includes('placement')) return 'Towers';
+  if (joined.includes('drone') || joined.includes('mech')) return 'Units';
+  if (joined.includes('ambient') || joined.includes('music') || joined.includes('ui')) return 'Other';
+  return 'Other';
+}
+
+function renderEntityTree() {
+  const container = document.getElementById('entity-tree');
+  const filter = document.getElementById('entity-filter').value.toLowerCase().trim();
+  container.innerHTML = '';
+
+  // Group entities by category
+  const groups = {};
+  const entityIds = Object.keys(state.entities).sort();
+
+  entityIds.forEach(id => {
+    if (filter && !id.toLowerCase().includes(filter)) return;
+    let cat;
+    if (state.categories && state.categories[id]) {
+      cat = state.categories[id];
+    } else {
+      cat = inferCategory(id, state.entities[id]);
+    }
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push(id);
+  });
+
+  const categoryOrder = ['Towers', 'Enemies', 'Units', 'Other'];
+  const sortedCats = Object.keys(groups).sort((a, b) => {
+    const ai = categoryOrder.indexOf(a);
+    const bi = categoryOrder.indexOf(b);
+    if (ai >= 0 && bi >= 0) return ai - bi;
+    if (ai >= 0) return -1;
+    if (bi >= 0) return 1;
+    return a.localeCompare(b);
+  });
+
+  sortedCats.forEach(cat => {
+    const header = document.createElement('div');
+    header.className = 'category-header';
+    header.textContent = '\u25BE ' + cat.toUpperCase();
+    header.dataset.category = cat;
+    let collapsed = false;
+
+    header.addEventListener('click', () => {
+      collapsed = !collapsed;
+      header.textContent = (collapsed ? '\u25B8 ' : '\u25BE ') + cat.toUpperCase();
+      const items = container.querySelectorAll(`.entity-item[data-category="${cat}"]`);
+      items.forEach(it => it.style.display = collapsed ? 'none' : '');
+    });
+
+    container.appendChild(header);
+
+    groups[cat].forEach(id => {
+      const item = document.createElement('div');
+      item.className = 'entity-item' + (id === selectedEntity ? ' selected' : '');
+      item.textContent = formatEntityName(id);
+      item.dataset.entity = id;
+      item.dataset.category = cat;
+      item.addEventListener('click', () => {
+        selectedEntity = id;
+        renderEntityTree();
+        renderCueEditor();
+      });
+      container.appendChild(item);
+    });
+  });
+}
+
+document.getElementById('entity-filter').addEventListener('input', () => {
+  renderEntityTree();
+});
+
+function formatEntityName(id) {
+  return id.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+
+// ============================================================================
+// --- Cue Editor ---
+// ============================================================================
+function renderCueEditor() {
+  const editor = document.getElementById('cue-editor');
+  const placeholder = document.getElementById('center-placeholder');
+
+  if (!selectedEntity || !state.entities[selectedEntity]) {
+    editor.style.display = 'none';
+    placeholder.style.display = '';
+    return;
+  }
+
+  placeholder.style.display = 'none';
+  editor.style.display = '';
+  editor.innerHTML = '';
+
+  const entity = state.entities[selectedEntity];
+  const entityId = selectedEntity;
+  const cues = entity;
+  const cueNames = Object.keys(cues).sort();
+
+  // Infer type
+  let entityType = 'Entity';
+  if (state.categories && state.categories[entityId]) {
+    entityType = state.categories[entityId];
+  } else {
+    entityType = inferCategory(entityId, cues);
+  }
+
+  // Entity header
+  const header = document.createElement('div');
+  header.className = 'entity-header';
+
+  const isSoloed = state.soloed.includes(entityId);
+  const isMuted = state.muted.includes(entityId);
+
+  header.innerHTML = `
+    <div>
+      <span class="name">${formatEntityName(entityId)}</span>
+      <span class="type">${entityType}</span>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <span class="sm-btn ${isSoloed ? 'active-solo' : ''}" data-action="solo-entity">SOLO</span>
+      <span class="sm-btn ${isMuted ? 'active-mute' : ''}" data-action="mute-entity">MUTE</span>
+    </div>
+  `;
+  editor.appendChild(header);
+
+  // Solo/Mute entity
+  header.querySelector('[data-action="solo-entity"]').addEventListener('click', () => {
+    send({ cmd: 'solo', target: entityId });
+    toggleInArray(state.soloed, entityId);
+    renderCueEditor();
+  });
+  header.querySelector('[data-action="mute-entity"]').addEventListener('click', () => {
+    send({ cmd: 'mute', target: entityId });
+    toggleInArray(state.muted, entityId);
+    renderCueEditor();
+  });
+
+  // Attenuation preset bar
+  const attnBar = document.createElement('div');
+  attnBar.className = 'attn-bar';
+  const currentPreset = (state.entity_attenuation && state.entity_attenuation[entityId]) || 'default';
+  const presetNames = Object.keys(state.attenuation_presets).sort();
+  let presetOptions = presetNames.map(p => `<option value="${escHtml(p)}" ${p === currentPreset ? 'selected' : ''}>${escHtml(p)}</option>`).join('');
+  if (!presetNames.includes(currentPreset)) {
+    presetOptions = `<option value="${escHtml(currentPreset)}" selected>${escHtml(currentPreset)}</option>` + presetOptions;
+  }
+
+  let attnInfo = '';
+  const cp = state.attenuation_presets[currentPreset];
+  if (cp) {
+    attnInfo = `unit:${cp.unit_size || '?'} | max:${cp.max_distance || '?'} | filter:${formatHz(cp.filter_cutoff_hz)}`;
+  }
+
+  attnBar.innerHTML = `
+    <label>Attenuation Preset:</label>
+    <select>${presetOptions}</select>
+    <span class="attn-info">${attnInfo}</span>
+  `;
+  editor.appendChild(attnBar);
+
+  attnBar.querySelector('select').addEventListener('change', (e) => {
+    const presetName = e.target.value;
+    state.entity_attenuation[entityId] = presetName;
+    send({ cmd: 'assign_attenuation_preset', entity: entityId, preset_name: presetName });
+    markDirty();
+    renderCueEditor();
+  });
+
+  // Cue cards
+  cueNames.forEach(cueName => {
+    const cue = cues[cueName];
+    const fullKey = entityId + '.' + cueName;
+    const isExpanded = expandedCues[fullKey] !== false; // default expanded
+    const isLooping = cue.is_looping || false;
+
+    const card = document.createElement('div');
+    card.className = 'cue-card' + (isLooping ? ' looping' : '') + (!isExpanded ? ' collapsed' : '');
+
+    const cueSoloed = state.soloed.includes(fullKey);
+    const cueMuted = state.muted.includes(fullKey);
+
+    if (!isExpanded) {
+      // Collapsed view
+      const firstFile = getFirstFile(cue);
+      const fileCount = countFiles(cue);
+      const fileInfo = firstFile
+        ? escHtml(shortPath(firstFile)) + (fileCount > 1 ? ` +${fileCount - 1} more` : '')
+        : 'No files assigned';
+
+      card.innerHTML = `
+        <div class="cue-header">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:var(--dim);cursor:pointer;">\u25B8</span>
+            <span class="cue-name">${escHtml(cueName)}</span>
+            <span class="cue-collapsed-info" style="${firstFile ? '' : 'color:#555;'}">${fileInfo}</span>
+          </div>
+          <div style="display:flex;gap:4px;">
+            <span class="sm-btn sm-btn-small ${cueSoloed ? 'active-solo' : ''}" data-action="solo-cue">S</span>
+            <span class="sm-btn sm-btn-small ${cueMuted ? 'active-mute' : ''}" data-action="mute-cue">M</span>
+          </div>
+        </div>
+      `;
+
+      card.querySelector('.cue-header').addEventListener('click', (e) => {
+        if (e.target.dataset.action) return;
+        expandedCues[fullKey] = true;
+        renderCueEditor();
+      });
+    } else {
+      // Expanded view
+      let slotsHtml;
+      if (isLooping) {
+        slotsHtml = buildLoopingSlotsHtml(cue, entityId, cueName);
+      } else {
+        slotsHtml = buildStandardSlotsHtml(cue, entityId, cueName);
+      }
+
+      card.innerHTML = `
+        <div class="cue-header">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="cue-name">${escHtml(cueName)}</span>
+            ${isLooping
+              ? '<span class="cue-badge loop-badge">&#128257; Looping</span>'
+              : '<span class="cue-badge standard">Standard</span>'}
+          </div>
+          <div style="display:flex;gap:4px;align-items:center;">
+            <span class="sm-btn sm-btn-small ${cueSoloed ? 'active-solo' : ''}" data-action="solo-cue">S</span>
+            <span class="sm-btn sm-btn-small ${cueMuted ? 'active-mute' : ''}" data-action="mute-cue">M</span>
+            <span style="color:var(--border);margin:0 2px;">|</span>
+            <button class="test-btn" data-action="test-play">&#9654; Test</button>
+          </div>
+        </div>
+        ${slotsHtml}
+        <div class="cue-controls">
+          <div class="cue-vol-wrap">
+            <div class="cue-vol-header">
+              <span>Volume</span>
+              <span class="db-val">${(cue.volume_db != null ? cue.volume_db : 0).toFixed(1)} dB</span>
+            </div>
+            <div class="slider-track" data-cue-vol="${fullKey}">
+              <div class="slider-fill green" style="width:${dbToPercent(cue.volume_db)}%"></div>
+              <div class="slider-knob" style="left:${dbToPercent(cue.volume_db)}%"></div>
+            </div>
+          </div>
+          <div class="ctrl-divider"></div>
+          <div class="pitch-group">
+            <input type="checkbox" ${cue.pitch_enabled ? 'checked' : ''} data-action="pitch-toggle" />
+            <label>Pitch</label>
+            <span style="color:var(--dim);">&plusmn;</span>
+            <input type="number" class="cents-input" value="${cue.pitch_cents || 0}" data-action="pitch-cents" ${!cue.pitch_enabled ? 'disabled' : ''} />
+            <span class="unit">cents</span>
+          </div>
+          <div class="ctrl-divider"></div>
+          <div class="voices-group">
+            <label style="color:var(--dim);">Voices:</label>
+            <input type="number" class="voices-input" value="${cue.max_voices || 3}" min="1" data-action="voices" />
+          </div>
+        </div>
+        <div class="looping-toggle">
+          <input type="checkbox" ${isLooping ? 'checked' : ''} data-action="looping-toggle" />
+          <label>Is Looping</label>
+        </div>
+      `;
+
+      // Collapse on header click
+      card.querySelector('.cue-header').addEventListener('click', (e) => {
+        if (e.target.dataset.action || e.target.tagName === 'BUTTON') return;
+        expandedCues[fullKey] = false;
+        renderCueEditor();
+      });
+
+      // Test play
+      const testBtn = card.querySelector('[data-action="test-play"]');
+      if (testBtn) {
+        testBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          send({ cmd: 'test_play', entity: entityId, cue: cueName });
+        });
+      }
+
+      // Volume slider (after DOM is in place — defer setup)
+      setTimeout(() => {
+        const volTrack = card.querySelector(`[data-cue-vol="${fullKey}"]`);
+        if (volTrack) {
+          const volDb = cue.volume_db != null ? cue.volume_db : 0;
+          setupSlider(volTrack, volDb, -60, 6, (v) => {
+            const pct = ((v - (-60)) / 66) * 100;
+            volTrack.querySelector('.slider-fill').style.width = pct + '%';
+            volTrack.querySelector('.slider-knob').style.left = pct + '%';
+            card.querySelector('.db-val').textContent = v.toFixed(1) + ' dB';
+          }, (v) => {
+            cue.volume_db = v;
+            send({ cmd: 'set_cue_volume', entity: entityId, cue: cueName, value: parseFloat(v.toFixed(1)) });
+            markDirty();
+          });
+        }
+      }, 0);
+
+      // WAV slot clicks
+      card.querySelectorAll('.wav-slot[data-slot-info]').forEach(slot => {
+        slot.addEventListener('click', () => {
+          const info = JSON.parse(slot.dataset.slotInfo);
+          openWavPicker((path) => {
+            if (info.key) {
+              // Looping cue: key = "start_files", "loop_files", or "end_files"
+              if (!cue[info.key]) cue[info.key] = ['', '', ''];
+              cue[info.key][info.slot] = path;
+              send({ cmd: 'set_cue_files', entity: entityId, cue: cueName, slot: info.slot, path: path, key: info.key });
+            } else {
+              // Standard cue
+              if (!cue.files) cue.files = ['', '', ''];
+              cue.files[info.slot] = path;
+              send({ cmd: 'set_cue_files', entity: entityId, cue: cueName, slot: info.slot, path: path, key: 'files' });
+            }
+            markDirty();
+            renderCueEditor();
+          });
+        });
+      });
+    }
+
+    // Solo/Mute cue buttons (both collapsed and expanded)
+    const soloBtn = card.querySelector('[data-action="solo-cue"]');
+    const muteBtn = card.querySelector('[data-action="mute-cue"]');
+    if (soloBtn) {
+      soloBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        send({ cmd: 'solo', target: fullKey });
+        toggleInArray(state.soloed, fullKey);
+        renderCueEditor();
+      });
+    }
+    if (muteBtn) {
+      muteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        send({ cmd: 'mute', target: fullKey });
+        toggleInArray(state.muted, fullKey);
+        renderCueEditor();
+      });
+    }
+
+    // Pitch toggle & cents (expanded only)
+    if (isExpanded) {
+      const pitchToggle = card.querySelector('[data-action="pitch-toggle"]');
+      const centsInput = card.querySelector('[data-action="pitch-cents"]');
+      const voicesInput = card.querySelector('[data-action="voices"]');
+      const loopToggle = card.querySelector('[data-action="looping-toggle"]');
+
+      if (pitchToggle) {
+        pitchToggle.addEventListener('change', () => {
+          cue.pitch_enabled = pitchToggle.checked;
+          centsInput.disabled = !pitchToggle.checked;
+          send({ cmd: 'set_cue_pitch', entity: entityId, cue: cueName, enabled: pitchToggle.checked, cents: parseInt(centsInput.value) || 0 });
+          markDirty();
+        });
+      }
+      if (centsInput) {
+        centsInput.addEventListener('change', () => {
+          cue.pitch_cents = parseInt(centsInput.value) || 0;
+          send({ cmd: 'set_cue_pitch', entity: entityId, cue: cueName, enabled: pitchToggle.checked, cents: cue.pitch_cents });
+          markDirty();
+        });
+      }
+      if (voicesInput) {
+        voicesInput.addEventListener('change', () => {
+          cue.max_voices = parseInt(voicesInput.value) || 3;
+          send({ cmd: 'set_cue_voices', entity: entityId, cue: cueName, max_voices: cue.max_voices });
+          markDirty();
+        });
+      }
+      if (loopToggle) {
+        loopToggle.addEventListener('change', () => {
+          cue.is_looping = loopToggle.checked;
+          send({ cmd: 'set_cue_looping', entity: entityId, cue: cueName, is_looping: loopToggle.checked });
+          markDirty();
+          renderCueEditor();
+        });
+      }
+    }
+
+    editor.appendChild(card);
+  });
+}
+
+function buildStandardSlotsHtml(cue, entityId, cueName) {
+  const files = cue.files || ['', '', ''];
+  let html = '<div class="wav-slots">';
+  for (let i = 0; i < 3; i++) {
+    const f = files[i] || '';
+    const info = JSON.stringify({ slot: i });
+    html += `<div class="wav-slot" data-slot-info='${info}'>
+      <span class="slot-num">[${i + 1}]</span>
+      ${f ? `<span class="slot-file">${escHtml(shortPath(f))}</span>` : '<span class="slot-empty">&mdash; empty &mdash;</span>'}
+    </div>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function buildLoopingSlotsHtml(cue, entityId, cueName) {
+  const sections = [
+    { key: 'start_files', label: '\u25B6 Start (one-shot)', cls: 'start' },
+    { key: 'loop_files',  label: '\uD83D\uDD01 Loop (continuous)', cls: 'loop' },
+    { key: 'end_files',   label: '\u23F9 End (one-shot)', cls: 'end' }
+  ];
+
+  let html = '';
+  sections.forEach(sec => {
+    const files = cue[sec.key] || ['', '', ''];
+    html += `<div class="loop-section">
+      <div class="loop-section-label ${sec.cls}">${sec.label}</div>
+      <div class="wav-slots">`;
+    for (let i = 0; i < 3; i++) {
+      const f = files[i] || '';
+      const info = JSON.stringify({ slot: i, key: sec.key });
+      html += `<div class="wav-slot" data-slot-info='${escHtml(info)}'>
+        <span class="slot-num">[${i + 1}]</span>
+        ${f ? `<span class="slot-file">${escHtml(shortPath(f))}</span>` : '<span class="slot-empty">&mdash; empty &mdash;</span>'}
+      </div>`;
+    }
+    html += '</div></div>';
+  });
+  return html;
+}
+
+function dbToPercent(db) {
+  if (db == null) db = 0;
+  // -60 to +6 range
+  return Math.max(0, Math.min(100, ((db + 60) / 66) * 100));
+}
+
+function getFirstFile(cue) {
+  if (cue.files) {
+    for (const f of cue.files) { if (f) return f; }
+  }
+  for (const k of ['start_files', 'loop_files', 'end_files']) {
+    if (cue[k]) {
+      for (const f of cue[k]) { if (f) return f; }
+    }
+  }
+  return null;
+}
+
+function countFiles(cue) {
+  let n = 0;
+  if (cue.files) { cue.files.forEach(f => { if (f) n++; }); }
+  for (const k of ['start_files', 'loop_files', 'end_files']) {
+    if (cue[k]) { cue[k].forEach(f => { if (f) n++; }); }
+  }
+  return n;
+}
+
+function shortPath(p) {
+  if (!p) return '';
+  // Strip common prefix
+  const prefixes = ['res://audio/sfx/', 'res://audio/', 'res://'];
+  for (const px of prefixes) {
+    if (p.startsWith(px)) return p.slice(px.length);
+  }
+  return p;
+}
+
+function toggleInArray(arr, item) {
+  const idx = arr.indexOf(item);
+  if (idx >= 0) arr.splice(idx, 1);
+  else arr.push(item);
+}
+
+// ============================================================================
+// --- WAV Picker Modal ---
+// ============================================================================
+function openWavPicker(callback) {
+  wavPickerCallback = callback;
+  wavHighlightIndex = -1;
+  const overlay = document.getElementById('wav-modal-overlay');
+  const search = document.getElementById('wav-search');
+  overlay.classList.add('visible');
+  search.value = '';
+  search.focus();
+  renderWavList();
+}
+
+function closeWavPicker() {
+  document.getElementById('wav-modal-overlay').classList.remove('visible');
+  wavPickerCallback = null;
+  wavHighlightIndex = -1;
+}
+
+function renderWavList() {
+  const list = document.getElementById('wav-list');
+  const filter = document.getElementById('wav-search').value.toLowerCase().trim();
+  list.innerHTML = '';
+
+  const filtered = state.wav_files.filter(f => {
+    if (!filter) return true;
+    return shortPath(f).toLowerCase().includes(filter);
+  });
+
+  filtered.forEach((f, i) => {
+    const item = document.createElement('div');
+    item.className = 'wav-list-item' + (i === wavHighlightIndex ? ' highlighted' : '');
+    item.textContent = shortPath(f);
+    item.dataset.path = f;
+    item.addEventListener('click', () => {
+      if (wavPickerCallback) wavPickerCallback(f);
+      closeWavPicker();
+    });
+    list.appendChild(item);
+  });
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div style="color:var(--dim);font-size:10px;padding:8px;">No matching files</div>';
+  }
+}
+
+document.getElementById('wav-search').addEventListener('input', () => {
+  wavHighlightIndex = -1;
+  renderWavList();
+});
+
+document.getElementById('wav-search').addEventListener('keydown', (e) => {
+  const items = document.querySelectorAll('#wav-list .wav-list-item');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    wavHighlightIndex = Math.min(wavHighlightIndex + 1, items.length - 1);
+    updateWavHighlight(items);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    wavHighlightIndex = Math.max(wavHighlightIndex - 1, 0);
+    updateWavHighlight(items);
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (wavHighlightIndex >= 0 && wavHighlightIndex < items.length) {
+      const path = items[wavHighlightIndex].dataset.path;
+      if (wavPickerCallback) wavPickerCallback(path);
+      closeWavPicker();
+    } else if (items.length > 0) {
+      const path = items[0].dataset.path;
+      if (wavPickerCallback) wavPickerCallback(path);
+      closeWavPicker();
+    }
+  } else if (e.key === 'Escape') {
+    closeWavPicker();
+  }
+});
+
+function updateWavHighlight(items) {
+  items.forEach((it, i) => {
+    it.classList.toggle('highlighted', i === wavHighlightIndex);
+  });
+  if (wavHighlightIndex >= 0 && items[wavHighlightIndex]) {
+    items[wavHighlightIndex].scrollIntoView({ block: 'nearest' });
+  }
+}
+
+document.getElementById('wav-modal-close').addEventListener('click', closeWavPicker);
+document.getElementById('wav-cancel-btn').addEventListener('click', closeWavPicker);
+document.getElementById('wav-clear-btn').addEventListener('click', () => {
+  if (wavPickerCallback) wavPickerCallback('');
+  closeWavPicker();
+});
+document.getElementById('wav-modal-overlay').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeWavPicker();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && document.getElementById('wav-modal-overlay').classList.contains('visible')) {
+    closeWavPicker();
+  }
+});
+
+// ============================================================================
+// --- Live Activity Monitor ---
+// ============================================================================
+let activityEntries = {}; // { "entity.cue": { count, isLoop, lastSeen } }
+
+function addActivity(entity, cue, file, isLoop) {
+  const key = entity + '.' + cue;
+  if (!activityEntries[key]) {
+    activityEntries[key] = { count: 0, isLoop: isLoop, lastSeen: Date.now() };
+  }
+  activityEntries[key].count++;
+  activityEntries[key].lastSeen = Date.now();
+  renderActivity();
+}
+
+function removeActivity(key) {
+  delete activityEntries[key];
+  renderActivity();
+}
+
+function renderActivity() {
+  const container = document.getElementById('activity-list');
+  container.innerHTML = '';
+
+  // Merge voice counts into activity
+  const allKeys = new Set([...Object.keys(voiceCounts), ...Object.keys(activityEntries)]);
+
+  if (allKeys.size === 0) {
+    container.innerHTML = '<div style="color:var(--dim);font-size:9px;">Waiting for data...</div>';
+    return;
+  }
+
+  // Sort by count descending
+  const entries = [];
+  allKeys.forEach(key => {
+    const count = voiceCounts[key] || 0;
+    const entry = activityEntries[key];
+    if (count > 0 || entry) {
+      entries.push({
+        key,
+        count: count || (entry ? entry.count : 0),
+        isLoop: entry ? entry.isLoop : false,
+        active: count > 0
+      });
+    }
+  });
+
+  entries.sort((a, b) => b.count - a.count);
+
+  entries.forEach(e => {
+    // Check if it's a looping cue by looking at the entity data
+    let isLoop = e.isLoop;
+    const parts = e.key.split('.');
+    if (parts.length >= 2) {
+      const entId = parts[0];
+      const cueId = parts.slice(1).join('.');
+      const ent = state.entities[entId];
+      if (ent && ent[cueId] && ent[cueId].is_looping) isLoop = true;
+    }
+
+    const item = document.createElement('div');
+    item.className = 'activity-item' + (e.active ? ' active' : '');
+    item.innerHTML = `
+      <div>
+        <span class="dot ${e.active ? 'green' : 'faded'}">&#9679;</span>
+        <span class="cue-label">${escHtml(e.key)}</span>
+      </div>
+      <span>${isLoop ? '<span class="loop-label">&#128257; loop</span>' : '<span class="count">x' + e.count + '</span>'}</span>
+    `;
+    container.appendChild(item);
+  });
+}
+
+// ============================================================================
+// --- Attenuation Preset Editor ---
+// ============================================================================
+function renderPresets() {
+  const container = document.getElementById('presets-list');
+  container.innerHTML = '';
+
+  const presetNames = Object.keys(state.attenuation_presets).sort();
+
+  presetNames.forEach(name => {
+    const preset = state.attenuation_presets[name];
+    const isSelected = name === selectedPreset;
+
+    // Find entities using this preset
+    const usedBy = [];
+    if (state.entity_attenuation) {
+      Object.entries(state.entity_attenuation).forEach(([eid, pname]) => {
+        if (pname === name) usedBy.push(eid);
+      });
+    }
+
+    const card = document.createElement('div');
+    card.className = 'preset-card' + (isSelected ? ' selected' : '');
+
+    if (isSelected) {
+      card.innerHTML = `
+        <div class="preset-name">${escHtml(name)}</div>
+        <div class="preset-detail">
+          <div class="field">
+            <label>Model:</label>
+            <select data-field="model">
+              <option value="inverse_distance" ${preset.model === 'inverse_distance' ? 'selected' : ''}>Inv. Distance</option>
+              <option value="inverse_square" ${preset.model === 'inverse_square' ? 'selected' : ''}>Inv. Square</option>
+              <option value="linear" ${preset.model === 'linear' ? 'selected' : ''}>Linear</option>
+              <option value="logarithmic" ${preset.model === 'logarithmic' ? 'selected' : ''}>Logarithmic</option>
+              <option value="disabled" ${preset.model === 'disabled' ? 'selected' : ''}>Disabled</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Unit Size:</label>
+            <input type="number" step="0.5" value="${preset.unit_size || 15}" data-field="unit_size" />
+          </div>
+          <div class="field">
+            <label>Max Distance:</label>
+            <input type="number" step="1" value="${preset.max_distance || 120}" data-field="max_distance" />
+          </div>
+          <div class="field">
+            <label>Filter Cutoff:</label>
+            <input type="number" step="100" value="${preset.filter_cutoff_hz || 10000}" data-field="filter_cutoff_hz" />
+            <span style="color:var(--dim);">Hz</span>
+          </div>
+          <div class="field">
+            <label>Filter dB:</label>
+            <input type="number" step="1" value="${preset.filter_db || -6}" data-field="filter_db" />
+          </div>
+          <div class="field">
+            <label>Pan Strength:</label>
+            <input type="number" step="0.05" min="0" max="1" value="${preset.panning_strength != null ? preset.panning_strength : 0.5}" data-field="panning_strength" />
+          </div>
+        </div>
+        <div class="preset-used">Used by: ${usedBy.length > 0 ? escHtml(usedBy.join(', ')) : 'none'}</div>
+        ${name !== 'default' ? '<button class="preset-delete-btn" data-action="delete-preset">Delete</button>' : ''}
+      `;
+
+      // Wire up field changes
+      card.querySelectorAll('[data-field]').forEach(input => {
+        const changeHandler = () => {
+          const field = input.dataset.field;
+          let val = input.value;
+          if (input.type === 'number') val = parseFloat(val);
+          preset[field] = val;
+          const settings = {
+            model: preset.model || 'inverse_distance',
+            unit_size: preset.unit_size || 15,
+            max_distance: preset.max_distance || 120,
+            filter_cutoff_hz: preset.filter_cutoff_hz || 10000,
+            filter_db: preset.filter_db || -6,
+            panning_strength: preset.panning_strength != null ? preset.panning_strength : 0.5
+          };
+          send({ cmd: 'set_attenuation_preset', preset_name: name, settings });
+          markDirty();
+        };
+        input.addEventListener('change', changeHandler);
+      });
+
+      // Delete
+      const delBtn = card.querySelector('[data-action="delete-preset"]');
+      if (delBtn) {
+        delBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (confirm('Delete preset "' + name + '"?')) {
+            send({ cmd: 'delete_attenuation_preset', preset_name: name });
+            delete state.attenuation_presets[name];
+            selectedPreset = null;
+            markDirty();
+            renderPresets();
+            renderCueEditor();
+          }
+        });
+      }
+    } else {
+      // Collapsed preset view
+      const summary = `unit:${preset.unit_size || '?'} | max:${preset.max_distance || '?'} | ${formatHz(preset.filter_cutoff_hz)}`;
+      card.innerHTML = `
+        <div class="preset-name">${escHtml(name)}</div>
+        <div class="preset-summary">${summary}</div>
+        <div class="preset-used">Used by: ${usedBy.length > 0 ? escHtml(usedBy.join(', ')) : 'none'}</div>
+      `;
+    }
+
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.preset-detail') || e.target.closest('.preset-delete-btn')) return;
+      selectedPreset = selectedPreset === name ? null : name;
+      renderPresets();
+    });
+
+    container.appendChild(card);
+  });
+}
+
+document.getElementById('new-preset-btn').addEventListener('click', () => {
+  let name = prompt('New preset name:');
+  if (!name) return;
+  name = name.trim().toLowerCase().replace(/\s+/g, '_');
+  if (!name) return;
+  if (state.attenuation_presets[name]) {
+    alert('Preset "' + name + '" already exists.');
+    return;
+  }
+  const settings = {
+    model: 'inverse_distance',
+    unit_size: 15,
+    max_distance: 120,
+    filter_cutoff_hz: 10000,
+    filter_db: -6,
+    panning_strength: 0.5
+  };
+  state.attenuation_presets[name] = { ...settings };
+  send({ cmd: 'set_attenuation_preset', preset_name: name, settings });
+  selectedPreset = name;
+  markDirty();
+  renderPresets();
+});
+
+// ============================================================================
+// --- Utilities ---
+// ============================================================================
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function formatHz(hz) {
+  if (!hz) return '?';
+  return hz >= 1000 ? (hz / 1000).toFixed(0) + 'kHz' : hz + 'Hz';
+}
+
+// ============================================================================
+// --- Init ---
+// ============================================================================
+renderAll();
+connect();
+</script>
+</body>
+</html>
