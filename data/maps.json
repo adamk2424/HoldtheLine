@@ -1,0 +1,342 @@
+{
+  "map_presets": [
+    {
+      "id": "valley_defense",
+      "name": "Valley Defense",
+      "description": "A natural valley with multiple winding paths leading to the central tower.",
+      "terrain_type": "grassland",
+      "size": {
+        "width": 120,
+        "height": 80
+      },
+      "central_tower_position": {
+        "x": 60,
+        "z": 40
+      },
+      "spawn_zones": [
+        {
+          "id": "north_entrance",
+          "position": {"x": 60, "z": 5},
+          "radius": 8,
+          "spawn_weight": 30
+        },
+        {
+          "id": "east_pass",
+          "position": {"x": 110, "z": 25},
+          "radius": 6,
+          "spawn_weight": 25
+        },
+        {
+          "id": "west_pass",
+          "position": {"x": 10, "z": 25},
+          "radius": 6,
+          "spawn_weight": 25
+        },
+        {
+          "id": "south_gap",
+          "position": {"x": 60, "z": 75},
+          "radius": 5,
+          "spawn_weight": 20
+        }
+      ],
+      "natural_barriers": [
+        {"type": "hill", "position": {"x": 30, "z": 20}, "size": {"width": 15, "height": 12}},
+        {"type": "hill", "position": {"x": 90, "z": 20}, "size": {"width": 15, "height": 12}},
+        {"type": "forest", "position": {"x": 20, "z": 50}, "size": {"width": 8, "height": 8}},
+        {"type": "forest", "position": {"x": 92, "z": 50}, "size": {"width": 8, "height": 8}},
+        {"type": "rock_formation", "position": {"x": 60, "z": 60}, "size": {"width": 6, "height": 4}}
+      ],
+      "buildable_zones": [
+        {"position": {"x": 45, "z": 30}, "radius": 20},
+        {"position": {"x": 75, "z": 30}, "radius": 20},
+        {"position": {"x": 60, "z": 50}, "radius": 15},
+        {"position": {"x": 30, "z": 40}, "radius": 12},
+        {"position": {"x": 90, "z": 40}, "radius": 12}
+      ],
+      "strategic_features": {
+        "chokepoints": [
+          {"position": {"x": 60, "z": 15}, "width": 12},
+          {"position": {"x": 60, "z": 65}, "width": 10}
+        ],
+        "high_ground": [
+          {"position": {"x": 30, "z": 20}, "elevation": 5},
+          {"position": {"x": 90, "z": 20}, "elevation": 5}
+        ]
+      },
+      "environment": {
+        "lighting": "daylight",
+        "weather": "clear",
+        "ambient_color": "#87CEEB",
+        "fog_distance": 150
+      }
+    },
+    {
+      "id": "narrow_pass",
+      "name": "Narrow Pass",
+      "description": "A tight mountain pass with limited space and strong chokepoints.",
+      "terrain_type": "mountain",
+      "size": {
+        "width": 100,
+        "height": 60
+      },
+      "central_tower_position": {
+        "x": 50,
+        "z": 45
+      },
+      "spawn_zones": [
+        {
+          "id": "mountain_entrance",
+          "position": {"x": 50, "z": 5},
+          "radius": 6,
+          "spawn_weight": 60
+        },
+        {
+          "id": "side_ledge_east",
+          "position": {"x": 85, "z": 15},
+          "radius": 4,
+          "spawn_weight": 20
+        },
+        {
+          "id": "side_ledge_west",
+          "position": {"x": 15, "z": 15},
+          "radius": 4,
+          "spawn_weight": 20
+        }
+      ],
+      "natural_barriers": [
+        {"type": "cliff", "position": {"x": 10, "z": 25}, "size": {"width": 5, "height": 30}},
+        {"type": "cliff", "position": {"x": 85, "z": 25}, "size": {"width": 5, "height": 30}},
+        {"type": "boulder", "position": {"x": 30, "z": 20}, "size": {"width": 4, "height": 4}},
+        {"type": "boulder", "position": {"x": 70, "z": 20}, "size": {"width": 4, "height": 4}},
+        {"type": "ravine", "position": {"x": 50, "z": 55}, "size": {"width": 20, "height": 3}}
+      ],
+      "buildable_zones": [
+        {"position": {"x": 50, "z": 25}, "radius": 15},
+        {"position": {"x": 50, "z": 35}, "radius": 12},
+        {"position": {"x": 25, "z": 30}, "radius": 8},
+        {"position": {"x": 75, "z": 30}, "radius": 8}
+      ],
+      "strategic_features": {
+        "chokepoints": [
+          {"position": {"x": 50, "z": 12}, "width": 8},
+          {"position": {"x": 50, "z": 30}, "width": 6}
+        ],
+        "high_ground": [
+          {"position": {"x": 25, "z": 30}, "elevation": 8},
+          {"position": {"x": 75, "z": 30}, "elevation": 8}
+        ]
+      },
+      "environment": {
+        "lighting": "mountain_shadow",
+        "weather": "windy",
+        "ambient_color": "#696969",
+        "fog_distance": 100
+      }
+    },
+    {
+      "id": "central_hub",
+      "name": "Central Hub",
+      "description": "A large open area with the tower at the center, attacked from all directions.",
+      "terrain_type": "plains",
+      "size": {
+        "width": 140,
+        "height": 140
+      },
+      "central_tower_position": {
+        "x": 70,
+        "z": 70
+      },
+      "spawn_zones": [
+        {
+          "id": "north_wave",
+          "position": {"x": 70, "z": 5},
+          "radius": 10,
+          "spawn_weight": 25
+        },
+        {
+          "id": "south_wave",
+          "position": {"x": 70, "z": 135},
+          "radius": 10,
+          "spawn_weight": 25
+        },
+        {
+          "id": "east_wave",
+          "position": {"x": 135, "z": 70},
+          "radius": 10,
+          "spawn_weight": 25
+        },
+        {
+          "id": "west_wave",
+          "position": {"x": 5, "z": 70},
+          "radius": 10,
+          "spawn_weight": 25
+        }
+      ],
+      "natural_barriers": [
+        {"type": "water", "position": {"x": 30, "z": 30}, "size": {"width": 12, "height": 8}},
+        {"type": "water", "position": {"x": 98, "z": 30}, "size": {"width": 12, "height": 8}},
+        {"type": "water", "position": {"x": 30, "z": 102}, "size": {"width": 12, "height": 8}},
+        {"type": "water", "position": {"x": 98, "z": 102}, "size": {"width": 12, "height": 8}},
+        {"type": "trees", "position": {"x": 70, "z": 35}, "size": {"width": 6, "height": 6}},
+        {"type": "trees", "position": {"x": 70, "z": 105}, "size": {"width": 6, "height": 6}}
+      ],
+      "buildable_zones": [
+        {"position": {"x": 70, "z": 50}, "radius": 25},
+        {"position": {"x": 70, "z": 90}, "radius": 25},
+        {"position": {"x": 50, "z": 70}, "radius": 25},
+        {"position": {"x": 90, "z": 70}, "radius": 25},
+        {"position": {"x": 45, "z": 45}, "radius": 15},
+        {"position": {"x": 95, "z": 45}, "radius": 15},
+        {"position": {"x": 45, "z": 95}, "radius": 15},
+        {"position": {"x": 95, "z": 95}, "radius": 15}
+      ],
+      "strategic_features": {
+        "chokepoints": [],
+        "high_ground": [
+          {"position": {"x": 35, "z": 35}, "elevation": 3},
+          {"position": {"x": 105, "z": 35}, "elevation": 3},
+          {"position": {"x": 35, "z": 105}, "elevation": 3},
+          {"position": {"x": 105, "z": 105}, "elevation": 3}
+        ]
+      },
+      "environment": {
+        "lighting": "bright_daylight",
+        "weather": "clear",
+        "ambient_color": "#ADD8E6",
+        "fog_distance": 200
+      }
+    },
+    {
+      "id": "industrial_complex",
+      "name": "Industrial Complex",
+      "description": "A former factory site with ruins and machinery providing cover and obstacles.",
+      "terrain_type": "urban",
+      "size": {
+        "width": 110,
+        "height": 90
+      },
+      "central_tower_position": {
+        "x": 55,
+        "z": 45
+      },
+      "spawn_zones": [
+        {
+          "id": "factory_entrance",
+          "position": {"x": 55, "z": 5},
+          "radius": 8,
+          "spawn_weight": 40
+        },
+        {
+          "id": "loading_dock",
+          "position": {"x": 105, "z": 45},
+          "radius": 6,
+          "spawn_weight": 30
+        },
+        {
+          "id": "waste_outlet",
+          "position": {"x": 5, "z": 70},
+          "radius": 5,
+          "spawn_weight": 30
+        }
+      ],
+      "natural_barriers": [
+        {"type": "ruins", "position": {"x": 25, "z": 20}, "size": {"width": 8, "height": 6}},
+        {"type": "ruins", "position": {"x": 80, "z": 25}, "size": {"width": 10, "height": 8}},
+        {"type": "machinery", "position": {"x": 40, "z": 60}, "size": {"width": 12, "height": 6}},
+        {"type": "machinery", "position": {"x": 75, "z": 55}, "size": {"width": 8, "height": 10}},
+        {"type": "toxic_pool", "position": {"x": 20, "z": 70}, "size": {"width": 6, "height": 6}},
+        {"type": "concrete_wall", "position": {"x": 90, "z": 15}, "size": {"width": 3, "height": 20}}
+      ],
+      "buildable_zones": [
+        {"position": {"x": 35, "z": 35}, "radius": 18},
+        {"position": {"x": 75, "z": 35}, "radius": 15},
+        {"position": {"x": 55, "z": 65}, "radius": 20},
+        {"position": {"x": 25, "z": 50}, "radius": 12},
+        {"position": {"x": 85, "z": 70}, "radius": 10}
+      ],
+      "strategic_features": {
+        "chokepoints": [
+          {"position": {"x": 55, "z": 15}, "width": 10},
+          {"position": {"x": 35, "z": 45}, "width": 8}
+        ],
+        "high_ground": [
+          {"position": {"x": 25, "z": 20}, "elevation": 6},
+          {"position": {"x": 80, "z": 25}, "elevation": 7}
+        ]
+      },
+      "environment": {
+        "lighting": "industrial_twilight",
+        "weather": "smoggy",
+        "ambient_color": "#708090",
+        "fog_distance": 80
+      }
+    },
+    {
+      "id": "fortress_siege",
+      "name": "Fortress Siege",
+      "description": "Defend the ancient fortress walls against a massive siege assault.",
+      "terrain_type": "castle",
+      "size": {
+        "width": 130,
+        "height": 100
+      },
+      "central_tower_position": {
+        "x": 65,
+        "z": 50
+      },
+      "spawn_zones": [
+        {
+          "id": "siege_front",
+          "position": {"x": 65, "z": 5},
+          "radius": 12,
+          "spawn_weight": 50
+        },
+        {
+          "id": "siege_east",
+          "position": {"x": 125, "z": 35},
+          "radius": 8,
+          "spawn_weight": 25
+        },
+        {
+          "id": "siege_west",
+          "position": {"x": 5, "z": 35},
+          "radius": 8,
+          "spawn_weight": 25
+        }
+      ],
+      "natural_barriers": [
+        {"type": "wall_section", "position": {"x": 20, "z": 25}, "size": {"width": 15, "height": 3}},
+        {"type": "wall_section", "position": {"x": 95, "z": 25}, "size": {"width": 15, "height": 3}},
+        {"type": "wall_section", "position": {"x": 50, "z": 15}, "size": {"width": 30, "height": 3}},
+        {"type": "tower_ruins", "position": {"x": 15, "z": 25}, "size": {"width": 6, "height": 6}},
+        {"type": "tower_ruins", "position": {"x": 115, "z": 25}, "size": {"width": 6, "height": 6}},
+        {"type": "moat", "position": {"x": 65, "z": 20}, "size": {"width": 50, "height": 4}}
+      ],
+      "buildable_zones": [
+        {"position": {"x": 40, "z": 40}, "radius": 20},
+        {"position": {"x": 90, "z": 40}, "radius": 20},
+        {"position": {"x": 65, "z": 65}, "radius": 25},
+        {"position": {"x": 25, "z": 60}, "radius": 15},
+        {"position": {"x": 105, "z": 60}, "radius": 15}
+      ],
+      "strategic_features": {
+        "chokepoints": [
+          {"position": {"x": 35, "z": 25}, "width": 6},
+          {"position": {"x": 95, "z": 25}, "width": 6},
+          {"position": {"x": 65, "z": 20}, "width": 15}
+        ],
+        "high_ground": [
+          {"position": {"x": 15, "z": 25}, "elevation": 10},
+          {"position": {"x": 115, "z": 25}, "elevation": 10},
+          {"position": {"x": 65, "z": 30}, "elevation": 5}
+        ]
+      },
+      "environment": {
+        "lighting": "stormy_twilight",
+        "weather": "stormy",
+        "ambient_color": "#2F4F4F",
+        "fog_distance": 120
+      }
+    }
+  ]
+}
