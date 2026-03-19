@@ -38,6 +38,11 @@ static func create_projectile_vfx(
 	homing: bool = false,
 	target: Node = null
 ) -> void:
+	# Use new pool system for projectile trails
+	var trail_color := _get_trail_color_for_weapon(weapon_type)
+	VfxPoolSystem.create_projectile_trail(start_pos, end_pos, weapon_type, trail_color, travel_time)
+	
+	# Create additional weapon-specific trail effects
 	var vfx_type := _get_vfx_type_for_weapon(weapon_type)
 	match vfx_type:
 		ProjectileVfxType.BULLET_TRACER:
@@ -96,12 +101,36 @@ static func create_projectile_impact(
 	damage: float = 10.0,
 	target_entity: Node = null
 ) -> void:
-	# Use enhanced impact effects system
+	# Use enhanced impact effects system via pool system
+	VfxPoolSystem.create_impact_effect(pos, normal, projectile_type, target_type, damage * 0.1)
+	
+	# Also create enhanced weapon-specific impacts
 	ImpactEffectsEnhanced.create_weapon_impact(pos, normal, damage, projectile_type, target_entity)
 
 # =============================================================================
 # Internal VFX Creation Functions
 # =============================================================================
+
+static func _get_trail_color_for_weapon(weapon_type: String) -> Color:
+	match weapon_type:
+		"autocannon":
+			return Color(1.0, 0.8, 0.2)  # Yellow tracer
+		"missile_battery":
+			return Color(1.0, 0.4, 0.0)  # Orange missile trail
+		"rail_gun":
+			return Color(0.6, 0.9, 1.0)  # Blue railgun bolt
+		"plasma_mortar":
+			return Color(0.8, 0.2, 0.9)  # Purple plasma
+		"tesla_coil":
+			return Color(0.5, 0.9, 1.0)  # Electric blue
+		"inferno_tower":
+			return Color(1.0, 0.5, 0.0)  # Flame orange
+		"enemy_projectile":
+			return Color(0.8, 0.7, 0.4)  # Bone/organic
+		"energy_projectile":
+			return Color(0.4, 0.6, 1.0)  # Energy blue
+		_:
+			return Color.YELLOW
 
 static func _get_vfx_type_for_weapon(weapon_type: String) -> ProjectileVfxType:
 	match weapon_type:

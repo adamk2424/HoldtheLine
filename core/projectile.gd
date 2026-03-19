@@ -151,17 +151,15 @@ func _process(delta: float) -> void:
 
 
 func _hit() -> void:
-	# Enhanced impact VFX
+	# Enhanced impact VFX using new system
 	var weapon_type := _get_weapon_type_from_source(source)
-	var target_type := _get_target_type(target)
 	var normal := Vector3.UP  # TODO: Calculate actual surface normal
 	
-	ProjectileVfxEnhanced.create_projectile_impact(
+	ImpactEffectsEnhanced.create_weapon_impact(
 		global_position,
-		weapon_type,
-		target_type,
 		normal,
 		damage,
+		weapon_type,
 		target
 	)
 	
