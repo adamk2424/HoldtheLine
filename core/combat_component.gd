@@ -202,10 +202,6 @@ func _spawn_aoe(target_pos: Vector3, dmg: float) -> void:
 	GameBus.aoe_triggered.emit(target_pos, radius, dmg, entity)
 
 
-func get_effective_damage() -> float:
-	return damage * damage_multiplier
-
-
 func get_effective_range() -> float:
 	return attack_range * range_multiplier
 
@@ -344,3 +340,26 @@ func _apply_item_modifiers() -> void:
 	attack_range *= range_multiplier
 	if attack_speed_multiplier != 1.0:
 		attack_rate /= attack_speed_multiplier  # Lower rate = faster attacks
+
+
+func get_effective_damage() -> float:
+	var base_dmg := damage * damage_multiplier
+	
+	if not ItemSystem:
+		return base_dmg
+	
+	# Apply time scaling bonuses
+	var time_bonuses := ItemSystem.get_time_scaling_bonuses()
+	if time_bonuses.has("damage_multiplier"):
+		base_dmg *= time_bonuses["damage_multiplier"]
+	
+	# Apply adaptive bonuses
+	var adaptive_bonuses := ItemSystem.get_adaptive_bonuses()
+	if adaptive_bonuses.has("adaptive_damage"):
+		base_dmg += adaptive_bonuses["adaptive_damage"]
+	
+	# Apply all damage multiplier from Omega Protocol
+	if ItemSystem.has_effect("all_multiplier"):
+		base_dmg *= ItemSystem.get_effect_value("all_multiplier", 1.0)
+	
+	return base_dmg

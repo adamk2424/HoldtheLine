@@ -297,6 +297,41 @@ func get_structure_modifiers() -> Dictionary:
 	}
 
 
+func get_time_scaling_bonuses() -> Dictionary:
+	var bonuses := {}
+	var game_time_minutes: float = GameState.game_time / 60.0
+	
+	# Time scaling damage (Dimensional Amplifier)
+	if has_effect("time_scaling_damage"):
+		var scaling_rate: float = get_effect_value("time_scaling_damage", 0.0)
+		bonuses["damage_multiplier"] = 1.0 + (scaling_rate * game_time_minutes)
+	
+	# Time scaling income (Dimensional Amplifier)
+	if has_effect("time_scaling_income"):
+		var scaling_rate: float = get_effect_value("time_scaling_income", 0.0)
+		bonuses["income_multiplier"] = 1.0 + (scaling_rate * game_time_minutes)
+	
+	return bonuses
+
+
+func get_adaptive_bonuses() -> Dictionary:
+	var bonuses := {}
+	
+	# Adaptive damage based on enemy variety killed
+	if has_effect("adaptive_damage_bonus"):
+		var variety_killed: int = unlock_progress.get("enemy_variety_killed", 0)
+		var bonus_per_type: float = get_effect_value("adaptive_damage_bonus", 0.0)
+		bonuses["adaptive_damage"] = variety_killed * bonus_per_type
+	
+	# Adaptive speed based on enemy variety
+	if has_effect("adaptive_speed_bonus"):
+		var variety_killed: int = unlock_progress.get("enemy_variety_killed", 0)
+		var bonus_per_type: float = get_effect_value("adaptive_speed_bonus", 0.0)
+		bonuses["adaptive_speed"] = variety_killed * bonus_per_type
+	
+	return bonuses
+
+
 # --- Signal Handlers ---
 
 func _on_enemy_killed(_total_killed: int) -> void:

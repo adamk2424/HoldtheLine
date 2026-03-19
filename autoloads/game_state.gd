@@ -133,6 +133,13 @@ func add_population(amount: int) -> bool:
 		GameBus.population_limit_reached.emit()
 		return false
 	population_current += amount
+	
+	# Track for item unlock conditions 
+	if population_current >= population_max and ItemSystem:
+		var current_count := ItemSystem.unlock_progress.get("population_cap_reached", 0)
+		ItemSystem.unlock_progress["population_cap_reached"] = current_count + 1
+		ItemSystem.check_unlock_conditions()
+	
 	GameBus.population_changed.emit(population_current, population_max)
 	return true
 
@@ -158,12 +165,28 @@ func set_game_speed(speed: float) -> void:
 
 func get_total_energy_rate() -> float:
 	var item_multiplier := ItemSystem.get_resource_multipliers().get("energy_rate_multiplier", 1.0)
-	return (energy_rate + energy_bonus_rate) * income_multiplier * item_multiplier
+	var base_rate := (energy_rate + energy_bonus_rate) * income_multiplier * item_multiplier
+	
+	# Apply time scaling income from items
+	if ItemSystem:
+		var time_bonuses := ItemSystem.get_time_scaling_bonuses()
+		if time_bonuses.has("income_multiplier"):
+			base_rate *= time_bonuses["income_multiplier"]
+	
+	return base_rate
 
 
 func get_total_material_rate() -> float:
 	var item_multiplier := ItemSystem.get_resource_multipliers().get("material_rate_multiplier", 1.0)
-	return (material_rate + material_bonus_rate) * income_multiplier * item_multiplier
+	var base_rate := (material_rate + material_bonus_rate) * income_multiplier * item_multiplier
+	
+	# Apply time scaling income from items
+	if ItemSystem:
+		var time_bonuses := ItemSystem.get_time_scaling_bonuses()
+		if time_bonuses.has("income_multiplier"):
+			base_rate *= time_bonuses["income_multiplier"]
+	
+	return base_rate
 
 
 func get_game_time_formatted() -> String:

@@ -12,11 +12,20 @@ func _ready() -> void:
 
 # --- Signal handlers ---
 
-func _on_entity_died(entity: Node, entity_type: String, _entity_id: String, _killer: Node) -> void:
+func _on_entity_died(entity: Node, entity_type: String, entity_id: String, _killer: Node) -> void:
 	if entity_type != "enemy":
 		return
 	GameState.enemies_killed += 1
 	GameBus.enemy_killed.emit(GameState.enemies_killed)
+	
+	# Track enemy variety for item unlocks
+	if ItemSystem:
+		var current_varieties: Array = ItemSystem.unlock_progress.get("enemy_variety_killed_list", [])
+		if entity_id not in current_varieties:
+			current_varieties.append(entity_id)
+			ItemSystem.unlock_progress["enemy_variety_killed_list"] = current_varieties
+			ItemSystem.unlock_progress["enemy_variety_killed"] = current_varieties.size()
+			ItemSystem.check_unlock_conditions()
 
 	# Track boss kills separately
 	if entity is EnemyBase and entity.enemy_data.get("role", "") == "boss":

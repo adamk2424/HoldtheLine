@@ -34,6 +34,9 @@ func initialize(p_entity_id: String, p_entity_type: String, p_data: Dictionary =
 		health_component.is_invulnerable = false
 		if not health_component.health_changed.is_connected(_on_central_hp_changed):
 			health_component.health_changed.connect(_on_central_hp_changed)
+	
+	# Apply central tower specific item effects
+	_apply_central_tower_item_effects()
 
 
 func _ready() -> void:
@@ -183,3 +186,32 @@ func die(killer: Node = null) -> void:
 	EntityRegistry.unregister(self, entity_type)
 	GameBus.entity_removed.emit(self, entity_type)
 	queue_free()
+
+
+func _apply_central_tower_item_effects() -> void:
+	if not ItemSystem:
+		return
+		
+	var effects := ItemSystem._active_effects
+	
+	# Apply central tower health multiplier
+	if health_component and effects.has("central_tower_health_multiplier"):
+		var multiplier: float = effects["central_tower_health_multiplier"]
+		health_component.max_hp *= multiplier
+		health_component.current_hp = health_component.max_hp
+		print("[CentralTower] Applied health multiplier: x%.1f" % multiplier)
+	
+	# Apply energy regeneration
+	if effects.has("central_tower_energy_regen"):
+		var regen_rate: float = effects["central_tower_energy_regen"]
+		var regen_timer := Timer.new()
+		regen_timer.wait_time = 1.0
+		regen_timer.autostart = true
+		regen_timer.timeout.connect(_central_tower_energy_regen.bind(regen_rate))
+		add_child(regen_timer)
+		print("[CentralTower] Applied energy regen: +%.1f/sec" % regen_rate)
+
+
+func _central_tower_energy_regen(amount: float) -> void:
+	if is_built and not is_building:
+		GameState.energy += amount
