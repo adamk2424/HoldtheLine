@@ -26,6 +26,9 @@ var _group_title: Label
 var _group_grid: GridContainer
 var _group_entities: Array = []
 
+# Batch upgrade state
+var _batch_upgrading: bool = false
+
 # Production state
 var _building: Node = null
 var _building_data: Dictionary = {}
@@ -246,6 +249,8 @@ func _on_group_selected(entities: Array) -> void:
 
 
 func _on_upgrade_completed(entity: Node, _upgrade_name: String) -> void:
+	if _batch_upgrading:
+		return
 	if entity == _entity and is_instance_valid(_entity):
 		_populate_panel()
 
@@ -537,6 +542,41 @@ func _populate_sequential_tower_upgrades() -> void:
 		desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_upgrades_container.add_child(desc_label)
 
+	# Upgrade All button for group selection
+	if _group_entities.size() > 1:
+		var upgradeable: int = _count_upgradeable_in_group()
+		if upgradeable > 1:
+			var all_btn := Button.new()
+			all_btn.text = "Upgrade All (%d)" % upgradeable
+			all_btn.custom_minimum_size = Vector2(0, 26)
+			all_btn.add_theme_font_size_override("font_size", 10)
+
+			var all_style := StyleBoxFlat.new()
+			if can_afford:
+				all_style.bg_color = Color(0.18, 0.15, 0.05, 0.9)
+				all_style.border_color = Color(0.7, 0.6, 0.2)
+			else:
+				all_style.bg_color = Color(0.15, 0.15, 0.15, 0.7)
+				all_style.border_color = Color(0.3, 0.3, 0.3)
+			all_style.set_border_width_all(1)
+			all_style.set_corner_radius_all(3)
+			all_style.set_content_margin_all(4)
+			all_btn.add_theme_stylebox_override("normal", all_style)
+
+			var hover_style := all_style.duplicate()
+			hover_style.bg_color = Color(0.22, 0.18, 0.06, 0.95)
+			hover_style.border_color = Color(0.8, 0.7, 0.3)
+			all_btn.add_theme_stylebox_override("hover", hover_style)
+
+			if not can_afford:
+				all_btn.disabled = true
+				all_btn.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+			else:
+				all_btn.add_theme_color_override("font_color", Color(0.95, 0.85, 0.4))
+
+			all_btn.pressed.connect(_on_upgrade_all_pressed)
+			_upgrades_container.add_child(all_btn)
+
 
 func _populate_central_tower_upgrades() -> void:
 	var central: CentralTower = _entity as CentralTower
@@ -607,6 +647,61 @@ func _populate_central_tower_upgrades() -> void:
 func _on_upgrade_pressed(upgrade_index: int) -> void:
 	if _entity and is_instance_valid(_entity):
 		GameBus.upgrade_requested.emit(_entity, upgrade_index)
+
+
+func _on_upgrade_all_pressed() -> void:
+	## Upgrade all selected towers of the same type and tier, as many as resources allow.
+	if not _entity or not _entity is TowerBase:
+		return
+	var ref: TowerBase = _entity as TowerBase
+	var ref_tier: int = ref.current_tier
+	var ref_upgrade_idx: int = ref.current_upgrade_index
+	var ref_entity_id: String = ref.entity_id
+	var ref_sequential: bool = ref.sequential_upgrades
+
+	_batch_upgrading = true
+	var upgraded_count: int = 0
+	for entity: Node in _group_entities.duplicate():
+		if not is_instance_valid(entity) or not entity is TowerBase:
+			continue
+		var tower: TowerBase = entity as TowerBase
+		if tower.entity_id != ref_entity_id:
+			continue
+		if tower.is_fully_upgraded() or not tower.is_built or tower.is_building:
+			continue
+		if ref_sequential and tower.current_tier != ref_tier:
+			continue
+		if not ref_sequential and tower.current_upgrade_index != ref_upgrade_idx:
+			continue
+		var success: bool = TowerUpgradeHandler.upgrade_tower(tower, 0)
+		if success:
+			upgraded_count += 1
+	_batch_upgrading = false
+
+	if _entity and is_instance_valid(_entity):
+		_populate_panel()
+
+
+func _count_upgradeable_in_group() -> int:
+	## Count how many towers in the group selection can still be upgraded.
+	var count: int = 0
+	if not _entity or not _entity is TowerBase:
+		return 0
+	var ref: TowerBase = _entity as TowerBase
+	for entity: Node in _group_entities:
+		if not is_instance_valid(entity) or not entity is TowerBase:
+			continue
+		var tower: TowerBase = entity as TowerBase
+		if tower.entity_id != ref.entity_id:
+			continue
+		if tower.is_fully_upgraded() or not tower.is_built or tower.is_building:
+			continue
+		if tower.sequential_upgrades and tower.current_tier != ref.current_tier:
+			continue
+		if not tower.sequential_upgrades and tower.current_upgrade_index != ref.current_upgrade_index:
+			continue
+		count += 1
+	return count
 
 
 # --- Production ---

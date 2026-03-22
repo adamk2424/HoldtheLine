@@ -1,0 +1,81 @@
+{
+  "notes": "Base starts with Basic Structure walls stacked 2 deep in a hexagon shape ~100 units across. This is the confines of the base but you can build out 10 units past the walls before hitting the build area limit (total buildable area ~120x120). Barriers block enemy pathing -- enemies attack barriers to break through rather than pathfinding around them. Some special enemies ignore barriers (flying, Clugg, Gorger). Barriers connect visually when placed adjacent (like Age of Empires walls). All barriers have passive regen (1% max HP / 5 sec) and can be repaired by Repair Drones and Repair Towers. 75% sell-back value.",
+  "barriers": [
+    {
+      "name": "Basic Structure",
+      "role": "Wall",
+      "description": "Standard defensive wall. Cheap and fast to place. Forms the backbone of base defense. Blocks all ground enemy movement -- enemies must attack and destroy it to pass through. Connects visually to adjacent barriers forming a continuous wall. The starting hexagonal wall ring is made of these.",
+      "visualDescription": "Modular concrete and metal wall panel. Prefabricated military-style fortification with visible bolt plates and reinforcement ribs. Dark grey concrete base with metal plating on the outward-facing side. When connected to adjacent walls, panels merge into a seamless wall with visible seam lines. Top edge has a slight lip/parapet. Shows progressive cracking and metal warping as HP decreases.",
+      "gridSize": "1x1",
+      "hp": 400,
+      "armor": 3,
+      "damageOnContact": 0,
+      "slowEffect": 0,
+      "slowRadius": 0,
+      "energyCost": 1,
+      "materialsCost": 5,
+      "buildTime": 0.2,
+      "requiredTechLevel": "None",
+      "connectsToAdjacent": true,
+      "height": "Medium",
+      "effectType": "None",
+      "effectValue": 0,
+      "effectRadius": 0,
+      "effectDescription": "",
+      "abilities": []
+    },
+    {
+      "name": "Reinforced Barrier",
+      "role": "Wall",
+      "description": "Heavy-duty defensive wall with double the HP and armor of Basic Structures. Costs significantly more materials but takes much longer to breach. Use at critical chokepoints or in front of high-value towers. The 1x2 footprint means it covers more wall length per placement but uses more space.",
+      "visualDescription": "Solid reinforced metal wall panel, twice as thick as the Basic Structure. Layered steel plating with visible welded seams and impact-resistant bracing. Darker gunmetal finish with industrial yellow hazard markings along the base. Heavy riveted construction. When connected to adjacent barriers, forms an imposing double-thick wall line. Shows dents, gouges, and buckling under damage before finally rupturing.",
+      "gridSize": "1x2",
+      "hp": 800,
+      "armor": 6,
+      "damageOnContact": 0,
+      "slowEffect": 0,
+      "slowRadius": 0,
+      "energyCost": 2,
+      "materialsCost": 20,
+      "buildTime": 0.5,
+      "requiredTechLevel": "None",
+      "connectsToAdjacent": true,
+      "height": "Medium",
+      "effectType": "None",
+      "effectValue": 0,
+      "effectRadius": 0,
+      "effectDescription": "",
+      "abilities": []
+    },
+    {
+      "name": "Energy Barrier",
+      "role": "Shield",
+      "description": "Semi-permeable energy shield that does not block movement but absorbs ranged projectiles passing through it and debuffs enemies walking through it. Cannot be attacked directly by melee -- enemies walk right through it. Ranged enemy projectiles that pass through the barrier are absorbed, dealing their damage to the barrier's HP instead of their intended target. Enemies physically walking through the barrier take 10 contact damage and are slowed 15% for 3 seconds. Rapidly self-heals after taking no damage for 5 seconds. Best placed behind physical walls -- ranged enemies firing over walls will have their projectiles absorbed, while melee enemies that breach the wall get slowed when they walk through the energy barrier behind it.",
+      "visualDescription": "Translucent glowing blue-white energy field stretched between two metal emitter posts. Visible hexagonal grid pattern shimmers across the surface. Ripples visually when projectiles impact it. Intensity of glow corresponds to current HP -- bright when full, dim and flickering when low. When enemies pass through, the barrier flashes brighter at the contact point. Posts have visible energy conduits running to the ground.",
+      "gridSize": "1x2",
+      "hp": 500,
+      "armor": 4,
+      "damageOnContact": 10,
+      "slowEffect": 15,
+      "slowRadius": 0,
+      "energyCost": 20,
+      "materialsCost": 10,
+      "buildTime": 3,
+      "requiredTechLevel": "Tier 1",
+      "connectsToAdjacent": true,
+      "height": "Medium",
+      "effectType": "None",
+      "effectValue": 0,
+      "effectRadius": 0,
+      "effectDescription": "",
+      "abilities": [
+        {
+          "name": "Recharge",
+          "description": "When the Energy Barrier has not taken damage for 5 seconds, it begins rapidly regenerating HP at 50 HP/sec until fully healed. Any incoming damage resets the 5-second timer. This makes Energy Barriers self-sustaining against intermittent attacks but vulnerable to sustained pressure. If HP reaches 0, the barrier is destroyed and must be rebuilt.",
+          "cooldown": 5,
+          "effectValue": 50
+        }
+      ]
+    }
+  ]
+}

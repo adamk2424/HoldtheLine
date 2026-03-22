@@ -8,10 +8,6 @@ var _levels_data: Dictionary = {}
 var _current_level: Dictionary = {}
 var _objectives_tracker: Dictionary = {}
 
-signal level_objective_completed(objective_type: String)
-signal level_completed(level_id: String, rewards: Dictionary)
-signal level_failed(reason: String)
-
 
 func _ready() -> void:
 	_load_level_data()
@@ -121,7 +117,7 @@ func _process(_delta: float) -> void:
 func _check_objectives() -> void:
 	# Check survival time objective
 	if _objectives_tracker.has("survival_time"):
-		var obj := _objectives_tracker["survival_time"]
+		var obj: Dictionary = _objectives_tracker["survival_time"]
 		obj["current"] = GameState.game_time
 		
 		if not obj["completed"] and obj["current"] >= obj["target"]:
@@ -131,7 +127,7 @@ func _check_objectives() -> void:
 
 
 func _complete_objective(objective_type: String) -> void:
-	level_objective_completed.emit(objective_type)
+	GameBus.level_objective_completed.emit(objective_type)
 	print("[LevelSystem] Objective completed: " + objective_type)
 
 
@@ -149,7 +145,7 @@ func _complete_level() -> void:
 	# Mark level as completed
 	_mark_level_completed(level_id)
 	
-	level_completed.emit(level_id, rewards)
+	GameBus.level_completed.emit(level_id, rewards)
 	print("[LevelSystem] Level completed: %s" % _current_level.get("name", level_id))
 
 
@@ -345,5 +341,5 @@ func _on_game_over(survival_time: float) -> void:
 	if not GameState.central_tower_alive:
 		reason = "Central tower destroyed"
 	
-	level_failed.emit(reason)
+	GameBus.level_failed.emit(reason)
 	print("[LevelSystem] Level failed: %s" % reason)

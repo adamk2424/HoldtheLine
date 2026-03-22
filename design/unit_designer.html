@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hold the Line - Unit Designer</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0e17;
+  --card: #111827;
+  --border: #1e2a3a;
+  --header: #1a2332;
+  --accent: #00e5ff;
+  --green: #00e676;
+  --red: #ff5252;
+  --orange: #ffab40;
+  --text: #e0e0e0;
+  --text-dim: #8899aa;
+  --text-bright: #ffffff;
+  --input-bg: #0d1320;
+  --hover: #162030;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #2a3a4f; }
+
+/* Header */
+.page-header {
+  background: linear-gradient(135deg, var(--header) 0%, #0f1a2a 100%);
+  border-bottom: 2px solid var(--accent);
+  padding: 20px 32px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.page-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.page-header .subtitle {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.header-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Progress bar */
+.progress-bar-container {
+  margin-top: 12px;
+}
+.progress-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+}
+.progress-bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--green));
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+/* Buttons */
+.btn {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--hover); border-color: var(--accent); color: var(--text-bright); }
+.btn-accent { border-color: var(--accent); color: var(--accent); }
+.btn-accent:hover { background: rgba(0,229,255,0.1); }
+.btn-green { border-color: var(--green); color: var(--green); }
+.btn-green:hover { background: rgba(0,230,118,0.1); }
+.btn-red { border-color: var(--red); color: var(--red); }
+.btn-red:hover { background: rgba(255,82,82,0.1); }
+.btn-small { padding: 4px 10px; font-size: 12px; }
+
+/* Tabs */
+.tabs-container {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border);
+  margin: 0 32px;
+  margin-top: 0;
+}
+.tab-btn {
+  padding: 14px 28px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  top: 2px;
+}
+.tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.02); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-btn .tab-count {
+  font-size: 11px;
+  background: var(--border);
+  padding: 1px 7px;
+  border-radius: 10px;
+  margin-left: 6px;
+}
+.tab-btn.active .tab-count { background: rgba(0,229,255,0.2); color: var(--accent); }
+
+/* Summary Table */
+.summary-section {
+  margin: 24px 32px;
+}
+.summary-section h2 {
+  font-size: 16px;
+  color: var(--accent);
+  margin-bottom: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.summary-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.summary-table thead th {
+  background: var(--header);
+  padding: 10px 14px;
+  text-align: left;
+  color: var(--text-dim);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.summary-table tbody tr {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.summary-table tbody tr:hover { background: var(--hover); }
+.summary-table tbody td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.summary-table tbody tr:last-child td { border-bottom: none; }
+.summary-table .building-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+.badge-drone { background: rgba(0,229,255,0.15); color: var(--accent); }
+.badge-mech { background: rgba(255,171,64,0.15); color: var(--orange); }
+.badge-war { background: rgba(255,82,82,0.15); color: var(--red); }
+.empty-summary { color: var(--text-dim); text-align: center; padding: 20px !important; font-style: italic; }
+
+/* Content area */
+.content { padding: 24px 32px; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+.tab-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.tab-panel-header h2 {
+  font-size: 18px;
+  color: var(--text-bright);
+  font-weight: 600;
+}
+
+/* Unit Cards */
+.unit-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.unit-card:hover { border-color: #2a3a55; }
+
+.unit-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  background: var(--header);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+.unit-card-header:hover { background: #1f2d42; }
+.unit-card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.unit-card-header-left .unit-number {
+  font-size: 12px;
+  color: var(--text-dim);
+  background: var(--border);
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-weight: 700;
+}
+.unit-card-header-left .unit-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-bright);
+}
+.unit-card-header-left .unit-role {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-left: 4px;
+}
+.unit-card-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.collapse-icon {
+  color: var(--text-dim);
+  font-size: 18px;
+  transition: transform 0.25s;
+}
+.unit-card.collapsed .collapse-icon { transform: rotate(-90deg); }
+.unit-card-body {
+  padding: 20px;
+  display: block;
+}
+.unit-card.collapsed .unit-card-body { display: none; }
+
+/* Stat sections within card */
+.stat-section {
+  margin-bottom: 20px;
+}
+.stat-section:last-child { margin-bottom: 0; }
+.stat-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+.stat-grid-wide {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.field-group label {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.field-group input,
+.field-group select,
+.field-group textarea {
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 8px 10px;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+.field-group input:focus,
+.field-group select:focus,
+.field-group textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.field-group textarea { resize: vertical; min-height: 60px; }
+.field-group input[type="number"] { -moz-appearance: textfield; }
+.field-group input[type="number"]::-webkit-outer-spin-button,
+.field-group input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+.field-group select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238899aa' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 5h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+}
+
+/* Checkbox */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 20px;
+}
+.checkbox-group input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.checkbox-group label {
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Abilities */
+.abilities-section { margin-top: 0; }
+.ability-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.ability-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.ability-header span {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--green);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Save status */
+.save-status {
+  font-size: 12px;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.save-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  display: inline-block;
+}
+.save-dot.unsaved { background: var(--orange); }
+
+/* Toast notifications */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--card);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  padding: 12px 20px;
+  color: var(--text-bright);
+  font-size: 13px;
+  z-index: 1000;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .page-header { padding: 16px 16px; }
+  .tabs-container { margin: 0 16px; }
+  .summary-section { margin: 16px; }
+  .content { padding: 16px; }
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+  .header-row { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 600px) {
+  .stat-grid { grid-template-columns: 1fr; }
+  .tab-btn { padding: 10px 14px; font-size: 12px; }
+}
+
+/* Delete confirm */
+.delete-confirm {
+  display: none;
+  align-items: center;
+  gap: 6px;
+}
+.delete-confirm.show { display: flex; }
+
+/* Notes Section */
+.notes-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 0 20px 20px 20px;
+  overflow: hidden;
+}
+.notes-header {
+  background: var(--header);
+  padding: 12px 20px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+}
+.notes-header:hover { background: var(--border); }
+.notes-header h2 {
+  color: var(--orange);
+  font-size: 1.05em;
+  letter-spacing: 1px;
+}
+.notes-header .toggle { color: var(--text-dim); font-size: 0.9em; }
+.notes-body { padding: 16px 20px; }
+.notes-body textarea {
+  width: 100%;
+  min-height: 150px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  padding: 12px;
+  font-family: inherit;
+  font-size: 0.9em;
+  resize: vertical;
+  line-height: 1.6;
+}
+.notes-body textarea:focus {
+  outline: none;
+  border-color: var(--orange);
+}
+.notes-body textarea.has-content {
+  border-color: var(--green);
+}
+.notes-hint {
+  font-size: 0.8em;
+  color: var(--text-dim);
+  margin-top: 6px;
+}
+
+/* Hidden file input */
+#importInput { display: none; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="page-header">
+  <div class="header-row">
+    <div>
+      <h1>Unit Designer</h1>
+      <div class="subtitle">Hold the Line -- Player Unit Configuration</div>
+    </div>
+    <div class="header-actions">
+      <span class="save-status" id="saveStatus">
+        <span class="save-dot" id="saveDot"></span>
+        <span id="saveText">Saved</span>
+      </span>
+      <button class="btn btn-accent" onclick="exportJSON()">Export JSON</button>
+      <button class="btn btn-green" onclick="document.getElementById('importInput').click()">Import JSON</button>
+      <input type="file" id="importInput" accept=".json" onchange="importJSON(event)">
+      <button class="btn btn-red" onclick="clearAll()">Clear All</button>
+    </div>
+  </div>
+  <div class="progress-bar-container">
+    <div class="progress-label">
+      <span>Design Progress</span>
+      <span id="progressText">0 / 0 units configured</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Design Notes -->
+<div class="notes-section">
+  <div class="notes-header" onclick="toggleNotes()">
+    <h2>Design Notes &amp; Details</h2>
+    <span class="toggle" id="notesToggle">&#9660;</span>
+  </div>
+  <div class="notes-body" id="notesBody">
+    <textarea id="designNotes" placeholder="Add general notes about unit design: role balance, drone abilities, mech vs war factory specialization, population cost philosophy..." oninput="onNotesInput(this)"></textarea>
+    <div class="notes-hint">Auto-saves with page data. Included in JSON exports.</div>
+  </div>
+</div>
+
+<!-- Summary Table -->
+<div class="summary-section">
+  <h2>Unit Summary</h2>
+  <div class="summary-table-wrap">
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Building</th>
+          <th>Role</th>
+          <th>HP</th>
+          <th>Armor</th>
+          <th>Damage</th>
+          <th>Speed</th>
+          <th>Pop</th>
+          <th>Cost (E/M)</th>
+          <th>Tech</th>
+        </tr>
+      </thead>
+      <tbody id="summaryBody">
+        <tr><td colspan="11" class="empty-summary">No units designed yet</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs-container">
+  <button class="tab-btn active" data-tab="drone" onclick="switchTab('drone')">
+    Drone Printer<span class="tab-count" id="droneCount">0</span>
+  </button>
+  <button class="tab-btn" data-tab="mech" onclick="switchTab('mech')">
+    Mech Bay<span class="tab-count" id="mechCount">0</span>
+  </button>
+  <button class="tab-btn" data-tab="war" onclick="switchTab('war')">
+    War Factory<span class="tab-count" id="warCount">0</span>
+  </button>
+</div>
+
+<!-- Content panels -->
+<div class="content">
+  <!-- Drone Printer -->
+  <div class="tab-panel active" id="panel-drone">
+    <div class="tab-panel-header">
+      <h2>Drone Printer Units</h2>
+      <button class="btn btn-accent" onclick="addUnit('drone')">+ Add Drone</button>
+    </div>
+    <div id="cards-drone"></div>
+  </div>
+
+  <!-- Mech Bay -->
+  <div class="tab-panel" id="panel-mech">
+    <div class="tab-panel-header">
+      <h2>Mech Bay Units</h2>
+      <button class="btn btn-accent" onclick="addUnit('mech')">+ Add Unit</button>
+    </div>
+    <div id="cards-mech"></div>
+  </div>
+
+  <!-- War Factory -->
+  <div class="tab-panel" id="panel-war">
+    <div class="tab-panel-header">
+      <h2>War Factory Units</h2>
+      <button class="btn btn-accent" onclick="addUnit('war')">+ Add Unit</button>
+    </div>
+    <div id="cards-war"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+
+const STORAGE_KEY = 'htl_unit_designs';
+
+const BUILDINGS = {
+  drone: 'Drone Printer',
+  mech: 'Mech Bay',
+  war: 'War Factory'
+};
+
+const ROLES = ['Repair', 'Combat', 'Tank', 'Ranged', 'Support', 'Scout', 'Special'];
+const ATTACK_TYPES = ['Melee', 'Projectile', 'Beam', 'AoE', 'Special', 'None'];
+const TECH_LEVELS = ['None', 'Tier 1', 'Tier 2', 'Tier 3'];
+const BEHAVIORS = ['Attack Nearest', 'Patrol Walls', 'Repair Nearest', 'Guard Towers', 'Support Allies', 'Custom'];
+
+function createEmptyUnit(building) {
+  return {
+    id: generateId(),
+    name: '',
+    building: building,
+    role: '',
+    description: '',
+    visualDescription: '',
+    hp: 0,
+    armor: 0,
+    damage: 0,
+    attackSpeed: 0,
+    attackRange: 0,
+    attackType: 'None',
+    splashRadius: 0,
+    splashDamagePercent: 0,
+    moveSpeed: 0,
+    flying: false,
+    energyCost: 0,
+    materialsCost: 0,
+    buildTime: 0,
+    populationCost: 1,
+    requiredTechLevel: 'None',
+    defaultBehavior: 'Attack Nearest',
+    behaviorDescription: '',
+    abilities: [],
+    collapsed: false
+  };
+}
+
+function createRepairDrone() {
+  const unit = createEmptyUnit('drone');
+  unit.name = 'Repair Drone';
+  unit.role = 'Repair';
+  unit.description = '';
+  unit.visualDescription = '';
+  unit.hp = 40;
+  unit.armor = 0;
+  unit.damage = 0;
+  unit.attackSpeed = 0;
+  unit.attackRange = 0;
+  unit.attackType = 'None';
+  unit.splashRadius = 0;
+  unit.splashDamagePercent = 0;
+  unit.moveSpeed = 0;
+  unit.flying = true;
+  unit.energyCost = 0;
+  unit.materialsCost = 0;
+  unit.buildTime = 0;
+  unit.populationCost = 1;
+  unit.requiredTechLevel = 'Tier 1';
+  unit.defaultBehavior = 'Repair Nearest';
+  unit.behaviorDescription = 'Flies to nearest damaged building or unit. Heals with light beam at 5 HP/sec. Stays on one target until fully healed, then moves to next damaged target.';
+  unit.abilities = [{
+    name: 'Repair Beam',
+    description: 'Heals target at 5 HP/sec',
+    cooldown: 0,
+    effectValue: 5
+  }];
+  return unit;
+}
+
+let state = {
+  notes: '',
+  drone: [],
+  mech: [],
+  war: []
+};
+
+let activeTab = 'drone';
+let saveTimeout = null;
+let dirty = false;
+
+function generateId() {
+  return 'u_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 6);
+}
+
+// ============================================================
+// PERSISTENCE
+// ============================================================
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.drone) {
+        if (parsed.notes === undefined) parsed.notes = '';
+        state = parsed;
+        return;
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to load state:', e);
+  }
+  // Default: pre-populate with Repair Drone and empty slots
+  state = {
+    notes: '',
+    drone: [createRepairDrone(), createEmptyUnit('drone'), createEmptyUnit('drone')],
+    mech: [createEmptyUnit('mech'), createEmptyUnit('mech'), createEmptyUnit('mech')],
+    war: [createEmptyUnit('war'), createEmptyUnit('war'), createEmptyUnit('war')]
+  };
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    dirty = false;
+    updateSaveStatus();
+  } catch (e) {
+    console.warn('Failed to save:', e);
+  }
+}
+
+function scheduleSave() {
+  dirty = true;
+  updateSaveStatus();
+  if (saveTimeout) clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(saveState, 2000);
+}
+
+function updateSaveStatus() {
+  const dot = document.getElementById('saveDot');
+  const text = document.getElementById('saveText');
+  if (dirty) {
+    dot.className = 'save-dot unsaved';
+    text.textContent = 'Unsaved changes...';
+  } else {
+    dot.className = 'save-dot';
+    text.textContent = 'Saved';
+  }
+}
+
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tab);
+  });
+  document.querySelectorAll('.tab-panel').forEach(panel => {
+    panel.classList.toggle('active', panel.id === 'panel-' + tab);
+  });
+}
+
+function updateTabCounts() {
+  document.getElementById('droneCount').textContent = state.drone.length;
+  document.getElementById('mechCount').textContent = state.mech.length;
+  document.getElementById('warCount').textContent = state.war.length;
+}
+
+// ============================================================
+// RENDERING
+// ============================================================
+
+function renderAll() {
+  renderCards('drone');
+  renderCards('mech');
+  renderCards('war');
+  updateSummaryTable();
+  updateTabCounts();
+  updateProgress();
+}
+
+function renderCards(building) {
+  const container = document.getElementById('cards-' + building);
+  container.innerHTML = '';
+  state[building].forEach((unit, index) => {
+    container.appendChild(createUnitCard(unit, building, index));
+  });
+}
+
+function createUnitCard(unit, building, index) {
+  const card = document.createElement('div');
+  card.className = 'unit-card' + (unit.collapsed ? ' collapsed' : '');
+  card.id = 'card-' + unit.id;
+
+  const displayName = unit.name || 'Unnamed Unit';
+  const displayRole = unit.role ? ' -- ' + unit.role : '';
+
+  card.innerHTML = `
+    <div class="unit-card-header" onclick="toggleCollapse('${building}', ${index})">
+      <div class="unit-card-header-left">
+        <span class="unit-number">${index + 1}</span>
+        <span class="unit-name">${escapeHtml(displayName)}</span>
+        <span class="unit-role">${escapeHtml(displayRole)}</span>
+      </div>
+      <div class="unit-card-header-right">
+        <button class="btn btn-small btn-red" onclick="event.stopPropagation(); deleteUnit('${building}', ${index})" title="Delete unit">Del</button>
+        <span class="collapse-icon">&#9660;</span>
+      </div>
+    </div>
+    <div class="unit-card-body">
+      ${renderIdentitySection(unit, building, index)}
+      ${renderCombatSection(unit, building, index)}
+      ${renderMovementSection(unit, building, index)}
+      ${renderEconomySection(unit, building, index)}
+      ${renderBehaviorSection(unit, building, index)}
+      ${renderAbilitiesSection(unit, building, index)}
+    </div>
+  `;
+  return card;
+}
+
+function renderIdentitySection(unit, building, index) {
+  const buildingOptions = Object.entries(BUILDINGS).map(([k, v]) =>
+    `<option value="${k}" ${unit.building === k ? 'selected' : ''}>${v}</option>`
+  ).join('');
+  const roleOptions = ['<option value="">-- Select --</option>'].concat(
+    ROLES.map(r => `<option value="${r}" ${unit.role === r ? 'selected' : ''}>${r}</option>`)
+  ).join('');
+
+  return `
+    <div class="stat-section">
+      <div class="stat-section-title">Identity</div>
+      <div class="stat-grid stat-grid-wide">
+        <div class="field-group">
+          <label>Name</label>
+          <input type="text" value="${escapeAttr(unit.name)}" onchange="updateField('${building}', ${index}, 'name', this.value)" placeholder="Unit name...">
+        </div>
+        <div class="field-group">
+          <label>Produced By</label>
+          <select onchange="moveUnit('${building}', ${index}, this.value)">${buildingOptions}</select>
+        </div>
+        <div class="field-group">
+          <label>Role</label>
+          <select onchange="updateField('${building}', ${index}, 'role', this.value)">${roleOptions}</select>
+        </div>
+      </div>
+      <div class="stat-grid stat-grid-wide" style="margin-top:12px">
+        <div class="field-group">
+          <label>Description</label>
+          <textarea onchange="updateField('${building}', ${index}, 'description', this.value)" placeholder="What does this unit do?">${escapeHtml(unit.description)}</textarea>
+        </div>
+        <div class="field-group">
+          <label>Visual Description</label>
+          <textarea onchange="updateField('${building}', ${index}, 'visualDescription', this.value)" placeholder="Describe placeholder geometry...">${escapeHtml(unit.visualDescription)}</textarea>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderCombatSection(unit, building, index) {
+  const attackTypeOptions = ATTACK_TYPES.map(t =>
+    `<option value="${t}" ${unit.attackType === t ? 'selected' : ''}>${t}</option>`
+  ).join('');
+
+  return `
+    <div class="stat-section">
+      <div class="stat-section-title">Combat Stats</div>
+      <div class="stat-grid">
+        <div class="field-group">
+          <label>HP</label>
+          <input type="number" min="0" value="${unit.hp}" onchange="updateField('${building}', ${index}, 'hp', parseFloat(this.value)||0)">
+        </div>
+        <div class="field-group">
+          <label>Armor</label>
+          <input type="number" min="0" value="${unit.armor}" onchange="updateField('${building}', ${index}, 'armor', parseFloat(this.value)||0)">
+        </div>
+        <div class="field-group">
+          <label>Damage</label>
+          <input type="number" min="0" value="${unit.damage}" onchange="updateField('${building}', ${index}, 'damage', parseFloat(this.value)||0)">
+        </div>
+        <div class="field-group">
+          <label>Attack Speed (atk/sec)</label>
+          <input type="number" min="0" step="0.1" value="${unit.attackSpeed}" onchange="updateField('${building}', ${index}, 'attackSpeed', parseFloat(this.value)||0)">
+        </div>
+        <div class="field-group">
+          <label>Attack Range (grid)</label>
+          <input type="number" min="0" step="0.5" value="${unit.attackRange}" onchange="updateField('${building}', ${index}, 'attackRange', parseFloat(this.value)||0)">
+        </div>
+        <div class="field-group">
+          <label>Attack Type</label>
+          <select onchange="updateField('${building}', ${index}, 'attackType', this.value)">${attackTypeOptions}</select>
+        </div>
+        <div class="field-group">
+          <label>Splash Radius</label>
+          <input type="number" min="0" step="0.5" value="${unit.splashRadius}" onchange="updateField('${building}', ${index}, 'splashRadius', parseFloat(this.value)||0)">
+        </div>
+        <div class="field-group">
+          <label>Splash Damage %</label>
+          <input type="number" min="0" max="100" value="${unit.splashDamagePercent}" onchange="updateField('${building}', ${index}, 'splashDamagePercent', parseFloat(this.value)||0)">
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderMovementSection(unit, building, index) {
+  return `
+    <div class="stat-section">
+      <div class="stat-section-title">Movement</div>
+      <div class="stat-grid">
+        <div class="field-group">
+          <label>Move Speed (grid/sec)</label>
+          <input type="number" min="0" step="0.5" value="${unit.moveSpeed}" onchange="updateField('${building}', ${index}, 'moveSpeed', parseFloat(this.value)||0)">
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="flying-${unit.id}" ${unit.flying ? 'checked' : ''} onchange="updateField('${building}', ${index}, 'flying', this.checked)">
+          <label for="flying-${unit.id}">Flying Unit</label>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderEconomySection(unit, building, index) {
+  const techOptions = TECH_LEVELS.map(t =>
+    `<option value="${t}" ${unit.requiredTechLevel === t ? 'selected' : ''}>${t}</option>`
+  ).join('');
+
+  return `
+    <div class="stat-section">
+      <div class="stat-section-title">Economy</div>
+      <div class="stat-grid">
+        <div class="field-group">
+          <label>Energy Cost</label>
+          <input type="number" min="0" value="${unit.energyCost}" onchange="updateField('${building}', ${index}, 'energyCost', parseFloat(this.value)||0)">
+        </div>
+        <div class="field-group">
+          <label>Materials Cost</label>
+          <input type="number" min="0" value="${unit.materialsCost}" onchange="updateField('${building}', ${index}, 'materialsCost', parseFloat(this.value)||0)">
+        </div>
+        <div class="field-group">
+          <label>Build Time (sec)</label>
+          <input type="number" min="0" step="0.5" value="${unit.buildTime}" onchange="updateField('${building}', ${index}, 'buildTime', parseFloat(this.value)||0)">
+        </div>
+        <div class="field-group">
+          <label>Population Cost</label>
+          <input type="number" min="0" value="${unit.populationCost}" onchange="updateField('${building}', ${index}, 'populationCost', parseFloat(this.value)||0)">
+        </div>
+        <div class="field-group">
+          <label>Required Tech Level</label>
+          <select onchange="updateField('${building}', ${index}, 'requiredTechLevel', this.value)">${techOptions}</select>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderBehaviorSection(unit, building, index) {
+  const behaviorOptions = BEHAVIORS.map(b =>
+    `<option value="${b}" ${unit.defaultBehavior === b ? 'selected' : ''}>${b}</option>`
+  ).join('');
+
+  return `
+    <div class="stat-section">
+      <div class="stat-section-title">AI Behavior</div>
+      <div class="stat-grid stat-grid-wide">
+        <div class="field-group">
+          <label>Default Behavior</label>
+          <select onchange="updateField('${building}', ${index}, 'defaultBehavior', this.value)">${behaviorOptions}</select>
+        </div>
+        <div class="field-group">
+          <label>Behavior Description</label>
+          <textarea onchange="updateField('${building}', ${index}, 'behaviorDescription', this.value)" placeholder="Describe the unit's default AI behavior...">${escapeHtml(unit.behaviorDescription)}</textarea>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderAbilitiesSection(unit, building, index) {
+  let abilitiesHtml = '';
+  unit.abilities.forEach((ability, aIdx) => {
+    abilitiesHtml += `
+      <div class="ability-card">
+        <div class="ability-header">
+          <span>Ability ${aIdx + 1}</span>
+          <button class="btn btn-small btn-red" onclick="removeAbility('${building}', ${index}, ${aIdx})">Remove</button>
+        </div>
+        <div class="stat-grid">
+          <div class="field-group">
+            <label>Name</label>
+            <input type="text" value="${escapeAttr(ability.name)}" onchange="updateAbility('${building}', ${index}, ${aIdx}, 'name', this.value)" placeholder="Ability name...">
+          </div>
+          <div class="field-group">
+            <label>Cooldown (sec)</label>
+            <input type="number" min="0" step="0.5" value="${ability.cooldown}" onchange="updateAbility('${building}', ${index}, ${aIdx}, 'cooldown', parseFloat(this.value)||0)">
+          </div>
+          <div class="field-group">
+            <label>Effect Value</label>
+            <input type="number" min="0" value="${ability.effectValue}" onchange="updateAbility('${building}', ${index}, ${aIdx}, 'effectValue', parseFloat(this.value)||0)">
+          </div>
+        </div>
+        <div class="stat-grid stat-grid-wide" style="margin-top:10px">
+          <div class="field-group">
+            <label>Description</label>
+            <textarea onchange="updateAbility('${building}', ${index}, ${aIdx}, 'description', this.value)" placeholder="What does this ability do?">${escapeHtml(ability.description)}</textarea>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  const canAdd = unit.abilities.length < 3;
+
+  return `
+    <div class="stat-section abilities-section">
+      <div class="stat-section-title">Abilities (${unit.abilities.length}/3)</div>
+      ${abilitiesHtml}
+      ${canAdd ? `<button class="btn btn-small btn-green" onclick="addAbility('${building}', ${index})">+ Add Ability</button>` : ''}
+    </div>
+  `;
+}
+
+// ============================================================
+// SUMMARY TABLE
+// ============================================================
+
+function updateSummaryTable() {
+  const tbody = document.getElementById('summaryBody');
+  const allUnits = [];
+  ['drone', 'mech', 'war'].forEach(b => {
+    state[b].forEach(u => {
+      allUnits.push({ ...u, buildingKey: b });
+    });
+  });
+
+  if (allUnits.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="11" class="empty-summary">No units designed yet</td></tr>';
+    return;
+  }
+
+  let num = 0;
+  tbody.innerHTML = allUnits.map(u => {
+    num++;
+    const badgeClass = u.buildingKey === 'drone' ? 'badge-drone' : u.buildingKey === 'mech' ? 'badge-mech' : 'badge-war';
+    const name = u.name || '<em style="color:var(--text-dim)">Unnamed</em>';
+    const cost = `${u.energyCost}/${u.materialsCost}`;
+    return `
+      <tr onclick="scrollToCard('${u.id}', '${u.buildingKey}')">
+        <td>${num}</td>
+        <td>${name}</td>
+        <td><span class="building-badge ${badgeClass}">${BUILDINGS[u.buildingKey]}</span></td>
+        <td>${u.role || '--'}</td>
+        <td>${u.hp}</td>
+        <td>${u.armor}</td>
+        <td>${u.damage}</td>
+        <td>${u.moveSpeed}</td>
+        <td>${u.populationCost}</td>
+        <td>${cost}</td>
+        <td>${u.requiredTechLevel}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function scrollToCard(unitId, buildingKey) {
+  switchTab(buildingKey);
+  // Small delay to let panel render
+  setTimeout(() => {
+    const card = document.getElementById('card-' + unitId);
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.style.borderColor = 'var(--accent)';
+      setTimeout(() => { card.style.borderColor = ''; }, 1500);
+    }
+  }, 50);
+}
+
+// ============================================================
+// PROGRESS
+// ============================================================
+
+function updateProgress() {
+  const allUnits = [...state.drone, ...state.mech, ...state.war];
+  const total = allUnits.length;
+  if (total === 0) {
+    document.getElementById('progressText').textContent = '0 / 0 units configured';
+    document.getElementById('progressFill').style.width = '0%';
+    return;
+  }
+
+  let configured = 0;
+  allUnits.forEach(u => {
+    // A unit is "configured" if it has at least a name, role, HP > 0 (or role is Repair/Support),
+    // and a tech level set
+    const hasName = u.name.trim().length > 0;
+    const hasRole = u.role.length > 0;
+    const hasHP = u.hp > 0;
+    const hasTech = u.requiredTechLevel !== 'None';
+    if (hasName && hasRole && hasHP && hasTech) configured++;
+  });
+
+  const pct = Math.round((configured / total) * 100);
+  document.getElementById('progressText').textContent = `${configured} / ${total} units configured`;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+// ============================================================
+// DATA OPERATIONS
+// ============================================================
+
+function updateField(building, index, field, value) {
+  state[building][index][field] = value;
+  scheduleSave();
+  // Update header name display and summary without full re-render
+  if (field === 'name' || field === 'role') {
+    const unit = state[building][index];
+    const card = document.getElementById('card-' + unit.id);
+    if (card) {
+      const nameEl = card.querySelector('.unit-name');
+      const roleEl = card.querySelector('.unit-role');
+      if (nameEl) nameEl.textContent = unit.name || 'Unnamed Unit';
+      if (roleEl) roleEl.textContent = unit.role ? ' -- ' + unit.role : '';
+    }
+  }
+  updateSummaryTable();
+  updateProgress();
+}
+
+function updateAbility(building, index, abilityIndex, field, value) {
+  state[building][index].abilities[abilityIndex][field] = value;
+  scheduleSave();
+}
+
+function addAbility(building, index) {
+  const unit = state[building][index];
+  if (unit.abilities.length >= 3) return;
+  unit.abilities.push({ name: '', description: '', cooldown: 0, effectValue: 0 });
+  scheduleSave();
+  renderCards(building);
+}
+
+function removeAbility(building, index, abilityIndex) {
+  state[building][index].abilities.splice(abilityIndex, 1);
+  scheduleSave();
+  renderCards(building);
+}
+
+function toggleCollapse(building, index) {
+  state[building][index].collapsed = !state[building][index].collapsed;
+  const unit = state[building][index];
+  const card = document.getElementById('card-' + unit.id);
+  if (card) {
+    card.classList.toggle('collapsed');
+  }
+  scheduleSave();
+}
+
+function addUnit(building) {
+  state[building].push(createEmptyUnit(building));
+  scheduleSave();
+  renderCards(building);
+  updateSummaryTable();
+  updateTabCounts();
+  updateProgress();
+  // Scroll to the new card
+  const lastUnit = state[building][state[building].length - 1];
+  setTimeout(() => {
+    const card = document.getElementById('card-' + lastUnit.id);
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 50);
+}
+
+function deleteUnit(building, index) {
+  const unit = state[building][index];
+  const name = unit.name || 'Unnamed Unit';
+  if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+  state[building].splice(index, 1);
+  scheduleSave();
+  renderCards(building);
+  updateSummaryTable();
+  updateTabCounts();
+  updateProgress();
+}
+
+function moveUnit(fromBuilding, index, toBuilding) {
+  if (fromBuilding === toBuilding) return;
+  const unit = state[fromBuilding].splice(index, 1)[0];
+  unit.building = toBuilding;
+  state[toBuilding].push(unit);
+  scheduleSave();
+  renderAll();
+  switchTab(toBuilding);
+  showToast(`Moved "${unit.name || 'Unnamed Unit'}" to ${BUILDINGS[toBuilding]}`);
+}
+
+// ============================================================
+// IMPORT / EXPORT
+// ============================================================
+
+function exportJSON() {
+  // Force save before export
+  saveState();
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'htl_unit_designs.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Exported unit designs to JSON');
+}
+
+function importJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data && (data.drone || data.mech || data.war)) {
+        // Validate structure
+        if (!Array.isArray(data.drone)) data.drone = [];
+        if (!Array.isArray(data.mech)) data.mech = [];
+        if (!Array.isArray(data.war)) data.war = [];
+        // Ensure all units have IDs
+        ['drone', 'mech', 'war'].forEach(b => {
+          data[b].forEach(u => {
+            if (!u.id) u.id = generateId();
+            // Ensure abilities array
+            if (!Array.isArray(u.abilities)) u.abilities = [];
+          });
+        });
+        state = data;
+        if (state.notes === undefined) state.notes = '';
+        saveState();
+        renderAll();
+        loadNotes();
+        showToast('Imported unit designs successfully');
+      } else {
+        showToast('Invalid file format: missing building arrays');
+      }
+    } catch (err) {
+      showToast('Failed to parse JSON: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  // Reset file input
+  event.target.value = '';
+}
+
+function clearAll() {
+  if (!confirm('Clear ALL unit designs? This cannot be undone.')) return;
+  if (!confirm('Are you sure? All data will be lost.')) return;
+  state = {
+    notes: '',
+    drone: [createEmptyUnit('drone')],
+    mech: [createEmptyUnit('mech')],
+    war: [createEmptyUnit('war')]
+  };
+  const notesEl = document.getElementById('designNotes');
+  if (notesEl) { notesEl.value = ''; notesEl.classList.remove('has-content'); }
+  saveState();
+  renderAll();
+  showToast('All unit designs cleared');
+}
+
+// ============================================================
+// UTILITY
+// ============================================================
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function escapeAttr(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ============================================================
+// NOTES
+// ============================================================
+
+function toggleNotes() {
+  const body = document.getElementById('notesBody');
+  const toggle = document.getElementById('notesToggle');
+  if (body.style.display === 'none') {
+    body.style.display = 'block';
+    toggle.innerHTML = '&#9660;';
+  } else {
+    body.style.display = 'none';
+    toggle.innerHTML = '&#9654;';
+  }
+}
+
+function onNotesInput(el) {
+  state.notes = el.value;
+  el.classList.toggle('has-content', el.value.trim().length > 0);
+  scheduleSave();
+}
+
+function loadNotes() {
+  const el = document.getElementById('designNotes');
+  if (el && state.notes) {
+    el.value = state.notes;
+    el.classList.toggle('has-content', state.notes.trim().length > 0);
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+
+loadState();
+renderAll();
+loadNotes();
+</script>
+</body>
+</html>

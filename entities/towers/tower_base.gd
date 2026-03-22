@@ -1017,35 +1017,35 @@ func _apply_item_effects() -> void:
 	if not is_instance_valid(ItemSystem):
 		return
 	
-	var structure_mods := ItemSystem.get_structure_modifiers()
-	var tower_mods := ItemSystem.get_tower_modifiers()
-	
+	var structure_mods: Dictionary = ItemSystem.get_structure_modifiers()
+	var tower_mods: Dictionary = ItemSystem.get_tower_modifiers()
+
 	# Apply health multiplier
-	var health_multiplier := structure_mods.get("health_multiplier", 1.0)
+	var health_multiplier: float = structure_mods.get("health_multiplier", 1.0)
 	if health_multiplier != 1.0 and health_component:
-		var new_max_health := float(data.get("hp", 100)) * health_multiplier
+		var new_max_health: float = float(data.get("hp", 100)) * health_multiplier
 		health_component.max_health = new_max_health
 		health_component.current_health = new_max_health
 		data["hp"] = new_max_health  # Update data for upgrades
-	
+
 	# Apply tower-specific modifiers
 	if combat_component:
 		# Range multiplier
-		var range_multiplier := tower_mods.get("range_multiplier", 1.0)
+		var range_multiplier: float = tower_mods.get("range_multiplier", 1.0)
 		if range_multiplier != 1.0:
-			var new_range := float(data.get("attack_range", 10)) * range_multiplier
+			var new_range: float = float(data.get("attack_range", 10)) * range_multiplier
 			combat_component.attack_range = new_range
 			data["attack_range"] = new_range
-		
-		# Attack speed multiplier  
-		var speed_multiplier := tower_mods.get("attack_speed_multiplier", 1.0)
+
+		# Attack speed multiplier
+		var speed_multiplier: float = tower_mods.get("attack_speed_multiplier", 1.0)
 		if speed_multiplier != 1.0:
-			var new_attack_rate := float(data.get("attack_rate", 1.0)) * speed_multiplier
+			var new_attack_rate: float = float(data.get("attack_rate", 1.0)) * speed_multiplier
 			combat_component.attack_rate = new_attack_rate
 			data["attack_rate"] = new_attack_rate
-		
+
 		# Energy drain for overclocker
-		var energy_drain := tower_mods.get("energy_drain", 0.0)
+		var energy_drain: float = tower_mods.get("energy_drain", 0.0)
 		if energy_drain > 0.0:
 			# Create timer to drain energy periodically
 			var drain_timer := Timer.new()
@@ -1063,33 +1063,6 @@ func _drain_energy(amount: float) -> void:
 	## Drain energy from game state (used by overclocker item)
 	if is_built and not is_building and GameState.energy > amount:
 		GameState.energy -= amount
-
-
-func _trigger_tesla_discharge_effects() -> void:
-	## Tesla coil electrical discharge animation
-	if not visual_node:
-		return
-	
-	# Create electrical arc effects
-	for i in range(6):
-		var delay := i * 0.08
-		get_tree().create_timer(delay).timeout.connect(
-			func(): _create_tesla_arc_at_top(visual_node)
-		)
-
-
-func _trigger_inferno_beam_effects(target: Node) -> void:
-	## Inferno tower continuous beam animation
-	if not visual_node or not target:
-		return
-	
-	# Create flame stream toward target
-	var beam_duration := 1.0
-	for i in range(8):
-		var delay := i * 0.05
-		get_tree().create_timer(delay).timeout.connect(
-			func(): _create_flame_beam_segment(visual_node, target.global_position, i)
-		)
 
 
 func _create_tesla_arc_at_top(parent: Node3D) -> void:

@@ -1,0 +1,122 @@
+{
+  "notes": "Production buildings train player units. Player starts with 1 of each type pre-built. Additional copies can be built to speed up production (orders distribute across buildings of the same type round-robin). Production queue max 5 per building, or set to Continuous mode (rotates through queued unit types as resources allow). Must have full price available to start producing a unit. Production pauses when population cap (100) is reached. Buildings can be targeted and destroyed by enemies -- losing all copies of a building type means you can no longer produce those units until you rebuild. 75% sell-back value. Passive regen: 1% max HP / 5 sec.",
+  "buildings": [
+    {
+      "id": "prod_001",
+      "name": "Drone Printer",
+      "role": "Utility drone production",
+      "description": "Fabricates lightweight flying drones that perform support roles. Drones are cheap, fast to produce, and act autonomously on spawn without needing orders. The Drone Printer is essential for base sustainability -- Repair Drones keep structures alive, Shield Drones harden key buildings, and Disruptor Drones weaken incoming enemies. Prioritize building a second Drone Printer if you're running heavy drone counts.",
+      "visualDescription": "Compact industrial fabrication unit with a flat top landing pad where drones are assembled and launched. Robotic arms visible through transparent panels assembling components. Green status lights along the base. Drones lift off from the top pad when production completes. Antenna array on one side for drone command signals. Military grey with green accent lighting. Hums with a soft mechanical whir when active.",
+      "gridSize": "2x2",
+      "hp": 600,
+      "armor": 2,
+      "energyCost": 75,
+      "materialsCost": 60,
+      "buildTime": 15,
+      "requiredTechLevel": "None",
+      "produces": ["Repair Drone", "Shield Drone", "Disruptor Drone"],
+      "hotkey": "1",
+      "upgrades": [
+        {
+          "name": "Quick Fabrication",
+          "description": "Reduces build time of all drones produced by this building type by 20%.",
+          "costEnergy": 40,
+          "costMaterials": 30,
+          "requiredTechLevel": "None"
+        },
+        {
+          "name": "Reinforced Chassis",
+          "description": "All drones produced gain +15 HP and +1 armor.",
+          "costEnergy": 60,
+          "costMaterials": 50,
+          "requiredTechLevel": "Tier 1"
+        },
+        {
+          "name": "Advanced Optics",
+          "description": "Repair Drones heal 7 HP/sec (up from 5). Shield Drones grant +5 armor (up from +4). Disruptor Drones slow enemies by 35% (up from 25%).",
+          "costEnergy": 100,
+          "costMaterials": 80,
+          "requiredTechLevel": "Tier 2"
+        }
+      ]
+    },
+    {
+      "id": "prod_002",
+      "name": "Mech Bay",
+      "role": "Frontline combat mech production",
+      "description": "Assembles heavily armored combat mechs designed for frontline defense. Sentinels provide reliable ranged firepower from behind walls, while Juggernauts hold breach points with their massive HP and devastating melee. The Mech Bay is the core of your standing army. Build additional Mech Bays to maintain unit production during heavy losses.",
+      "visualDescription": "Large industrial hangar-style building with a wide bay door that opens to deploy finished mechs. Interior shows assembly gantries, welding sparks, and mech frames in various stages of completion. Heavy reinforced walls with external armor plating. Blue operational status lights. Smoke and steam vent from exhaust ports during production. Dark steel construction with blue accent lighting matching Sentinel visors.",
+      "gridSize": "3x2",
+      "hp": 900,
+      "armor": 4,
+      "energyCost": 120,
+      "materialsCost": 100,
+      "buildTime": 22,
+      "requiredTechLevel": "None",
+      "produces": ["Sentinel", "Juggernaut"],
+      "hotkey": "2",
+      "upgrades": [
+        {
+          "name": "Streamlined Assembly",
+          "description": "Reduces build time of all mechs produced by this building type by 20%.",
+          "costEnergy": 50,
+          "costMaterials": 40,
+          "requiredTechLevel": "None"
+        },
+        {
+          "name": "Hardened Plating",
+          "description": "All mechs produced gain +50 HP and +1 armor.",
+          "costEnergy": 80,
+          "costMaterials": 65,
+          "requiredTechLevel": "Tier 1"
+        },
+        {
+          "name": "Overclocked Servos",
+          "description": "All mechs produced gain +10% attack speed and +10% move speed. Juggernaut Fortify grants +4 armor (up from +3).",
+          "costEnergy": 120,
+          "costMaterials": 100,
+          "requiredTechLevel": "Tier 2"
+        }
+      ]
+    },
+    {
+      "id": "prod_003",
+      "name": "War Factory",
+      "role": "Specialized heavy unit production",
+      "description": "Manufactures specialized heavy vehicles and walkers. Strikers provide fast mobile firepower for rapid response, while Siege Walkers deliver devastating long-range artillery support. War Factory units are expensive and pop-heavy but fill critical roles that mechs and drones cannot. The Striker's speed makes it irreplaceable for plugging sudden breaches, and the Siege Walker's range lets it hit enemies before they even reach the walls.",
+      "visualDescription": "Massive industrial complex with a reinforced vehicle ramp exit. Tank treads and heavy machinery visible inside. Thick armored walls with blast-resistant construction. Orange warning lights and hazard striping around the deployment ramp. Heavy crane arm extends from the roof for lifting components. Exhaust stacks release bursts of steam during production. Dark industrial metal with orange accent lighting matching Siege Walker plasma glow.",
+      "gridSize": "3x3",
+      "hp": 1200,
+      "armor": 5,
+      "energyCost": 160,
+      "materialsCost": 130,
+      "buildTime": 28,
+      "requiredTechLevel": "None",
+      "produces": ["Striker", "Siege Walker"],
+      "hotkey": "3",
+      "upgrades": [
+        {
+          "name": "Rapid Deployment",
+          "description": "Reduces build time of all vehicles produced by this building type by 20%.",
+          "costEnergy": 60,
+          "costMaterials": 50,
+          "requiredTechLevel": "None"
+        },
+        {
+          "name": "Composite Armor",
+          "description": "All vehicles produced gain +75 HP and +1 armor.",
+          "costEnergy": 100,
+          "costMaterials": 80,
+          "requiredTechLevel": "Tier 1"
+        },
+        {
+          "name": "Weapons Research",
+          "description": "Striker Overdrive duration increased to 12 seconds (up from 8). Siege Walker Shatter Shell triggers every 3rd shot (up from every 4th). All vehicles gain +15% damage.",
+          "costEnergy": 150,
+          "costMaterials": 120,
+          "requiredTechLevel": "Tier 2"
+        }
+      ]
+    }
+  ]
+}

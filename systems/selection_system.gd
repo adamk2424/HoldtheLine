@@ -10,6 +10,12 @@ var selected_units: Array = []
 var selected_entities: Array = []  # All selected entities (units + towers)
 var _selected_entity: Node = null
 var _is_sell_mode: bool = false
+
+# Double-click detection
+var _last_click_time: int = 0
+var _last_clicked_entity: Node = null
+const DOUBLE_CLICK_MS: int = 400
+
 var _sell_marker: MeshInstance3D = null
 var _sell_hovered_entity: Node = null
 var _sell_highlight_mat: StandardMaterial3D = null
@@ -134,6 +140,21 @@ func _click_select(screen_pos: Vector2) -> void:
 				closest_dist = dist
 				closest_entity = entity
 
+	# Double-click detection: select all matching towers
+	var now: int = Time.get_ticks_msec()
+	var is_double_click: bool = (
+		closest_entity != null
+		and closest_entity is TowerBase
+		and closest_entity == _last_clicked_entity
+		and (now - _last_click_time) < DOUBLE_CLICK_MS
+	)
+	_last_click_time = now
+	_last_clicked_entity = closest_entity
+
+	if is_double_click:
+		_select_all_matching_towers(closest_entity as TowerBase)
+		return
+
 	if not additive:
 		_deselect_all()
 
@@ -214,6 +235,31 @@ func _emit_selection_signals() -> void:
 		GameBus.ui_info_panel_show.emit(selected_entities[0])
 		if selected_entities.size() > 1:
 			GameBus.ui_group_selected.emit(selected_entities.duplicate())
+
+
+func _select_all_matching_towers(tower: TowerBase) -> void:
+	## Select all towers matching the given tower's type and upgrade level.
+	_deselect_all()
+	var all_towers: Array = EntityRegistry.get_all("tower")
+	for entity: Node in all_towers:
+		if not is_instance_valid(entity) or not entity.is_inside_tree():
+			continue
+		if not entity is TowerBase:
+			continue
+		var other: TowerBase = entity as TowerBase
+		if other.entity_id != tower.entity_id:
+			continue
+		if not other.is_built or other.is_building:
+			continue
+		if tower.sequential_upgrades:
+			if other.current_tier != tower.current_tier:
+				continue
+		else:
+			if other.current_upgrade_index != tower.current_upgrade_index:
+				continue
+		_select_entity(other)
+
+	_emit_selection_signals()
 
 
 # --- Screen-Space Distance ---

@@ -284,8 +284,8 @@ func _update_dashboard() -> void:
 		var achievement_sys = get_node("/root/AchievementSystem")
 		achievement_summary = achievement_sys.get_achievement_summary()
 	
-	var ach_unlocked := achievement_summary.get("unlocked_count", 0)
-	var ach_total := achievement_summary.get("total_achievements", 0)
+	var ach_unlocked: int = achievement_summary.get("unlocked_count", 0)
+	var ach_total: int = achievement_summary.get("total_achievements", 0)
 	_stats_labels["achievements"].text = "%d/%d (%.0f%%)" % [ach_unlocked, ach_total, achievement_summary.get("percentage", 0)]
 	
 	# Update difficulty chart

@@ -140,21 +140,20 @@ func _perform_attack() -> void:
 	if current_target.is_in_group("building") and bonus_vs_buildings > 1.0:
 		final_damage *= bonus_vs_buildings
 
-	# Determine weapon type for VFX
-	var weapon_type := _get_weapon_type()
-	
-	match attack_type:
-		"melee", "beam":
-			_deal_direct_damage(current_target, final_damage)
-		"projectile":
-			_spawn_projectile(current_target, final_damage)
-			GameBus.projectile_fired.emit(entity, current_target, weapon_type)
-		"aoe":
-			_spawn_aoe(current_target.global_position, final_damage)
+	# All towers deal instant direct damage
+	if attack_type == "aoe":
+		_spawn_aoe(current_target.global_position, final_damage)
+	else:
+		_deal_direct_damage(current_target, final_damage)
 
-	# Emit weapon fire signal for VFX
+	# Draw attack line from tower to target
+	var fire_pos: Vector3 = entity.global_position + Vector3(0, 1.5, 0)
+	var hit_pos: Vector3 = current_target.global_position + Vector3(0, 0.5, 0)
+	_create_attack_line(fire_pos, hit_pos)
+
+	# Emit signals for audio
+	var weapon_type := _get_weapon_type()
 	GameBus.weapon_fired.emit(entity.global_position, weapon_type, current_target.global_position)
-	
 	attack_fired.emit(current_target)
 	GameBus.audio_play_3d.emit("%s.%s.fire" % [entity.entity_type, entity.entity_id], entity.global_position)
 
@@ -185,10 +184,41 @@ func _deal_direct_damage(target: Node, amount: float) -> void:
 		_try_chain_lightning(target, amount)
 
 
-func _spawn_projectile(target: Node, dmg: float) -> void:
-	var proj := Projectile.acquire(entity.get_tree().current_scene)
-	proj.global_position = entity.global_position + Vector3(0, 1, 0)
-	proj.setup(target, dmg, armor_pierce, entity)
+func _create_attack_line(from_pos: Vector3, to_pos: Vector3) -> void:
+	## Draw a quick flash line from tower to target showing where it's aiming.
+	var scene_root: Node = entity.get_tree().current_scene
+	if not scene_root:
+		return
+
+	var length: float = from_pos.distance_to(to_pos)
+	if length < 0.1:
+		return
+
+	var mid: Vector3 = (from_pos + to_pos) / 2.0
+
+	var line := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = Vector3(0.04, 0.04, length)
+
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.9, 0.3, 0.9)
+	mat.emission_enabled = true
+	mat.emission = Color(1.0, 0.8, 0.2)
+	mat.emission_energy_multiplier = 3.0
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	box.material = mat
+
+	line.mesh = box
+	line.position = mid
+	line.look_at_from_position(mid, to_pos)
+
+	scene_root.add_child(line)
+
+	# Fade out and cleanup
+	var tween: Tween = scene_root.create_tween()
+	tween.tween_property(mat, "albedo_color", Color(1.0, 0.9, 0.3, 0.0), 0.12)
+	tween.tween_callback(line.queue_free)
 
 
 func _spawn_aoe(target_pos: Vector3, dmg: float) -> void:
@@ -250,9 +280,9 @@ func _try_chain_lightning(primary_target: Node, damage: float) -> void:
 	if not is_instance_valid(ItemSystem):
 		return
 		
-	var tower_mods := ItemSystem.get_tower_modifiers()
-	var chain_chance := tower_mods.get("chain_lightning_chance", 0.0)
-	var max_bounces := int(tower_mods.get("chain_lightning_bounces", 0))
+	var tower_mods: Dictionary = ItemSystem.get_tower_modifiers()
+	var chain_chance: float = tower_mods.get("chain_lightning_chance", 0.0)
+	var max_bounces: int = int(tower_mods.get("chain_lightning_bounces", 0))
 	
 	if chain_chance <= 0.0 or max_bounces <= 0 or randf() > chain_chance:
 		return
@@ -265,7 +295,7 @@ func _try_chain_lightning(primary_target: Node, damage: float) -> void:
 	var chain_range := attack_range * 0.6  # 60% of attack range
 	var bounced := 0
 	var hit_targets: Array[Node] = [primary_target]
-	var current_pos := primary_target.global_position
+	var current_pos: Vector3 = primary_target.global_position
 	
 	while bounced < max_bounces:
 		var nearest_enemy := _find_nearest_chainable_enemy(current_pos, chain_range, hit_targets)
@@ -297,7 +327,7 @@ func _find_nearest_chainable_enemy(pos: Vector3, range: float, exclude: Array[No
 	var nearest: Node = null
 	var nearest_dist := range
 	
-	var entities := EntityRegistry.get_entities_by_type(target_type)
+	var entities: Array = EntityRegistry.get_all(target_type)
 	for target: Node in entities:
 		if target in exclude or not is_instance_valid(target):
 			continue

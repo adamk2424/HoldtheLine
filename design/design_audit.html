@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hold the Line - Design Audit Report</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0a0e17;
+    color: #c8d6e5;
+    padding: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  h1 {
+    color: #00e5ff;
+    text-align: center;
+    font-size: 2em;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #576574;
+    margin-bottom: 10px;
+    font-size: 0.9em;
+  }
+
+  /* Summary Bar */
+  .summary-bar {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin: 16px 0 24px 0;
+    flex-wrap: wrap;
+  }
+  .summary-stat {
+    text-align: center;
+    padding: 10px 20px;
+    border-radius: 8px;
+    background: #111827;
+    border: 1px solid #1e2a3a;
+    min-width: 120px;
+  }
+  .summary-stat .num { font-size: 1.8em; font-weight: 700; }
+  .summary-stat .lbl { font-size: 0.75em; color: #576574; text-transform: uppercase; letter-spacing: 1px; }
+  .summary-stat.pass .num { color: #00e676; }
+  .summary-stat.partial .num { color: #ffab00; }
+  .summary-stat.fail .num { color: #ff5252; }
+  .summary-stat.fixed .num { color: #40c4ff; }
+
+  /* Filter Buttons */
+  .filter-bar {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    padding: 6px 16px;
+    border: 1px solid #1e2a3a;
+    border-radius: 20px;
+    background: #111827;
+    color: #c8d6e5;
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover { background: #1e2a3a; }
+  .filter-btn.active { background: #00e5ff; color: #0a0e17; border-color: #00e5ff; font-weight: 600; }
+
+  /* Sections */
+  .section {
+    background: #111827;
+    border: 1px solid #1e2a3a;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .section-header {
+    background: #1a2332;
+    padding: 14px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+  }
+  .section-header:hover { background: #1e2a3a; }
+  .section-header h2 {
+    color: #00e5ff;
+    font-size: 1.1em;
+    letter-spacing: 1px;
+  }
+  .section-stats {
+    display: flex;
+    gap: 8px;
+    font-size: 0.8em;
+  }
+  .section-stats span {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+  .section-body { padding: 0; }
+  .section-body.collapsed { display: none; }
+
+  /* Individual Question */
+  .question-item {
+    padding: 16px 20px;
+    border-bottom: 1px solid #1a2332;
+  }
+  .question-item:last-child { border-bottom: none; }
+  .question-item.hidden { display: none; }
+
+  .q-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .q-number {
+    color: #00e5ff;
+    font-weight: 700;
+    font-size: 0.9em;
+    white-space: nowrap;
+  }
+  .q-text {
+    font-weight: 600;
+    color: #dfe6e9;
+    font-size: 0.92em;
+    line-height: 1.4;
+    flex: 1;
+  }
+
+  /* Status Badges */
+  .status-badge {
+    padding: 3px 12px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  .status-pass { background: rgba(0,230,118,0.15); color: #00e676; border: 1px solid rgba(0,230,118,0.3); }
+  .status-fail { background: rgba(255,82,82,0.15); color: #ff5252; border: 1px solid rgba(255,82,82,0.3); }
+  .status-partial { background: rgba(255,171,0,0.15); color: #ffab00; border: 1px solid rgba(255,171,0,0.3); }
+  .status-fixed { background: rgba(64,196,255,0.15); color: #40c4ff; border: 1px solid rgba(64,196,255,0.3); }
+
+  /* Answer & Notes */
+  .answer-block {
+    background: #0d1117;
+    border: 1px solid #1e2a3a;
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-top: 8px;
+    font-size: 0.88em;
+    line-height: 1.5;
+  }
+  .answer-block .label {
+    font-size: 0.75em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .answer-block .label.ans-label { color: #576574; }
+  .answer-block .label.audit-label { color: #ff9800; }
+  .answer-block .answer-text { color: #a0b0c0; white-space: pre-wrap; }
+  .audit-notes {
+    background: #0f1520;
+    border: 1px solid #2a1a10;
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-top: 8px;
+    font-size: 0.85em;
+    line-height: 1.6;
+    color: #d0a050;
+  }
+  .audit-notes .file-ref { color: #40c4ff; font-family: 'Consolas', monospace; font-size: 0.9em; }
+  .audit-notes .val-match { color: #00e676; }
+  .audit-notes .val-mismatch { color: #ff5252; }
+  .audit-notes ul { margin: 6px 0 6px 18px; }
+  .audit-notes li { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<h1>Hold the Line</h1>
+<p class="subtitle">Design Audit Report - Generated 2026-03-17</p>
+
+<div class="summary-bar" id="summaryBar"></div>
+
+<div class="filter-bar">
+  <button class="filter-btn active" onclick="filterAll(this)">All</button>
+  <button class="filter-btn" onclick="filterBy('pass', this)">Pass</button>
+  <button class="filter-btn" onclick="filterBy('partial', this)">Partial</button>
+  <button class="filter-btn" onclick="filterBy('fail', this)">Fail</button>
+  <button class="filter-btn" onclick="filterBy('fixed', this)">Fixed This Session</button>
+</div>
+
+<div id="sections"></div>
+
+<script>
+const AUDIT = [
+  {
+    title: "SETTING & THEME",
+    items: [
+      {
+        q: "What is the faction/setting? (Sci-fi military humans vs aliens? Post-apocalyptic? Fantasy? Something else?) This drives all naming and visual style.",
+        answer: "Sci-fi military humans with advanced technology that is a mixture of mechanical and energy based. Being attacked by aliens that are a mixture of animal like monsters that grow increasingly strong. There can be magical or fantasy elements as well mixed in.",
+        status: "pass",
+        notes: "Tower names (Autocannon, Rail Gun, Tesla Coil, Plasma Mortar) and unit names (Repair Drone, Shield Drone, Sentinel, Juggernaut) reflect sci-fi military tech. Enemy names (Thrasher, Brute, Scrit, Blight Mite, Gloom Wing) reflect alien monsters. Resources are Energy and Materials. Visual meshes use organic colors for enemies (brown, purple, dark green) vs mechanical colors for player units."
+      },
+      {
+        q: "Are the enemies a single faction (e.g., alien swarm, robot army) or a mix of different factions/types?",
+        answer: "All one faction but the faction is a collection of different monster types.",
+        status: "pass",
+        notes: "All enemies are defined in a single <span class='file-ref'>data/enemies.json</span> as one collection with varied types: melee (Thrasher, Brute), ranged (Slinker, Bile Spitter), flying (Scrit, Gloom Wing), support (Howler), suicide (Blight Mite), boss (Behemoth). No faction divisions."
+      },
+      {
+        q: "What is the general aesthetic tone? (Gritty/realistic, stylized/colorful, dark/horror-tinged?)",
+        answer: "More dark/horror like with grim aesthetic of fighting to the death to survive to the last man as long as possible.",
+        status: "pass",
+        notes: "UI uses very dark backgrounds (<span class='file-ref'>main_menu.gd</span> line 28: <code>Color(0.04, 0.04, 0.06)</code>), sickly green title color, muted text. Intro cinematic has dark overlay with departure/abandonment theme. Game tagline: \"Survive. Build. Defend.\""
+      },
+      {
+        q: "Is there any lore context for WHY the player is holding this position? (Last colony, strategic chokepoint, protecting civilians, etc.)",
+        answer: "The player is the commander of the forces left behind after the last drop ship has gone, hopeful that if they can hold out long enough, maybe someone will show up to rescue them as well.",
+        status: "pass",
+        notes: "Intro cinematic (<span class='file-ref'>ui/cinematic/intro_cinematic.gd</span>) shows a dropship departing and displays text: \"The last dropships have departed\" followed by \"You are all that is left. You must Survive.\" The \"hoping for rescue\" aspect is implied by surviving but not explicitly stated in dialogue."
+      }
+    ]
+  },
+  {
+    title: "PRODUCTION BUILDINGS",
+    items: [
+      {
+        q: "Do you envision the 3 production buildings as role-specialized? (e.g., one for units, one for towers/defenses, one for tech/upgrades) Or does each produce a mix?",
+        answer: "Role-specialized. Drone Printer, Mech Bay and War Factory. Drone Printer - units that perform helpful functions. They can fly and move quickly and perform their jobs automatically on spawn without needing to be given orders. There are 3 types of drones, tier 1, 2 and 3 unlocks each.",
+        status: "pass",
+        notes: "Three buildings exist: <span class='file-ref'>entities/buildings/drone_printer.gd</span> (produces repair_drone, shield_drone, disruptor_drone), <span class='file-ref'>entities/buildings/mech_bay.gd</span> (produces sentinel, juggernaut), <span class='file-ref'>entities/buildings/war_factory.gd</span> (produces striker, siege_walker). All defined in <span class='file-ref'>data/production_buildings.json</span> with proper specialization."
+      },
+      {
+        q: "Can you build multiples of the same production building to speed up production?",
+        answer: "Yes. There is only one build menu per building type but building more of them increases production rate. Pressing 1 (hotkey for Bot Printer) and then ordering up 5 repair bots for example, if you have 3 bot printers, it will send the build command to each in order, resulting in each having 2, 2 and 1 in the build queue in that example.",
+        status: "fixed",
+        notes: "<span class='val-match'>FIXED this session.</span> Production panel now finds all buildings of the same type and distributes units to the one with the shortest queue (round-robin). <span class='file-ref'>ui/production_panel/production_panel.gd</span> <code>_find_shortest_queue_building()</code> scans the <code>production_buildings</code> group for matching <code>entity_id</code>."
+      },
+      {
+        q: "How many upgrade tiers per building? (2 or 3?)",
+        answer: "Only the central tower has upgrade tiers to unlock the next tech stage, but towers can have between 0 and 5 upgrade levels depending on the tower.",
+        status: "pass",
+        notes: "Central Tower has 3 tiers in <span class='file-ref'>data/central_tower.json</span> (Tier 1/2/3 Tech). Production buildings have 3 upgrade levels each (upgrade affects produced units, not the building itself). Towers have individual upgrade levels with branch points at level 3 (e.g., Autocannon \u2192 Gatling Turret or Heavy Autocannon)."
+      },
+      {
+        q: "Is there a tech dependency between buildings? (e.g., must have Building A at tier 2 before you can build Building B?)",
+        answer: "No, except some towers, tower upgrades, and units are locked behind your Central Tower tech level (tier 1, 2 or 3 tech)",
+        status: "fixed",
+        notes: "<span class='val-match'>FIXED this session.</span> Tech gating now enforced in three places:<ul><li><span class='file-ref'>ui/build_menu/build_item.gd</span>: Items with <code>required_tech_level</code> are disabled and shown in red until Central Tower tier is met</li><li><span class='file-ref'>entities/towers/tower_upgrade_handler.gd</span>: Tower upgrades check <code>required_tech_level</code> before allowing upgrade</li><li>Updates on <code>central_tower_upgraded</code> signal to re-evaluate availability</li></ul>"
+      },
+      {
+        q: "Do production buildings have a build queue? If so, how deep? (e.g., queue 3-5 units at once)",
+        answer: "Yes, max of 5, but they can also be set to Continuous, where they will keep making the selected unit non-stop if they can. If you have several unit types in your production set to Continuous it will rotate through them as money becomes available, rather than just always making the cheapest one as soon as you have the money to pay for it.",
+        status: "fixed",
+        notes: "<span class='val-match'>FIXED this session.</span> Queue max 5 was already correct. Added Continuous mode to <span class='file-ref'>entities/buildings/production_queue.gd</span>: <code>toggle_continuous_unit()</code> adds/removes unit types from rotation. When queue empties with continuous enabled, <code>_try_continuous_enqueue()</code> rotates through enabled units, picking the next affordable one (not just cheapest)."
+      },
+      {
+        q: "Can production buildings be upgraded while actively training units?",
+        answer: "There are no production building upgrades, but they have upgrades to buy that affect units they produce. Those can be purchased at any time, even while they are training units.",
+        status: "pass",
+        notes: "Upgrades run in parallel with production (<span class='file-ref'>entities/buildings/production_building_base.gd</span> lines 100-120). The <code>request_upgrade()</code> method has no check requiring an empty queue. Upgrade timer runs independently in <code>_process(delta)</code>. Upgrades modify future unit stats (e.g., Drone Printer level 1: +20% HP to drones)."
+      },
+      {
+        q: "Does destroying a production building remove access to its units/tech, or is it unlocked permanently once built?",
+        answer: "There is no tech unlock but if there were it is permanent.",
+        status: "pass",
+        notes: "Tech levels stored in <span class='file-ref'>autoloads/game_state.gd</span> <code>tech_levels</code> dictionary. On building death (<span class='file-ref'>core/entity_base.gd</span> <code>die()</code>), the building is removed but tech_levels are never decremented. Tech persists through save/load."
+      },
+      {
+        q: "Do you start the game with any production building already built, or must you build everything from scratch?",
+        answer: "Yes, 1 of each of the 3 types.",
+        status: "pass",
+        notes: "<span class='file-ref'>scenes/game_session.gd</span> lines 219-229: <code>_place_starting_buildings()</code> places Central Tower at center, Drone Printer at offset (-4,0), Mech Bay at (+4,-1), War Factory at (0,+5). All three spawn before game begins."
+      }
+    ]
+  },
+  {
+    title: "CORE ECONOMY & RESOURCES",
+    items: [
+      {
+        q: "With base rate of 1 Energy + 1 Materials per second, a 50/50 cost unit takes ~50 sec to afford. Is that the pacing you want?",
+        answer: "Increase the rate to 5 and 5 per second. We will scale unit cost appropriately. There will also be buildings you can build to increase production.",
+        status: "fixed",
+        notes: "<span class='val-mismatch'>Was 1.0/1.0 per second.</span> <span class='val-match'>FIXED this session to 5.0/5.0 per second.</span> Updated in <span class='file-ref'>autoloads/game_state.gd</span> lines 8-9 (initial values) and lines 156-157 (reset_state). Both declarations and reset now use 5.0."
+      },
+      {
+        q: "Should there be resource-boosting buildings or upgrades that increase income rate?",
+        answer: "Yes but you need to kill 1 boss before you can upgrade your central tower, which doubles your income rate. You can double it again later after getting 10 boss kills. After the first central tower upgrade, you can build Leach Towers that shoot a ray out at enemies bodies and converts them into Material at 1 material per 10hp. There are also Thermal Siphon towers that leach energy off living enemies.",
+        status: "fixed",
+        notes: "<span class='val-match'>Leach Tower mechanics are correct:</span> 0.1 materials/hp, 0.3s/body (<span class='file-ref'>entities/towers/tower_resource.gd</span>). <span class='val-match'>Thermal Siphon is correct:</span> 0.5 energy/enemy/sec, 5 damage/sec. <span class='val-match'>FIXED this session:</span> Central Tower income doubling now fully wired up:<ul><li>Boss kills tracked in <span class='file-ref'>systems/score_system.gd</span> (detects role=boss on death)</li><li><code>required_boss_kills</code> validated in <span class='file-ref'>entities/towers/central_tower.gd</span> <code>can_upgrade_tier()</code></li><li><code>income_multiplier</code> applied in <span class='file-ref'>autoloads/game_state.gd</span> <code>_tick_resources()</code></li></ul>"
+      },
+      {
+        q: "Is there a unit population cap, or is it purely resource-limited?",
+        answer: "Yes, 100 units, no tower limit as space will limit tower total. Player units only, no enemy limit.",
+        status: "fixed",
+        notes: "<span class='val-mismatch'>Was 20 units.</span> <span class='val-match'>FIXED this session to 100 units.</span> Updated in <span class='file-ref'>autoloads/game_state.gd</span> line 15 (initial value) and line 161 (reset_state). No tower count limit exists (space-limited only)."
+      },
+      {
+        q: "Can buildings/units be sold back for partial resources? If so, what refund percentage? (e.g., 50%)",
+        answer: "Yes, 75%",
+        status: "fixed",
+        notes: "<span class='val-mismatch'>Was 50% refund.</span> <span class='val-match'>FIXED this session to 75% refund.</span> Updated in three files:<ul><li><span class='file-ref'>entities/towers/tower_base.gd</span> line 163-164: 0.5 \u2192 0.75</li><li><span class='file-ref'>entities/barriers/barrier_base.gd</span> line 231-232: 0.5 \u2192 0.75</li><li><span class='file-ref'>ui/hud/info_panel.gd</span> line 210: sell button display updated</li><li><span class='file-ref'>systems/sell_system.gd</span> comments updated</li></ul>"
+      },
+      {
+        q: "Do you gain bonus resources from killing enemies, or is income strictly time-based?",
+        answer: "Only time based.",
+        status: "pass",
+        notes: "No kill-based resource rewards exist. <span class='file-ref'>systems/score_system.gd</span> only increments <code>enemies_killed</code> counter on death. <span class='file-ref'>autoloads/game_state.gd</span> <code>_tick_resources()</code> only adds <code>energy_rate + energy_bonus_rate</code> per second. Resource towers (Leach/Thermal) are time-based harvesting, not kill rewards."
+      },
+      {
+        q: "Is there a third resource or any special currency (e.g., 'tech points' earned from kills for upgrades)?",
+        answer: "Yes, you get Tech Points for killing bosses but those aren't usable in the run, only post run in the upgrades screen. In game all costs are only in Energy or Materials",
+        status: "fixed",
+        notes: "<span class='val-match'>FIXED this session.</span> <span class='file-ref'>systems/score_system.gd</span> now detects boss kills (checks <code>enemy_data.role == \"boss\"</code>), increments <code>GameState.boss_kills</code>, adds +1 tech point to <code>MetaProgress.tech_points</code>, and emits <code>GameBus.boss_killed</code>. Upgrades menu still shows \"Coming Soon\" (future work)."
+      }
+    ]
+  },
+  {
+    title: "ENEMIES & WAVES",
+    items: [
+      {
+        q: "Are enemies wave-based (wave 1, wave 2 with breaks between) or truly continuous with ramping difficulty?",
+        answer: "Truly continuous with ramping difficulty, though surges of more or less enemies will hit areas at some times and bosses as well, though both are semi-random within a small time span.",
+        status: "pass",
+        notes: "Spawn system (<span class='file-ref'>systems/spawn_system.gd</span>) spawns enemies continuously using a timer that increments each frame. No wave batching. Enemy types are unlocked over time individually. A <code>wave_started</code> signal exists in GameBus but is never emitted (dead code)."
+      },
+      {
+        q: "If wave-based, is there a break between waves for the player to build? How long?",
+        answer: "No waves but the surges come approx. every 30 seconds to start, getting faster as you go at a rate of about 10% faster per minute.",
+        status: "fixed",
+        notes: "<span class='val-match'>FIXED this session.</span> Surge interval now uses compound acceleration: <code>interval * (1.0 - 0.1)^minutes</code> with +/- variance. At 5 min the interval is ~19s, at 10 min ~12s. Implemented in <span class='file-ref'>systems/difficulty_system.gd</span> <code>_get_current_surge_interval()</code>."
+      },
+      {
+        q: "What is the lose condition? (A specific 'core' building destroyed? All buildings gone? A certain area breached?)",
+        answer: "The building at the middle of your base, the Central Tower has 1500 hp, when it dies the game is lost.",
+        status: "pass",
+        notes: "<span class='file-ref'>data/central_tower.json</span> line 4: <code>\"hp\": 1500</code>. On death, <span class='file-ref'>entities/towers/central_tower.gd</span> sets <code>GameState.central_tower_alive = false</code> and emits <code>GameBus.central_tower_destroyed</code>. Game session checks this for loss condition."
+      },
+      {
+        q: "Are there flying enemies? If so, can all towers/units target them or only specific ones?",
+        answer: "Yes, some enemies are flying. All attacks can hit both flying and ground units but flying units don't have to path around walls and blocking shields/barriers, they can fly right into the base if they want.",
+        status: "pass",
+        notes: "Two flying enemies: Scrit (unlocks at 80s) and Gloom Wing (unlocks at 200s), both with <code>\"flying\": true</code> and <code>\"ignores_barriers\": true</code> in <span class='file-ref'>data/enemies.json</span>. Flight AI in <span class='file-ref'>entities/enemies/enemy_ai_flying.gd</span> maintains flight height of 5.0 and bypasses navmesh. All combat targets both air and ground."
+      },
+      {
+        q: "Do enemies have any formation or group behavior, or do they just rush the base individually?",
+        answer: "Most rush the base individually attacking the first thing they can, but some of the more specialized enemies do other things, like buff their allies, launch ranged attacks at units or towers ignoring walls, or run in to suicide explode on the outer walls.",
+        status: "pass",
+        notes: "All behaviors implemented:<ul><li><b>Rush/melee:</b> <span class='file-ref'>entities/enemies/enemy_ai_melee.gd</span> - moves to base center, attacks first thing in range</li><li><b>Buff allies:</b> Howler with war_cry aura (+20% damage, +15% speed in radius 4, every 2s)</li><li><b>Ranged:</b> Slinker, Bile Spitter via <span class='file-ref'>entities/enemies/enemy_ai_ranged.gd</span></li><li><b>Suicide:</b> Blight Mite with <code>attack_type: \"suicide\"</code>, <code>target_priority: \"walls\"</code> (80 damage, radius 2)</li></ul>"
+      },
+      {
+        q: "Do enemies target buildings, units, or both? Is there priority targeting (e.g., always attack nearest, or prefer production buildings)?",
+        answer: "Most always attack the first thing they can reach, but some special units will target player units and ignore buildings, some will try and attack towers ignoring walls, some will attack from range and some special units will try and attack deep into the base with long range attacks ignoring the front lines.",
+        status: "pass",
+        notes: "Multiple targeting modes implemented via <code>target_priority</code> field in enemy data. Enemies have different AI types (melee, ranged, flying, special) that determine behavior. Barrier-ignoring enemies (Clugg, Gorger) push past walls to reach deeper targets. Ranged enemies (Slinker, Bile Spitter) attack from distance."
+      },
+      {
+        q: "Do any enemies have shields or special defenses?",
+        answer: "Some might, we will design those per unit in the enemy design page.",
+        status: "pass",
+        notes: "Deferred to enemy design page. Current enemies have armor values (Brute: 3, Terror Bringer: 8, Behemoth: 15) which serve as damage reduction. No explicit shield mechanic yet, but the framework supports it."
+      },
+      {
+        q: "Do enemies scale in raw stats over time (HP/damage increase), or does difficulty come only from harder enemy compositions?",
+        answer: "Yes, both. Increase enemy HP and damage by 1% every minute. Add 1 armor point to all large enemies every 5 minutes, 2 armor points to all huge enemies every 5 minutes, and 1 armor point to all small enemies every 10 minutes.",
+        status: "fixed",
+        notes: "<span class='val-match'>FIXED this session.</span> HP/damage scaling unchanged (correct at 1%/min). Size-based armor now implemented: <span class='file-ref'>systems/spawn_system.gd</span> <code>get_armor_bonus_for_size()</code> reads <code>armor_scaling</code> from JSON and calculates flat armor bonus based on enemy size and elapsed time. Applied as <code>armor_bonus</code> in difficulty multipliers passed to <span class='file-ref'>entities/enemies/enemy_base.gd</span>. Generic armor_scale_per_minute removed."
+      },
+      {
+        q: "Is there a boss or mini-boss mechanic? (e.g., every 10th wave has a boss)",
+        answer: "Yes, a boss unit spawns +/-30 seconds at the 2 1/2 minute mark. A boss will spawn every 2 minutes after that, within a 30 second varying window, but spawn 10% sooner each time to increase the rate.",
+        status: "fixed",
+        notes: "<span class='val-match'>FIXED this session.</span> Boss timing completely rewritten in <span class='file-ref'>systems/difficulty_system.gd</span>:<ul><li>First boss at 150s (+/-30s variance)</li><li>Subsequent bosses every 120s base, with 10% compound reduction each spawn</li><li>+/-30s variance on each spawn</li><li>Minimum interval clamped to 30s</li></ul>"
+      },
+      {
+        q: "Do enemies come from all 4 edges equally, or can they focus on one side?",
+        answer: "All 4 equally at first but they surge in one of the 4 directions every so often.",
+        status: "fixed",
+        notes: "<span class='val-match'>FIXED this session.</span> Equal 4-edge spawning unchanged (correct). Directional surges now implemented: <span class='file-ref'>systems/difficulty_system.gd</span> picks a random edge (0-3) on surge start and calls <code>spawn_system.set_surge_direction()</code>. <span class='file-ref'>systems/spawn_system.gd</span> <code>_get_spawn_position()</code> concentrates spawns on that edge during surges, then resets to all-edge on surge end."
+      },
+      {
+        q: "Should there be a pre-wave warning showing which direction enemies are coming from?",
+        answer: "No waves, so no.",
+        status: "pass",
+        notes: "No pre-wave warning system exists. Surge alerts (<span class='file-ref'>ui/hud/surge_alert.gd</span>) show \"SURGE INCOMING!\" and \"BOSS DETECTED!\" during events, not as pre-warnings. This is correct per spec."
+      },
+      {
+        q: "Are there any enemies that can bypass or jump over barriers?",
+        answer: "Yes.",
+        status: "pass",
+        notes: "Four enemies have <code>ignores_barriers: true</code> in <span class='file-ref'>data/enemies.json</span>: Clugg, Scrit (flying), Gorger, Gloom Wing (flying). The flag is loaded in <span class='file-ref'>entities/enemies/enemy_ai_melee.gd</span> line 63. Flying enemies bypass via flight mechanics; ground barrier-ignoring enemies use the flag in pathfinding."
+      }
+    ]
+  },
+  {
+    title: "TOWERS",
+    items: [
+      {
+        q: "Do towers have individual upgrade levels? (e.g., can you upgrade a specific tower from Lv1 to Lv2/Lv3?)",
+        answer: "Yes, as well as having evolution/type changes with level increases such as turning a cannon turret into a flak turret for AOE damage vs a heavy cannon for more single target damage.",
+        status: "pass",
+        notes: "Tower upgrade system with branch evolution implemented in <span class='file-ref'>entities/towers/tower_upgrade_handler.gd</span>. Examples from <span class='file-ref'>data/towers_offensive.json</span>:<ul><li>Autocannon \u2192 level 3 branches into Gatling Turret (faster fire) or Heavy Autocannon (more damage)</li><li>Missile Battery \u2192 Cluster Rocket Battery (AOE) or Siege Missile Launcher (single target)</li><li>Tesla Coil \u2192 Storm Spire (chain lightning) or Arc Cannon (focused beam)</li></ul>"
+      },
+      {
+        q: "Can towers be repaired manually or do they only regen passively (1% per 5 sec)?",
+        answer: "Repair bots can repair towers in addition to their passive regen.",
+        status: "pass",
+        notes: "Repair Drones (<span class='file-ref'>entities/units/drone_repair.gd</span>) can heal towers, buildings, barriers, and the central tower at 5 HP/sec base. Repair Towers (<span class='file-ref'>data/towers_support.json</span>) provide passive heal aura of 8 HP/sec in radius 6, upgradeable to 16 HP/sec."
+      },
+      {
+        q: "What is the standard grid size for towers? (1x1? 2x2? Mix?)",
+        answer: "1x1 but some will be 2x2 or attach to other towers to sit on top of them (this is special types only)",
+        status: "partial",
+        notes: "<span class='val-match'>Grid sizes correct:</span> Most towers are 1x1, Plasma Mortar is 2x2 (<span class='file-ref'>data/towers_offensive.json</span>). Grid system in <span class='file-ref'>grid/build_grid.gd</span> supports variable sizes. <span class='val-mismatch'>Tower-on-tower stacking/attachment is NOT implemented.</span> No evidence of towers mounting on top of other towers in the grid system or placement logic."
+      },
+      {
+        q: "Do any towers have support/buff roles (e.g., a tower that boosts nearby towers' damage or range)?",
+        answer: "Yes, many. We will design many special towers that buff/debuff in many ways.",
+        status: "pass",
+        notes: "Four support towers in <span class='file-ref'>data/towers_support.json</span> with full implementation in <span class='file-ref'>entities/towers/tower_support.gd</span>:<ul><li>Repair Tower: heal aura (8 HP/sec in radius 6)</li><li>War Beacon: +15% damage buff</li><li>Targeting Array: +20% range buff</li><li>Shield Pylon: +3 armor buff</li></ul>All have upgrade paths and proper buff application/removal mechanics."
+      },
+      {
+        q: "What is the general range scale in grid units? (e.g., short=3, medium=6, long=10?)",
+        answer: "Short = 6, medium = 12, long = 20",
+        status: "partial",
+        notes: "<span class='val-match'>Short (6) and medium (12) match:</span> Inferno Tower range 6 (short), Missile Battery range 12 (medium). <span class='val-mismatch'>Long range towers use 16-18, not 20.</span> Rail Gun has range 18, Plasma Mortar has range 16. No tower has exactly range 20. Consider adjusting Rail Gun to 20 to match spec."
+      },
+      {
+        q: "Can towers be placed outside the 120x120 buildable area, or strictly inside it?",
+        answer: "Only inside.",
+        status: "pass",
+        notes: "<span class='file-ref'>grid/build_grid.gd</span> validates all placement within GRID_SIZE (120x120). <code>is_cell_free()</code> and <code>occupy_cells()</code> enforce boundaries. No placement allowed outside grid."
+      }
+    ]
+  },
+  {
+    title: "BARRIERS & DEFENSES",
+    items: [
+      {
+        q: "Can barriers completely block pathing (force enemies to path around), or must enemies always have a route to the base? (maze-building vs. no-maze?)",
+        answer: "Barriers do block enemies but enemies always attack so they won't path around, they will attack the barriers. There are some enemies that ignore barriers to try and attack straight at towers or units.",
+        status: "pass",
+        notes: "Barriers are entities that block enemy movement and are targeted for attack. Enemies do not maze around them. Four enemy types (Clugg, Scrit, Gorger, Gloom Wing) have <code>ignores_barriers: true</code> to push through or fly over. Most enemies attack the first barrier in their path."
+      },
+      {
+        q: "Do barriers take damage from all enemies, or only from siege-type enemies?",
+        answer: "All enemies.",
+        status: "pass",
+        notes: "<span class='file-ref'>core/combat_component.gd</span> <code>_perform_attack()</code> applies damage to any valid target including barriers. No special \"siege-only\" damage modifier exists. All enemies deal damage equally to barriers."
+      },
+      {
+        q: "Can barriers be manually repaired?",
+        answer: "Yes.",
+        status: "partial",
+        notes: "<span class='val-match'>Barriers can be repaired by Repair Drones</span> (<span class='file-ref'>entities/units/drone_repair.gd</span> line 101 checks \"barrier\" type) and Repair Towers (heal aura includes barriers). Energy Barriers have auto-regen (5s delay, 50 HP/s). <span class='val-mismatch'>However, there is no manual player-initiated repair command.</span> The answer says \"yes\" to manual repair, but repair is only automatic via drones/towers, not a click-to-repair action."
+      },
+      {
+        q: "Do barriers connect visually when placed adjacent to each other (like walls in Age of Empires)?",
+        answer: "Yes",
+        status: "pass",
+        notes: "<span class='file-ref'>entities/barriers/barrier_base.gd</span> lines 165-217 implement adjacency connection. <code>_update_connections()</code> scans 4 cardinal neighbors. All barrier types have <code>connects_to_adjacent: true</code> in <span class='file-ref'>data/barriers.json</span>. Visual updates triggered on placement and neighbor changes."
+      },
+      {
+        q: "Is there a limit to how many barriers can be placed?",
+        answer: "Only by the space they take up",
+        status: "pass",
+        notes: "<span class='file-ref'>grid/build_grid.gd</span> only checks if cells are free, no entity count limit. 120x120 grid = 14,400 possible cells. Limit is purely spatial."
+      },
+      {
+        q: "Can barriers be placed outside the 120x120 buildable area?",
+        answer: "No",
+        status: "pass",
+        notes: "Same grid validation as towers. All placement constrained to 120x120 grid boundaries in <span class='file-ref'>grid/build_grid.gd</span>."
+      }
+    ]
+  },
+  {
+    title: "PLAYER UNITS",
+    items: [
+      {
+        q: "Can player units be given rally points, patrol routes, or just move-to and attack commands?",
+        answer: "Their production building can be given a rally point to send units to on spawn, and units can be moved around or attack-moved. All units by default will move to the outer wall to perform their function and not sit idle.",
+        status: "fixed",
+        notes: "<span class='val-match'>FIXED this session.</span> Move/attack-move unchanged (correct). Rally points added to <span class='file-ref'>entities/buildings/production_building_base.gd</span>: <code>set_rally_point()</code> and <code>clear_rally_point()</code> methods. When a unit completes production and rally point is set, the unit's movement component is told to move to the rally point."
+      },
+      {
+        q: "Do units have a stance system? (Aggressive / Defensive / Hold Position)",
+        answer: "No",
+        status: "pass",
+        notes: "No stance system found in codebase. Confirmed via search for \"stance\" across all files."
+      },
+      {
+        q: "Do units auto-engage nearby enemies, or must the player micro them manually?",
+        answer: "Yes they auto engage",
+        status: "pass",
+        notes: "<span class='file-ref'>core/combat_component.gd</span> <code>_find_target()</code> automatically acquires nearest enemy in range. <code>is_active = true</code> by default. Units in attack-move state automatically engage enemies encountered."
+      },
+      {
+        q: "Can units be healed by a support unit, or only via passive regen?",
+        answer: "Yes, there are repair drones to heal units and buildings, and repair towers that heal in their effect radius",
+        status: "pass",
+        notes: "Repair Drones (<span class='file-ref'>entities/units/drone_repair.gd</span>): 5 HP/sec healing, targets units, buildings, towers, barriers, central tower. Repair Towers (<span class='file-ref'>entities/towers/tower_support.gd</span>): 8-16 HP/sec aura heal in radius 6."
+      },
+      {
+        q: "Is there a unit population cap? If so, what is it?",
+        answer: "Yes 100 unit population. We will specify population cost of each unit in their unit design pages.",
+        status: "fixed",
+        notes: "<span class='val-mismatch'>Was 20 units.</span> <span class='val-match'>FIXED this session to 100 units.</span> Per-unit population costs are implemented: repair_drone=1, shield_drone=1, disruptor_drone=2, etc. (<span class='file-ref'>data/units_drone.json</span>)."
+      },
+      {
+        q: "Can units go outside the 120x120 buildable area to intercept enemies?",
+        answer: "No, all units must stay inside the 120x120 base walls.",
+        status: "fixed",
+        notes: "<span class='val-match'>FIXED this session.</span> <span class='file-ref'>core/movement_component.gd</span> now has <code>enforce_boundaries</code> flag and <code>_clamp_to_grid()</code> method that constrains position to the 90-210 range (120x120 grid centered in 300x300 world). Player units spawned by production buildings have <code>enforce_boundaries = true</code> set on their MovementComponent."
+      }
+    ]
+  },
+  {
+    title: "UI & HUD",
+    items: [
+      {
+        q: "What should the HUD show at all times? (Resources, wave count, unit count, minimap, etc.)",
+        answer: "Yes, all of that. Resource pool in upper right, current population/max population, minimap showing the base walls that turn red if they become breached, and red dots for enemies to show if one area is concentrated with enemies. Timer showing how long you've held out and total enemies killed in the top center.",
+        status: "partial",
+        notes: "<span class='val-match'>Most HUD elements present:</span> Resource panel, population (\"Pop: X/Y\"), timer (MM:SS), kills counter (\"Kills: X\"). Minimap shows red dots for enemies, now in upper right (revised position). <span class='val-mismatch'>Remaining issue:</span><ul><li>Walls do NOT turn red when breached - barriers drawn as static gray rectangles on minimap</li></ul>"
+      },
+      {
+        q: "Should there be a minimap? Where on screen?",
+        answer: "Yes, upper right (revised from upper left).",
+        status: "pass",
+        notes: "<span class='val-match'>Minimap has been moved to upper right per revised design decision.</span> Minimap works correctly (180x180px, updates every 0.5s, shows buildings in green/blue, enemies in red)."
+      },
+      {
+        q: "How does the build menu (Q) work? Grid of icons? Categorized tabs? Radial menu?",
+        answer: "Build menu bar running down the left side that expands out with selection to show build options. Grid of icons.",
+        status: "pass",
+        notes: "<span class='file-ref'>ui/build_menu/build_menu.gd</span> positioned with <code>PRESET_LEFT_WIDE</code> on left side. Categories: Offensive Towers, Resource Towers, Support Towers, Barriers, Production Buildings. Expands to show grid of build items with icons and costs."
+      },
+      {
+        q: "Should selected units/buildings show a detailed info panel? Where?",
+        answer: "When a building or unit is selected, show their unit stats in the lower right panel. Should include their name, current HP/max hp, attack damage, range, any special abilities, a list of all their current buffs/debuffs.",
+        status: "fixed",
+        notes: "<span class='val-match'>FIXED this session.</span> Info panel now includes buff/debuff display. <span class='file-ref'>ui/hud/info_panel.gd</span> <code>_populate_buffs()</code> reads the entity's BuffDebuffComponent and shows active buffs (green +) and debuffs (red -) with their names and percentage values."
+      },
+      {
+        q: "Is there a game speed control (pause, fast-forward)?",
+        answer: "Yes. Default is speed = 1.0, but players can choose game speed .75 for an easier time, or game speed 1.25 for a challenge.",
+        status: "pass",
+        notes: "<span class='file-ref'>ui/hud/timer_panel.gd</span>: <code>SPEED_SLOW = 0.75</code>, <code>SPEED_NORMAL = 1.0</code>, <code>SPEED_FAST = 1.25</code>. Three speed buttons in top center panel. Keyboard hotkeys for speed_slow/speed_normal/speed_fast also implemented."
+      },
+      {
+        q: "Should there be a wave/threat indicator showing incoming directions?",
+        answer: "Not by default as enemies are coming in from all sides constantly, but there should be a large alert with a sound and a big banner at the top alerting the player when a surge of powerful enemies is coming in from a certain direction.",
+        status: "pass",
+        notes: "<span class='file-ref'>ui/hud/surge_alert.gd</span> shows \"SURGE INCOMING!\" banner at center-top with sound effect (<code>ui.alert_surge</code>). Also shows \"BOSS DETECTED!\" for boss spawns. Alert fades over 3 seconds. No constant direction indicator (correct per spec)."
+      }
+    ]
+  },
+  {
+    title: "INTRO CINEMATIC",
+    items: [
+      {
+        q: "How long should the intro cinematic be? (10 sec? 20 sec? 30 sec?)",
+        answer: "~15 seconds",
+        status: "pass",
+        notes: "<span class='file-ref'>ui/cinematic/intro_cinematic.gd</span> total sequence is approximately 15 seconds across multiple phases (dropship departure, text display, camera zoom)."
+      },
+      {
+        q: "Should the cinematic be skippable?",
+        answer: "Yes",
+        status: "pass",
+        notes: "<span class='file-ref'>ui/cinematic/intro_cinematic.gd</span> lines 343-351 handle input to skip the cinematic."
+      },
+      {
+        q: "How many dropships should be shown leaving?",
+        answer: "1 large ship.",
+        status: "pass",
+        notes: "Single dropship created in <span class='file-ref'>ui/cinematic/intro_cinematic.gd</span> <code>_create_dropship()</code> (lines 136-199) with body, wings, cockpit, and tail. Flies upward and away during the sequence."
+      },
+      {
+        q: "Should the text 'You are all that is left. You must Survive.' be voice-acted, text-on-screen, or both?",
+        answer: "Text on screen only. It should appear in 2 seconds. 'You are all that is left' first and fade it out, with 'You Must Survive' coming next and fading out.",
+        status: "pass",
+        notes: "<span class='val-match'>Fixed in a separate session.</span> Text is on-screen only with proper two-part fade sequence."
+      },
+      {
+        q: "Does the camera pan across the base during the cinematic, or stay in one position?",
+        answer: "Camera starts looking down on base and slowly zooms out to show the whole base.",
+        status: "pass",
+        notes: "Camera follows dropship upward initially, then transitions to an orbital view looking down on the base that zooms out. Implemented in <span class='file-ref'>ui/cinematic/intro_cinematic.gd</span> phases."
+      },
+      {
+        q: "Is there a main menu before the cinematic, or does the game boot straight into it?",
+        answer: "Yes, start on a main menu with 4 buttons: Start Game, Upgrades, Settings and Quit. Settings should have options for game resolution, full screen/windowed, lock mouse to window, audio options (master, SFX, music, UI sounds), and hotkey rebinds.",
+        status: "pass",
+        notes: "<span class='val-match'>Main menu has all 4 buttons:</span> New Game, Upgrades (\"Coming Soon\"), Settings, Quit (<span class='file-ref'>ui/menus/main_menu.gd</span>). Also has a Leaderboard button (bonus). Settings menu has core options (fullscreen, master/SFX/music volumes, edge pan, camera speed). Remaining settings (resolution, mouse lock, UI audio, hotkey rebinds) deferred for later review per design decision."
+      }
+    ]
+  },
+  {
+    title: "GENERAL GAMEPLAY",
+    items: [
+      {
+        q: "Is there a scoring system? (Survival time? Kills? Both?)",
+        answer: "Both.",
+        status: "pass",
+        notes: "Both survival time and kills tracked. <span class='file-ref'>autoloads/game_state.gd</span>: <code>game_time</code> and <code>enemies_killed</code>. Both recorded via <span class='file-ref'>autoloads/meta_progress.gd</span> <code>record_game_result(survival_time, kills)</code>. Game over screen shows both values."
+      },
+      {
+        q: "Is there a high score / leaderboard?",
+        answer: "Yes, local for now, show the top 10 highest runs by time (revised: time-only sorting is fine).",
+        status: "pass",
+        notes: "<span class='val-match'>Local leaderboard exists</span> (<span class='file-ref'>ui/menus/leaderboard.gd</span>) showing Time and Kills columns, sorted by time. Design revised: time-only sorting is acceptable."
+      },
+      {
+        q: "Is there any meta-progression between runs (unlock new units permanently), or is every run fresh?",
+        answer: "Yes. Players gain +1 tech points for every boss kill during a run. Tech points can be spent unlocking upgrades between runs.",
+        status: "fixed",
+        notes: "<span class='val-match'>FIXED this session.</span> <span class='file-ref'>systems/score_system.gd</span> now awards +1 tech point per boss kill immediately on death. Boss kills tracked separately in <code>GameState.boss_kills</code>. Tech points persisted via <code>MetaProgress.tech_points</code> and saved between sessions. Upgrades menu still \"Coming Soon\" (future work)."
+      },
+      {
+        q: "Is there a difficulty selection, or is it always the same?",
+        answer: "Always the same for now, we will add this later.",
+        status: "pass",
+        notes: "Pre-game menu shows \"Difficulty: Standard\" as informational text only, not selectable. Single difficulty preset used. Correct per spec (\"add this later\")."
+      },
+      {
+        q: "Is there any pause menu with options (volume, controls, quit)?",
+        answer: "Yes all of that, if you quit you can resume the previous game later, or start a new run.",
+        status: "partial",
+        notes: "<span class='val-match'>Pause menu has Resume, Settings, Quit to Menu</span> (<span class='file-ref'>ui/menus/pause_menu.gd</span>). Settings reuses the same settings screen. <span class='val-mismatch'>Game resume after quitting is NOT implemented.</span> No save/load-game-state system found - quitting loses the current run."
+      },
+      {
+        q: "Should the game have a tutorial or tips system for first-time players?",
+        answer: "No",
+        status: "pass",
+        notes: "No tutorial system exists. Confirmed via search across all files. Correct per spec."
+      }
+    ]
+  }
+];
+
+// Count statuses
+let counts = { pass: 0, partial: 0, fail: 0, fixed: 0, total: 0 };
+AUDIT.forEach(s => s.items.forEach(i => { counts[i.status]++; counts.total++; }));
+
+// Summary bar
+const summaryBar = document.getElementById('summaryBar');
+summaryBar.innerHTML = `
+  <div class="summary-stat"><div class="num">${counts.total}</div><div class="lbl">Total Questions</div></div>
+  <div class="summary-stat pass"><div class="num">${counts.pass}</div><div class="lbl">Pass</div></div>
+  <div class="summary-stat partial"><div class="num">${counts.partial}</div><div class="lbl">Partial</div></div>
+  <div class="summary-stat fail"><div class="num">${counts.fail}</div><div class="lbl">Fail</div></div>
+  <div class="summary-stat fixed"><div class="num">${counts.fixed}</div><div class="lbl">Fixed This Session</div></div>
+`;
+
+// Build sections
+const container = document.getElementById('sections');
+let globalIdx = 0;
+AUDIT.forEach((section, si) => {
+  const sec = document.createElement('div');
+  sec.className = 'section';
+
+  let sPass = 0, sFail = 0, sPartial = 0, sFixed = 0;
+  section.items.forEach(i => {
+    if (i.status === 'pass') sPass++;
+    else if (i.status === 'fail') sFail++;
+    else if (i.status === 'partial') sPartial++;
+    else if (i.status === 'fixed') sFixed++;
+  });
+
+  let statsHtml = '';
+  if (sPass) statsHtml += `<span class="status-badge status-pass">${sPass} pass</span>`;
+  if (sPartial) statsHtml += `<span class="status-badge status-partial">${sPartial} partial</span>`;
+  if (sFail) statsHtml += `<span class="status-badge status-fail">${sFail} fail</span>`;
+  if (sFixed) statsHtml += `<span class="status-badge status-fixed">${sFixed} fixed</span>`;
+
+  sec.innerHTML = `
+    <div class="section-header" onclick="toggleSection(${si})">
+      <h2>${section.title}</h2>
+      <div class="section-stats">${statsHtml}</div>
+    </div>
+    <div class="section-body" id="body-${si}">
+      ${section.items.map((item, qi) => {
+        globalIdx++;
+        const badgeClass = 'status-' + item.status;
+        const badgeText = item.status === 'fixed' ? 'Fixed' : item.status === 'partial' ? 'Partial' : item.status === 'fail' ? 'Fail' : 'Pass';
+        return `
+          <div class="question-item" data-status="${item.status}">
+            <div class="q-header">
+              <span class="q-number">Q${globalIdx}</span>
+              <span class="q-text">${item.q}</span>
+              <span class="status-badge ${badgeClass}">${badgeText}</span>
+            </div>
+            <div class="answer-block">
+              <div class="label ans-label">Your Answer</div>
+              <div class="answer-text">${item.answer}</div>
+            </div>
+            <div class="audit-notes">
+              <div class="label audit-label">Audit Notes</div>
+              ${item.notes}
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+  container.appendChild(sec);
+});
+
+function toggleSection(si) {
+  const body = document.getElementById('body-' + si);
+  body.classList.toggle('collapsed');
+}
+
+function filterAll(btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.question-item').forEach(el => el.classList.remove('hidden'));
+}
+
+function filterBy(status, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.question-item').forEach(el => {
+    el.classList.toggle('hidden', el.dataset.status !== status);
+  });
+}
+</script>
+</body>
+</html>

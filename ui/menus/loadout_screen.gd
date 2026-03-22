@@ -318,9 +318,9 @@ func _refresh_equipped_effects() -> void:
 	else:
 		for item_id: String in equipped_items:
 			var item_data := ItemSystem.get_item_data(item_id)
-			var effects := item_data.get("effects", {})
-			var rarity_data := ItemSystem.get_rarity_data(item_data.get("rarity", "common"))
-			var color := rarity_data.get("color", "#FFFFFF")
+			var effects: Dictionary = item_data.get("effects", {})
+			var rarity_data: Dictionary = ItemSystem.get_rarity_data(item_data.get("rarity", "common"))
+			var color: String = rarity_data.get("color", "#FFFFFF")
 			
 			text += "[color=%s]%s:[/color]\n" % [color, item_data.get("name", item_id)]
 			for effect_name: String in effects.keys():

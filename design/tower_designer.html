@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hold the Line - Tower Designer</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0a0e17;
+    color: #c8d6e5;
+    padding: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    color: #00e5ff;
+    text-align: center;
+    font-size: 2em;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #576574;
+    margin-bottom: 20px;
+    font-size: 0.9em;
+  }
+
+  /* ---- Save Bar ---- */
+  .save-bar {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: #0a0e17;
+    border-bottom: 1px solid #1e2a3a;
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .save-bar .btn-group { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .save-bar .status {
+    font-size: 0.85em;
+    color: #576574;
+  }
+
+  .save-bar .status.saved { color: #00e676; }
+
+  .btn {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.88em;
+    font-weight: 600;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-save { background: #00e5ff; color: #0a0e17; }
+  .btn-save:hover { background: #00b8d4; }
+  .btn-export { background: #576574; color: #fff; }
+  .btn-export:hover { background: #6c7a89; }
+  .btn-import { background: #576574; color: #fff; }
+  .btn-import:hover { background: #6c7a89; }
+  .btn-clear { background: #e74c3c; color: #fff; font-size: 0.8em; }
+  .btn-clear:hover { background: #c0392b; }
+  .btn-add { background: #1e2a3a; color: #00e5ff; border: 1px solid #00e5ff; }
+  .btn-add:hover { background: #00e5ff; color: #0a0e17; }
+  .btn-remove { background: #e74c3c22; color: #e74c3c; border: 1px solid #e74c3c44; font-size: 0.78em; padding: 4px 10px; }
+  .btn-remove:hover { background: #e74c3c; color: #fff; }
+  .btn-small { padding: 5px 12px; font-size: 0.8em; }
+
+  .hidden-input { display: none; }
+
+  /* ---- Progress ---- */
+  .overall-progress {
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .progress-bar-outer {
+    background: #1a2332;
+    border-radius: 10px;
+    height: 12px;
+    margin: 8px 0;
+    overflow: hidden;
+  }
+
+  .progress-bar-inner {
+    background: linear-gradient(90deg, #00e5ff, #00e676);
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.4s;
+    width: 0%;
+  }
+
+  .progress-text {
+    font-size: 0.85em;
+    color: #576574;
+  }
+
+  /* ---- Summary Table ---- */
+  .summary-section {
+    background: #111827;
+    border: 1px solid #1e2a3a;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+
+  .summary-header {
+    background: #1a2332;
+    padding: 12px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+  }
+
+  .summary-header:hover { background: #1e2a3a; }
+
+  .summary-header h2 {
+    color: #00e5ff;
+    font-size: 1.05em;
+    letter-spacing: 1px;
+  }
+
+  .summary-body { padding: 0; }
+
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85em;
+  }
+
+  .summary-table th {
+    background: #0a0e17;
+    color: #00e5ff;
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 0.85em;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #1e2a3a;
+    position: sticky;
+    top: 0;
+  }
+
+  .summary-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid #1a2332;
+    color: #c8d6e5;
+  }
+
+  .summary-table tr.clickable-row {
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .summary-table tr.clickable-row:hover { background: #1a233288; }
+
+  .summary-table .cat-offensive { border-left: 3px solid #e74c3c; }
+  .summary-table .cat-resource { border-left: 3px solid #f39c12; }
+  .summary-table .cat-support { border-left: 3px solid #00e676; }
+  .summary-table .cat-special { border-left: 3px solid #00e5ff; }
+
+  .no-data { color: #576574; font-style: italic; }
+
+  /* ---- Tabs ---- */
+  .tab-bar {
+    display: flex;
+    gap: 0;
+    margin-bottom: 0;
+    border-bottom: 2px solid #1e2a3a;
+  }
+
+  .tab-btn {
+    padding: 10px 24px;
+    background: #0a0e17;
+    color: #576574;
+    border: 1px solid #1e2a3a;
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 600;
+    transition: all 0.2s;
+    position: relative;
+    top: 2px;
+  }
+
+  .tab-btn:hover { color: #c8d6e5; background: #111827; }
+
+  .tab-btn.active {
+    color: #00e5ff;
+    background: #111827;
+    border-color: #1e2a3a;
+    border-bottom-color: #111827;
+  }
+
+  .tab-content {
+    display: none;
+    background: #111827;
+    border: 1px solid #1e2a3a;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 16px;
+  }
+
+  .tab-content.active { display: block; }
+
+  .tab-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .tab-header h3 {
+    color: #576574;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* ---- Tower Cards ---- */
+  .tower-card {
+    background: #0d1117;
+    border: 1px solid #1e2a3a;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .tower-card.has-name { border-color: #00e67644; }
+
+  .tower-card-header {
+    background: #1a2332;
+    padding: 10px 16px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+  }
+
+  .tower-card-header:hover { background: #1e2a3a; }
+
+  .tower-card-title {
+    color: #dfe6e9;
+    font-size: 0.95em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .tower-card-title .tower-index {
+    color: #00e5ff;
+    font-size: 0.8em;
+    background: #0a0e17;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .tower-card-title .tower-name-preview {
+    color: #00e676;
+    font-weight: 400;
+    font-size: 0.9em;
+  }
+
+  .tower-card-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .chevron {
+    color: #576574;
+    font-size: 0.8em;
+    transition: transform 0.2s;
+  }
+
+  .tower-card.collapsed .chevron { transform: rotate(-90deg); }
+
+  .tower-card-body {
+    padding: 16px;
+    display: block;
+  }
+
+  .tower-card.collapsed .tower-card-body { display: none; }
+
+  /* ---- Form Fields ---- */
+  .field-group {
+    margin-bottom: 16px;
+    border-bottom: 1px solid #1a2332;
+    padding-bottom: 14px;
+  }
+
+  .field-group:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+  .field-group-title {
+    color: #00e5ff;
+    font-size: 0.8em;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+
+  .field-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+
+  .field {
+    flex: 1;
+    min-width: 140px;
+  }
+
+  .field.wide { min-width: 280px; flex: 2; }
+  .field.full { min-width: 100%; flex: 100%; }
+
+  .field label {
+    display: block;
+    font-size: 0.78em;
+    color: #576574;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    width: 100%;
+    background: #0a0e17;
+    border: 1px solid #1e2a3a;
+    border-radius: 4px;
+    color: #c8d6e5;
+    padding: 7px 10px;
+    font-family: inherit;
+    font-size: 0.88em;
+    transition: border-color 0.2s;
+  }
+
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: #00e5ff;
+  }
+
+  .field input.has-content,
+  .field select.has-content,
+  .field textarea.has-content {
+    border-color: #00e67644;
+  }
+
+  .field textarea {
+    resize: vertical;
+    min-height: 50px;
+  }
+
+  .field select {
+    cursor: pointer;
+  }
+
+  .field input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
+  .field input[type="number"]::-webkit-inner-spin-button,
+  .field input[type="number"]::-webkit-outer-spin-button {
+    opacity: 1;
+  }
+
+  /* ---- Upgrade Section ---- */
+  .upgrade-levels {
+    margin-top: 8px;
+  }
+
+  .upgrade-level {
+    background: #0a0e1788;
+    border: 1px solid #1a2332;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+
+  .upgrade-level-header {
+    color: #00e5ff;
+    font-size: 0.82em;
+    font-weight: 700;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .branch-container {
+    background: #111827;
+    border: 1px dashed #00e5ff44;
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 8px;
+  }
+
+  .branch-container .branch-title {
+    color: #00e5ff;
+    font-size: 0.82em;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .branch-path {
+    background: #0a0e17;
+    border: 1px solid #1e2a3a;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+
+  .branch-path:last-child { margin-bottom: 0; }
+
+  .branch-label {
+    font-size: 0.82em;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  .branch-label.a { color: #00e5ff; }
+  .branch-label.b { color: #f39c12; }
+
+  /* ---- Ability Section ---- */
+  .ability-block {
+    background: #0a0e1788;
+    border: 1px solid #1a2332;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    position: relative;
+  }
+
+  .ability-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .ability-label {
+    color: #00e676;
+    font-size: 0.82em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ---- Misc ---- */
+  .collapse-indicator { color: #576574; font-size: 0.75em; }
+
+  .range-hint {
+    font-size: 0.72em;
+    color: #576574;
+    margin-top: 2px;
+    font-style: italic;
+  }
+
+  @media (max-width: 700px) {
+    body { padding: 10px; }
+    .field { min-width: 100%; }
+    .tab-btn { padding: 8px 12px; font-size: 0.8em; }
+  }
+
+  /* Notes Section */
+  .notes-section {
+    background: #111827;
+    border: 1px solid #1e2a3a;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .notes-header {
+    background: #1a2332;
+    padding: 12px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+  }
+  .notes-header:hover { background: #1e2a3a; }
+  .notes-header h2 {
+    color: #ffa726;
+    font-size: 1.05em;
+    letter-spacing: 1px;
+  }
+  .notes-header .toggle { color: #576574; font-size: 0.9em; }
+  .notes-body { padding: 16px 20px; }
+  .notes-body textarea {
+    width: 100%;
+    min-height: 150px;
+    background: #0a0e17;
+    border: 1px solid #1e2a3a;
+    border-radius: 4px;
+    color: #c8d6e5;
+    padding: 12px;
+    font-family: inherit;
+    font-size: 0.9em;
+    resize: vertical;
+    line-height: 1.6;
+  }
+  .notes-body textarea:focus {
+    outline: none;
+    border-color: #ffa726;
+  }
+  .notes-body textarea.has-content {
+    border-color: #00e676;
+  }
+  .notes-hint {
+    font-size: 0.8em;
+    color: #576574;
+    margin-top: 6px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Hold the Line</h1>
+<p class="subtitle">Tower Designer</p>
+
+<div class="overall-progress">
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="overallBar"></div></div>
+  <div class="progress-text" id="overallText">0 / 0 towers named</div>
+</div>
+
+<div class="save-bar">
+  <div class="btn-group">
+    <button class="btn btn-save" onclick="saveAll()">Save</button>
+    <button class="btn btn-export" onclick="exportJSON()">Export JSON</button>
+    <button class="btn btn-import" onclick="document.getElementById('importFile').click()">Import JSON</button>
+    <input type="file" id="importFile" class="hidden-input" accept=".json" onchange="importJSON(event)">
+    <button class="btn btn-clear" onclick="clearAll()">Clear All</button>
+  </div>
+  <div class="status" id="saveStatus">Not yet saved</div>
+</div>
+
+<!-- Design Notes -->
+<div class="notes-section">
+  <div class="notes-header" onclick="toggleNotes()">
+    <h2>Design Notes &amp; Details</h2>
+    <span class="toggle" id="notesToggle">&#9660;</span>
+  </div>
+  <div class="notes-body" id="notesBody">
+    <textarea id="designNotes" placeholder="Add general notes about tower design: balance philosophy, range/damage scaling rationale, upgrade path ideas, synergy combos..." oninput="onNotesInput(this)"></textarea>
+    <div class="notes-hint">Auto-saves with page data. Included in JSON exports.</div>
+  </div>
+</div>
+
+<!-- Summary Table -->
+<div class="summary-section" id="summarySection">
+  <div class="summary-header" onclick="toggleSummary()">
+    <h2>ALL TOWERS SUMMARY</h2>
+    <span class="chevron" id="summaryChevron">&#9660;</span>
+  </div>
+  <div class="summary-body" id="summaryBody">
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Role</th>
+          <th>HP</th>
+          <th>Damage</th>
+          <th>Range</th>
+          <th>Cost (E/M)</th>
+          <th>Size</th>
+        </tr>
+      </thead>
+      <tbody id="summaryTableBody">
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('offensive')" id="tabBtn-offensive">Offensive (6)</button>
+  <button class="tab-btn" onclick="switchTab('resource')" id="tabBtn-resource">Resource (2)</button>
+  <button class="tab-btn" onclick="switchTab('support')" id="tabBtn-support">Support (4)</button>
+  <button class="tab-btn" onclick="switchTab('special')" id="tabBtn-special">Special (1)</button>
+</div>
+
+<div class="tab-content active" id="tab-offensive">
+  <div class="tab-header">
+    <h3>Offensive Towers</h3>
+    <button class="btn btn-add btn-small" onclick="addTower('offensive')">+ Add Tower</button>
+  </div>
+  <div id="cards-offensive"></div>
+</div>
+
+<div class="tab-content" id="tab-resource">
+  <div class="tab-header">
+    <h3>Resource Towers</h3>
+    <button class="btn btn-add btn-small" onclick="addTower('resource')">+ Add Tower</button>
+  </div>
+  <div id="cards-resource"></div>
+</div>
+
+<div class="tab-content" id="tab-support">
+  <div class="tab-header">
+    <h3>Support Towers</h3>
+    <button class="btn btn-add btn-small" onclick="addTower('support')">+ Add Tower</button>
+  </div>
+  <div id="cards-support"></div>
+</div>
+
+<div class="tab-content" id="tab-special">
+  <div class="tab-header">
+    <h3>Special Towers</h3>
+    <button class="btn btn-add btn-small" onclick="addTower('special')">+ Add Tower</button>
+  </div>
+  <div id="cards-special"></div>
+</div>
+
+<script>
+// ============================================================
+// DATA MODEL
+// ============================================================
+
+const STORAGE_KEY = 'htl_tower_designs';
+let autoSaveTimer = null;
+let summaryCollapsed = false;
+
+function createEmptyTower(category) {
+  return {
+    id: generateId(),
+    name: '',
+    category: category,
+    role: '',
+    description: '',
+    visualDescription: '',
+    gridSize: '1x1',
+    hp: 0,
+    armor: 0,
+    damage: 0,
+    attackSpeed: 0,
+    attackRange: 0,
+    attackType: 'None',
+    splashRadius: 0,
+    splashDamagePct: 0,
+    energyCost: 0,
+    materialsCost: 0,
+    buildTime: 0,
+    requiredTechLevel: 'None',
+    effectType: 'None',
+    effectValue: 0,
+    effectRadius: 0,
+    effectDescription: '',
+    maxUpgradeLevel: 0,
+    upgrades: [],
+    branchAtLevel: 0,
+    branchAName: '',
+    branchBName: '',
+    abilities: [],
+    collapsed: true
+  };
+}
+
+function generateId() {
+  return 'tw_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 6);
+}
+
+function createDefaultData() {
+  const data = {
+    notes: '',
+    offensive: [],
+    resource: [],
+    support: [],
+    special: []
+  };
+
+  // 6 offensive slots
+  for (let i = 0; i < 6; i++) {
+    data.offensive.push(createEmptyTower('Offensive'));
+  }
+
+  // 2 resource slots (pre-populated)
+  const leach = createEmptyTower('Resource');
+  leach.name = 'Leach Tower';
+  leach.role = 'Material harvester';
+  leach.description = 'Shoots a ray at enemy bodies (persist ~10sec after death). Converts bodies into Materials at 1 material per 10 HP the enemy had. Conversion takes 0.3 sec per body.';
+  leach.attackType = 'Beam';
+  leach.effectType = 'Resource Generation';
+  leach.effectDescription = 'Converts enemy corpses into Materials. 1 material per 10 HP of the original enemy. Conversion rate: 0.3 sec per body. Bodies persist for ~10 seconds after death.';
+  data.resource.push(leach);
+
+  const thermal = createEmptyTower('Resource');
+  thermal.name = 'Thermal Siphon';
+  thermal.role = 'Energy drainer';
+  thermal.description = 'Continuously drains Energy from living enemies in range. Deals low damage.';
+  thermal.attackType = 'Beam';
+  thermal.effectType = 'Resource Generation';
+  thermal.effectDescription = 'Drains Energy from living enemies within range. Deals low damage as a side effect.';
+  data.resource.push(thermal);
+
+  // 4 support slots
+  for (let i = 0; i < 4; i++) {
+    data.support.push(createEmptyTower('Support'));
+  }
+
+  // 1 special slot (Central Tower pre-populated)
+  const central = createEmptyTower('Special');
+  central.name = 'Central Tower';
+  central.hp = 1500;
+  central.role = 'Core building / Win condition';
+  central.description = 'Core building. If destroyed, the game is lost. Can be upgraded 3 tiers (requires boss kills). Each tier doubles resource income rate.';
+  central.gridSize = '2x2';
+  central.maxUpgradeLevel = 3;
+  central.upgrades = [
+    { name: 'Tier 1', statChanges: 'Doubles resource income rate. Unlocks Tier 1 tech towers.', costEnergy: 0, costMaterials: 0 },
+    { name: 'Tier 2', statChanges: 'Doubles resource income rate again (4x base). Unlocks Tier 2 tech towers.', costEnergy: 0, costMaterials: 0 },
+    { name: 'Tier 3', statChanges: 'Doubles resource income rate again (8x base). Unlocks Tier 3 tech towers.', costEnergy: 0, costMaterials: 0 }
+  ];
+  central.requiredTechLevel = 'None';
+  central.collapsed = false;
+  data.special.push(central);
+
+  return data;
+}
+
+// ============================================================
+// STATE
+// ============================================================
+
+let towerData = null;
+
+function loadData() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      towerData = JSON.parse(saved);
+      // Ensure all categories exist
+      if (!towerData.offensive) towerData.offensive = [];
+      if (!towerData.resource) towerData.resource = [];
+      if (!towerData.support) towerData.support = [];
+      if (!towerData.special) towerData.special = [];
+      if (towerData.notes === undefined) towerData.notes = '';
+      // Ensure all towers have an id
+      for (const cat of ['offensive', 'resource', 'support', 'special']) {
+        for (const tw of towerData[cat]) {
+          if (!tw.id) tw.id = generateId();
+          if (tw.abilities === undefined) tw.abilities = [];
+          if (tw.upgrades === undefined) tw.upgrades = [];
+          if (tw.collapsed === undefined) tw.collapsed = true;
+        }
+      }
+    } else {
+      towerData = createDefaultData();
+    }
+  } catch (e) {
+    console.error('Failed to load data:', e);
+    towerData = createDefaultData();
+  }
+}
+
+// ============================================================
+// SAVE / EXPORT / IMPORT
+// ============================================================
+
+function collectAllFromDOM() {
+  for (const cat of ['offensive', 'resource', 'support', 'special']) {
+    for (let i = 0; i < towerData[cat].length; i++) {
+      collectTowerFromDOM(cat, i);
+    }
+  }
+}
+
+function collectTowerFromDOM(cat, idx) {
+  const prefix = `${cat}_${idx}`;
+  const tw = towerData[cat][idx];
+
+  tw.name = getVal(prefix + '_name');
+  tw.category = getVal(prefix + '_category');
+  tw.role = getVal(prefix + '_role');
+  tw.description = getVal(prefix + '_description');
+  tw.visualDescription = getVal(prefix + '_visualDescription');
+  tw.gridSize = getVal(prefix + '_gridSize');
+  tw.hp = getNum(prefix + '_hp');
+  tw.armor = getNum(prefix + '_armor');
+  tw.damage = getNum(prefix + '_damage');
+  tw.attackSpeed = getNum(prefix + '_attackSpeed');
+  tw.attackRange = getNum(prefix + '_attackRange');
+  tw.attackType = getVal(prefix + '_attackType');
+  tw.splashRadius = getNum(prefix + '_splashRadius');
+  tw.splashDamagePct = getNum(prefix + '_splashDamagePct');
+  tw.energyCost = getNum(prefix + '_energyCost');
+  tw.materialsCost = getNum(prefix + '_materialsCost');
+  tw.buildTime = getNum(prefix + '_buildTime');
+  tw.requiredTechLevel = getVal(prefix + '_requiredTechLevel');
+  tw.effectType = getVal(prefix + '_effectType');
+  tw.effectValue = getNum(prefix + '_effectValue');
+  tw.effectRadius = getNum(prefix + '_effectRadius');
+  tw.effectDescription = getVal(prefix + '_effectDescription');
+  tw.maxUpgradeLevel = getNum(prefix + '_maxUpgradeLevel');
+  tw.branchAtLevel = getNum(prefix + '_branchAtLevel');
+  tw.branchAName = getVal(prefix + '_branchAName');
+  tw.branchBName = getVal(prefix + '_branchBName');
+
+  // Collect upgrades
+  const maxLvl = tw.maxUpgradeLevel;
+  tw.upgrades = [];
+  for (let l = 0; l < maxLvl; l++) {
+    tw.upgrades.push({
+      name: getVal(prefix + '_upg' + l + '_name'),
+      statChanges: getVal(prefix + '_upg' + l + '_statChanges'),
+      costEnergy: getNum(prefix + '_upg' + l + '_costEnergy'),
+      costMaterials: getNum(prefix + '_upg' + l + '_costMaterials')
+    });
+  }
+
+  // Collect abilities
+  const abilContainer = document.getElementById(prefix + '_abilities');
+  tw.abilities = [];
+  if (abilContainer) {
+    const blocks = abilContainer.querySelectorAll('.ability-block');
+    blocks.forEach((block, ai) => {
+      tw.abilities.push({
+        name: getVal(prefix + '_abil' + ai + '_name'),
+        description: getVal(prefix + '_abil' + ai + '_description'),
+        cooldown: getNum(prefix + '_abil' + ai + '_cooldown'),
+        effectValue: getNum(prefix + '_abil' + ai + '_effectValue')
+      });
+    });
+  }
+}
+
+function getVal(id) {
+  const el = document.getElementById(id);
+  return el ? el.value : '';
+}
+
+function getNum(id) {
+  const el = document.getElementById(id);
+  return el ? (parseFloat(el.value) || 0) : 0;
+}
+
+function saveAll() {
+  collectAllFromDOM();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(towerData));
+  const status = document.getElementById('saveStatus');
+  status.textContent = 'Saved!';
+  status.className = 'status saved';
+  setTimeout(() => {
+    status.textContent = 'Auto-saved';
+    status.className = 'status saved';
+  }, 2000);
+}
+
+function triggerAutoSave() {
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    saveAll();
+  }, 2000);
+}
+
+function exportJSON() {
+  collectAllFromDOM();
+  const blob = new Blob([JSON.stringify(towerData, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'htl_tower_designs.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (imported.offensive || imported.resource || imported.support || imported.special) {
+        towerData = imported;
+        if (towerData.notes === undefined) towerData.notes = '';
+        // Ensure all categories
+        if (!towerData.offensive) towerData.offensive = [];
+        if (!towerData.resource) towerData.resource = [];
+        if (!towerData.support) towerData.support = [];
+        if (!towerData.special) towerData.special = [];
+        for (const cat of ['offensive', 'resource', 'support', 'special']) {
+          for (const tw of towerData[cat]) {
+            if (!tw.id) tw.id = generateId();
+            if (tw.abilities === undefined) tw.abilities = [];
+            if (tw.upgrades === undefined) tw.upgrades = [];
+            if (tw.collapsed === undefined) tw.collapsed = true;
+          }
+        }
+        // Save directly to localStorage WITHOUT collectAllFromDOM
+        // (DOM still has old cards, collecting would overwrite imported data)
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(towerData));
+        renderAll();
+        loadNotes();
+        const status = document.getElementById('saveStatus');
+        status.textContent = 'Imported!';
+        status.className = 'status saved';
+        alert('Import successful!');
+      } else {
+        alert('Invalid file format. Expected tower design data.');
+      }
+    } catch (err) {
+      alert('Failed to parse JSON: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function clearAll() {
+  if (!confirm('Clear ALL tower designs? This cannot be undone.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  towerData = createDefaultData();
+  renderAll();
+  const notesEl = document.getElementById('designNotes');
+  if (notesEl) { notesEl.value = ''; notesEl.classList.remove('has-content'); }
+  const status = document.getElementById('saveStatus');
+  status.textContent = 'Cleared';
+  status.className = 'status';
+}
+
+// ============================================================
+// RENDERING
+// ============================================================
+
+function renderAll() {
+  renderCards('offensive');
+  renderCards('resource');
+  renderCards('support');
+  renderCards('special');
+  updateTabCounts();
+  updateSummary();
+  updateProgress();
+}
+
+function renderCards(category) {
+  const container = document.getElementById('cards-' + category);
+  container.innerHTML = '';
+  towerData[category].forEach((tw, idx) => {
+    container.innerHTML += renderTowerCard(category, idx, tw);
+  });
+
+  // Attach change listeners
+  towerData[category].forEach((tw, idx) => {
+    attachCardListeners(category, idx);
+  });
+}
+
+function renderTowerCard(cat, idx, tw) {
+  const prefix = `${cat}_${idx}`;
+  const collapsedClass = tw.collapsed ? ' collapsed' : '';
+  const hasName = tw.name ? ' has-name' : '';
+  const namePreview = tw.name ? `<span class="tower-name-preview">${escHtml(tw.name)}</span>` : '<span class="no-data">Unnamed</span>';
+
+  const catMap = { 'Offensive': 'Offensive', 'Resource': 'Resource', 'Support': 'Support', 'Special': 'Special' };
+  const defaultCat = cat.charAt(0).toUpperCase() + cat.slice(1);
+
+  let html = `
+  <div class="tower-card${collapsedClass}${hasName}" id="card-${tw.id}">
+    <div class="tower-card-header" onclick="toggleCard('${cat}', ${idx})">
+      <div class="tower-card-title">
+        <span class="tower-index">#${idx + 1}</span>
+        ${namePreview}
+      </div>
+      <div class="tower-card-controls">
+        <button class="btn btn-remove" onclick="event.stopPropagation(); removeTower('${cat}', ${idx})" title="Remove tower">Remove</button>
+        <span class="chevron">&#9660;</span>
+      </div>
+    </div>
+    <div class="tower-card-body">
+
+      <!-- IDENTITY -->
+      <div class="field-group">
+        <div class="field-group-title">Identity</div>
+        <div class="field-row">
+          <div class="field wide">
+            <label>Name</label>
+            <input type="text" id="${prefix}_name" value="${escAttr(tw.name)}" placeholder="Tower name...">
+          </div>
+          <div class="field">
+            <label>Category</label>
+            <select id="${prefix}_category">
+              ${optionList(['Offensive','Resource','Support','Special'], tw.category || defaultCat)}
+            </select>
+          </div>
+          <div class="field">
+            <label>Grid Size</label>
+            <select id="${prefix}_gridSize">
+              ${optionList(['1x1','2x2','Attachment'], tw.gridSize)}
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field wide">
+            <label>Role</label>
+            <input type="text" id="${prefix}_role" value="${escAttr(tw.role)}" placeholder="e.g., Anti-infantry AoE, Armor shredder...">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field full">
+            <label>Description</label>
+            <textarea id="${prefix}_description" placeholder="What this tower does, flavor text...">${escHtml(tw.description)}</textarea>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field full">
+            <label>Visual Description</label>
+            <textarea id="${prefix}_visualDescription" placeholder="Placeholder geometry description...">${escHtml(tw.visualDescription)}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMBAT STATS -->
+      <div class="field-group">
+        <div class="field-group-title">Combat Stats</div>
+        <div class="field-row">
+          <div class="field">
+            <label>HP</label>
+            <input type="number" id="${prefix}_hp" value="${tw.hp}" min="0">
+          </div>
+          <div class="field">
+            <label>Armor</label>
+            <input type="number" id="${prefix}_armor" value="${tw.armor}" min="0">
+          </div>
+          <div class="field">
+            <label>Damage</label>
+            <input type="number" id="${prefix}_damage" value="${tw.damage}" min="0">
+          </div>
+          <div class="field">
+            <label>Attack Speed (atk/sec)</label>
+            <input type="number" id="${prefix}_attackSpeed" value="${tw.attackSpeed}" min="0" step="0.1">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Attack Range (grid units)</label>
+            <input type="number" id="${prefix}_attackRange" value="${tw.attackRange}" min="0" step="0.5">
+            <div class="range-hint">Short=6, Medium=12, Long=20</div>
+          </div>
+          <div class="field">
+            <label>Attack Type</label>
+            <select id="${prefix}_attackType">
+              ${optionList(['None','Projectile','Beam','AoE Burst','Missile','Special'], tw.attackType)}
+            </select>
+          </div>
+          <div class="field">
+            <label>Splash Radius</label>
+            <input type="number" id="${prefix}_splashRadius" value="${tw.splashRadius}" min="0" step="0.5">
+          </div>
+          <div class="field">
+            <label>Splash Damage %</label>
+            <input type="number" id="${prefix}_splashDamagePct" value="${tw.splashDamagePct}" min="0" max="100">
+          </div>
+        </div>
+      </div>
+
+      <!-- ECONOMY -->
+      <div class="field-group">
+        <div class="field-group-title">Economy</div>
+        <div class="field-row">
+          <div class="field">
+            <label>Energy Cost</label>
+            <input type="number" id="${prefix}_energyCost" value="${tw.energyCost}" min="0">
+          </div>
+          <div class="field">
+            <label>Materials Cost</label>
+            <input type="number" id="${prefix}_materialsCost" value="${tw.materialsCost}" min="0">
+          </div>
+          <div class="field">
+            <label>Build Time (sec)</label>
+            <input type="number" id="${prefix}_buildTime" value="${tw.buildTime}" min="0" step="0.5">
+          </div>
+          <div class="field">
+            <label>Required Tech Level</label>
+            <select id="${prefix}_requiredTechLevel">
+              ${optionList(['None','Tier 1','Tier 2','Tier 3'], tw.requiredTechLevel)}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- SPECIAL EFFECTS -->
+      <div class="field-group">
+        <div class="field-group-title">Special Effects</div>
+        <div class="field-row">
+          <div class="field">
+            <label>Effect Type</label>
+            <select id="${prefix}_effectType">
+              ${optionList(['None','Heal','Damage Buff','Range Buff','Speed Buff','Armor Buff','Resource Generation','Slow','Other'], tw.effectType)}
+            </select>
+          </div>
+          <div class="field">
+            <label>Effect Value</label>
+            <input type="number" id="${prefix}_effectValue" value="${tw.effectValue}" min="0" step="0.1">
+          </div>
+          <div class="field">
+            <label>Effect Radius (grid units)</label>
+            <input type="number" id="${prefix}_effectRadius" value="${tw.effectRadius}" min="0" step="0.5">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field full">
+            <label>Effect Description</label>
+            <textarea id="${prefix}_effectDescription" placeholder="Detailed effect description...">${escHtml(tw.effectDescription)}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- UPGRADE PATH -->
+      <div class="field-group">
+        <div class="field-group-title">Upgrade Path</div>
+        <div class="field-row">
+          <div class="field">
+            <label>Max Upgrade Level</label>
+            <select id="${prefix}_maxUpgradeLevel" onchange="onUpgradeLevelChange('${cat}', ${idx})">
+              ${optionList(['0','1','2','3','4','5'], String(tw.maxUpgradeLevel))}
+            </select>
+          </div>
+          <div class="field">
+            <label>Branch at Level (0=none)</label>
+            <input type="number" id="${prefix}_branchAtLevel" value="${tw.branchAtLevel}" min="0" max="5" onchange="onUpgradeLevelChange('${cat}', ${idx})">
+          </div>
+          <div class="field">
+            <label>Branch A Name</label>
+            <input type="text" id="${prefix}_branchAName" value="${escAttr(tw.branchAName)}" placeholder="e.g., Flak Turret">
+          </div>
+          <div class="field">
+            <label>Branch B Name</label>
+            <input type="text" id="${prefix}_branchBName" value="${escAttr(tw.branchBName)}" placeholder="e.g., Heavy Cannon">
+          </div>
+        </div>
+        <div class="upgrade-levels" id="${prefix}_upgradeLevels">
+          ${renderUpgradeLevels(prefix, tw)}
+        </div>
+      </div>
+
+      <!-- ABILITIES -->
+      <div class="field-group">
+        <div class="field-group-title" style="display:flex; justify-content:space-between; align-items:center;">
+          <span>Abilities (max 2)</span>
+          <button class="btn btn-add btn-small" onclick="addAbility('${cat}', ${idx})" style="margin:0;">+ Add Ability</button>
+        </div>
+        <div id="${prefix}_abilities">
+          ${renderAbilities(prefix, tw)}
+        </div>
+      </div>
+
+    </div>
+  </div>`;
+
+  return html;
+}
+
+function renderUpgradeLevels(prefix, tw) {
+  const maxLvl = tw.maxUpgradeLevel || 0;
+  const branchAt = tw.branchAtLevel || 0;
+  if (maxLvl === 0) return '<div class="range-hint">No upgrades configured.</div>';
+
+  let html = '';
+
+  for (let l = 0; l < maxLvl; l++) {
+    const upg = tw.upgrades[l] || { name: '', statChanges: '', costEnergy: 0, costMaterials: 0 };
+    const isBranchPoint = (branchAt > 0 && l + 1 === branchAt);
+    const isAfterBranch = (branchAt > 0 && l + 1 > branchAt);
+
+    if (isAfterBranch) continue; // After branch, show branch paths instead
+
+    html += `
+    <div class="upgrade-level">
+      <div class="upgrade-level-header">Level ${l + 1}${isBranchPoint ? ' (Branch Point)' : ''}</div>
+      <div class="field-row">
+        <div class="field wide">
+          <label>Upgrade Name</label>
+          <input type="text" id="${prefix}_upg${l}_name" value="${escAttr(upg.name)}" placeholder="Upgrade name...">
+        </div>
+        <div class="field">
+          <label>Cost Energy</label>
+          <input type="number" id="${prefix}_upg${l}_costEnergy" value="${upg.costEnergy}" min="0">
+        </div>
+        <div class="field">
+          <label>Cost Materials</label>
+          <input type="number" id="${prefix}_upg${l}_costMaterials" value="${upg.costMaterials}" min="0">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field full">
+          <label>Stat Changes / Effects</label>
+          <textarea id="${prefix}_upg${l}_statChanges" placeholder="What changes at this level...">${escHtml(upg.statChanges)}</textarea>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // If branching, show branch paths for levels after branch point
+  if (branchAt > 0 && branchAt <= maxLvl) {
+    const remaining = maxLvl - branchAt;
+    if (remaining > 0) {
+      html += `
+      <div class="branch-container">
+        <div class="branch-title">Evolution Branches (from Level ${branchAt})</div>
+        <div class="branch-path">
+          <div class="branch-label a">Branch A: ${escHtml(tw.branchAName || 'Unnamed')}</div>`;
+      for (let l = branchAt; l < maxLvl; l++) {
+        const upg = tw.upgrades[l] || { name: '', statChanges: '', costEnergy: 0, costMaterials: 0 };
+        html += `
+          <div class="upgrade-level" style="margin-top:6px;">
+            <div class="upgrade-level-header" style="color:#00e5ff;">Branch A - Level ${l + 1}</div>
+            <div class="field-row">
+              <div class="field wide">
+                <label>Upgrade Name</label>
+                <input type="text" id="${prefix}_upg${l}_name" value="${escAttr(upg.name)}" placeholder="Branch A upgrade...">
+              </div>
+              <div class="field">
+                <label>Cost Energy</label>
+                <input type="number" id="${prefix}_upg${l}_costEnergy" value="${upg.costEnergy}" min="0">
+              </div>
+              <div class="field">
+                <label>Cost Materials</label>
+                <input type="number" id="${prefix}_upg${l}_costMaterials" value="${upg.costMaterials}" min="0">
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field full">
+                <label>Stat Changes / Effects</label>
+                <textarea id="${prefix}_upg${l}_statChanges" placeholder="Branch A changes...">${escHtml(upg.statChanges)}</textarea>
+              </div>
+            </div>
+          </div>`;
+      }
+      html += `</div>
+        <div class="branch-path">
+          <div class="branch-label b">Branch B: ${escHtml(tw.branchBName || 'Unnamed')}</div>
+          <div class="range-hint" style="margin:6px 0;">Branch B upgrade details use the same level slots. Describe both branches in the stat changes text above, or use the branch names to differentiate designs in notes. For detailed branch data, describe Branch B specifics in the Effect Description or Abilities sections.</div>
+        </div>
+      </div>`;
+    }
+  }
+
+  return html;
+}
+
+function renderAbilities(prefix, tw) {
+  if (!tw.abilities || tw.abilities.length === 0) {
+    return '<div class="range-hint">No abilities added yet.</div>';
+  }
+
+  let html = '';
+  tw.abilities.forEach((ab, ai) => {
+    html += `
+    <div class="ability-block">
+      <div class="ability-header">
+        <span class="ability-label">Ability ${ai + 1}</span>
+        <button class="btn btn-remove" onclick="removeAbility('${prefix}', ${ai})">Remove</button>
+      </div>
+      <div class="field-row">
+        <div class="field wide">
+          <label>Name</label>
+          <input type="text" id="${prefix}_abil${ai}_name" value="${escAttr(ab.name)}" placeholder="Ability name...">
+        </div>
+        <div class="field">
+          <label>Cooldown (sec)</label>
+          <input type="number" id="${prefix}_abil${ai}_cooldown" value="${ab.cooldown}" min="0" step="0.5">
+        </div>
+        <div class="field">
+          <label>Effect Value</label>
+          <input type="number" id="${prefix}_abil${ai}_effectValue" value="${ab.effectValue}" min="0" step="0.1">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field full">
+          <label>Description</label>
+          <textarea id="${prefix}_abil${ai}_description" placeholder="What this ability does...">${escHtml(ab.description)}</textarea>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  return html;
+}
+
+function attachCardListeners(cat, idx) {
+  const prefix = `${cat}_${idx}`;
+  const card = document.getElementById('card-' + towerData[cat][idx].id);
+  if (!card) return;
+
+  const inputs = card.querySelectorAll('input, textarea, select');
+  inputs.forEach(inp => {
+    inp.addEventListener('input', () => {
+      triggerAutoSave();
+      updateHasContent(inp);
+      // Update name preview
+      if (inp.id === prefix + '_name') {
+        updateCardNamePreview(cat, idx);
+        updateSummary();
+        updateProgress();
+        updateTabCounts();
+      }
+    });
+    inp.addEventListener('change', () => {
+      triggerAutoSave();
+      updateHasContent(inp);
+    });
+    // Init has-content class
+    updateHasContent(inp);
+  });
+}
+
+function updateHasContent(el) {
+  if (el.value && el.value.trim() !== '' && el.value !== '0' && el.value !== 'None') {
+    el.classList.add('has-content');
+  } else {
+    el.classList.remove('has-content');
+  }
+}
+
+function updateCardNamePreview(cat, idx) {
+  const tw = towerData[cat][idx];
+  const nameEl = document.getElementById(`${cat}_${idx}_name`);
+  const name = nameEl ? nameEl.value : '';
+  const card = document.getElementById('card-' + tw.id);
+  if (!card) return;
+
+  const previewEl = card.querySelector('.tower-name-preview, .no-data');
+  if (previewEl) {
+    if (name) {
+      previewEl.className = 'tower-name-preview';
+      previewEl.textContent = name;
+      card.classList.add('has-name');
+    } else {
+      previewEl.className = 'no-data';
+      previewEl.textContent = 'Unnamed';
+      card.classList.remove('has-name');
+    }
+  }
+}
+
+// ============================================================
+// TABS
+// ============================================================
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tabBtn-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+function updateTabCounts() {
+  for (const cat of ['offensive', 'resource', 'support', 'special']) {
+    const count = towerData[cat].length;
+    const named = towerData[cat].filter(t => {
+      const el = document.getElementById(`${cat}_${towerData[cat].indexOf(t)}_name`);
+      return el ? el.value.trim() !== '' : (t.name && t.name.trim() !== '');
+    }).length;
+    const btn = document.getElementById('tabBtn-' + cat);
+    const label = cat.charAt(0).toUpperCase() + cat.slice(1);
+    btn.textContent = `${label} (${count})`;
+  }
+}
+
+// ============================================================
+// SUMMARY TABLE
+// ============================================================
+
+function toggleSummary() {
+  summaryCollapsed = !summaryCollapsed;
+  document.getElementById('summaryBody').style.display = summaryCollapsed ? 'none' : 'block';
+  document.getElementById('summaryChevron').style.transform = summaryCollapsed ? 'rotate(-90deg)' : '';
+}
+
+function updateSummary() {
+  const tbody = document.getElementById('summaryTableBody');
+  let rows = '';
+  let allTowers = [];
+
+  for (const cat of ['offensive', 'resource', 'support', 'special']) {
+    towerData[cat].forEach((tw, idx) => {
+      const prefix = `${cat}_${idx}`;
+      const name = getValOrData(prefix + '_name', tw.name) || '(Unnamed)';
+      const category = getValOrData(prefix + '_category', tw.category) || cat;
+      const role = getValOrData(prefix + '_role', tw.role) || '-';
+      const hp = getValOrData(prefix + '_hp', tw.hp) || '0';
+      const damage = getValOrData(prefix + '_damage', tw.damage) || '0';
+      const range = getValOrData(prefix + '_attackRange', tw.attackRange) || '0';
+      const eCost = getValOrData(prefix + '_energyCost', tw.energyCost) || '0';
+      const mCost = getValOrData(prefix + '_materialsCost', tw.materialsCost) || '0';
+      const size = getValOrData(prefix + '_gridSize', tw.gridSize) || '1x1';
+
+      const catClass = 'cat-' + cat;
+
+      rows += `<tr class="clickable-row ${catClass}" onclick="scrollToTower('${cat}', ${idx})">
+        <td>${escHtml(name)}</td>
+        <td>${escHtml(category)}</td>
+        <td>${escHtml(role)}</td>
+        <td>${hp}</td>
+        <td>${damage}</td>
+        <td>${range}</td>
+        <td>${eCost} / ${mCost}</td>
+        <td>${escHtml(size)}</td>
+      </tr>`;
+    });
+  }
+
+  if (!rows) {
+    rows = '<tr><td colspan="8" class="no-data" style="text-align:center; padding:14px;">No towers defined yet.</td></tr>';
+  }
+
+  tbody.innerHTML = rows;
+}
+
+function getValOrData(id, fallback) {
+  const el = document.getElementById(id);
+  return el ? el.value : (fallback !== undefined ? String(fallback) : '');
+}
+
+function scrollToTower(cat, idx) {
+  // Switch to the correct tab
+  switchTab(cat);
+
+  const tw = towerData[cat][idx];
+  const card = document.getElementById('card-' + tw.id);
+  if (card) {
+    // Expand if collapsed
+    if (card.classList.contains('collapsed')) {
+      card.classList.remove('collapsed');
+      tw.collapsed = false;
+    }
+    setTimeout(() => {
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Flash border
+      card.style.borderColor = '#00e5ff';
+      setTimeout(() => { card.style.borderColor = ''; }, 1500);
+    }, 100);
+  }
+}
+
+// ============================================================
+// PROGRESS
+// ============================================================
+
+function updateProgress() {
+  let total = 0;
+  let named = 0;
+  for (const cat of ['offensive', 'resource', 'support', 'special']) {
+    towerData[cat].forEach((tw, idx) => {
+      total++;
+      const el = document.getElementById(`${cat}_${idx}_name`);
+      const name = el ? el.value.trim() : (tw.name ? tw.name.trim() : '');
+      if (name) named++;
+    });
+  }
+
+  const pct = total > 0 ? (named / total * 100) : 0;
+  document.getElementById('overallBar').style.width = pct + '%';
+  document.getElementById('overallText').textContent = `${named} / ${total} towers named`;
+}
+
+// ============================================================
+// CARD COLLAPSE / ADD / REMOVE
+// ============================================================
+
+function toggleCard(cat, idx) {
+  const tw = towerData[cat][idx];
+  const card = document.getElementById('card-' + tw.id);
+  if (card) {
+    tw.collapsed = !tw.collapsed;
+    card.classList.toggle('collapsed');
+  }
+}
+
+function addTower(cat) {
+  const defaultCat = cat.charAt(0).toUpperCase() + cat.slice(1);
+  collectAllFromDOM();
+  const tw = createEmptyTower(defaultCat);
+  tw.collapsed = false;
+  towerData[cat].push(tw);
+  renderCards(cat);
+  updateTabCounts();
+  updateSummary();
+  updateProgress();
+  triggerAutoSave();
+
+  // Scroll to new card
+  setTimeout(() => {
+    const card = document.getElementById('card-' + tw.id);
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+}
+
+function removeTower(cat, idx) {
+  const tw = towerData[cat][idx];
+  const name = tw.name || '(Unnamed)';
+  if (!confirm(`Remove "${name}"? This cannot be undone.`)) return;
+
+  collectAllFromDOM();
+  towerData[cat].splice(idx, 1);
+  renderCards(cat);
+  updateTabCounts();
+  updateSummary();
+  updateProgress();
+  triggerAutoSave();
+}
+
+// ============================================================
+// UPGRADE LEVEL CHANGE
+// ============================================================
+
+function onUpgradeLevelChange(cat, idx) {
+  collectTowerFromDOM(cat, idx);
+  const tw = towerData[cat][idx];
+  const prefix = `${cat}_${idx}`;
+
+  // Re-read the select values for max level and branch
+  tw.maxUpgradeLevel = getNum(prefix + '_maxUpgradeLevel');
+  tw.branchAtLevel = getNum(prefix + '_branchAtLevel');
+  tw.branchAName = getVal(prefix + '_branchAName');
+  tw.branchBName = getVal(prefix + '_branchBName');
+
+  // Ensure upgrades array is large enough
+  while (tw.upgrades.length < tw.maxUpgradeLevel) {
+    tw.upgrades.push({ name: '', statChanges: '', costEnergy: 0, costMaterials: 0 });
+  }
+
+  const container = document.getElementById(prefix + '_upgradeLevels');
+  if (container) {
+    container.innerHTML = renderUpgradeLevels(prefix, tw);
+    // Re-attach listeners for new upgrade fields
+    const card = document.getElementById('card-' + tw.id);
+    if (card) {
+      const inputs = container.querySelectorAll('input, textarea, select');
+      inputs.forEach(inp => {
+        inp.addEventListener('input', () => { triggerAutoSave(); updateHasContent(inp); });
+        inp.addEventListener('change', () => { triggerAutoSave(); updateHasContent(inp); });
+        updateHasContent(inp);
+      });
+    }
+  }
+  triggerAutoSave();
+}
+
+// ============================================================
+// ABILITIES
+// ============================================================
+
+function addAbility(cat, idx) {
+  collectAllFromDOM();
+  const tw = towerData[cat][idx];
+  if (tw.abilities.length >= 2) {
+    alert('Maximum 2 abilities per tower.');
+    return;
+  }
+  tw.abilities.push({ name: '', description: '', cooldown: 0, effectValue: 0 });
+
+  const prefix = `${cat}_${idx}`;
+  const container = document.getElementById(prefix + '_abilities');
+  if (container) {
+    container.innerHTML = renderAbilities(prefix, tw);
+    // Re-attach listeners
+    const inputs = container.querySelectorAll('input, textarea');
+    inputs.forEach(inp => {
+      inp.addEventListener('input', () => { triggerAutoSave(); updateHasContent(inp); });
+      inp.addEventListener('change', () => { triggerAutoSave(); updateHasContent(inp); });
+      updateHasContent(inp);
+    });
+  }
+  triggerAutoSave();
+}
+
+function removeAbility(prefix, abilIdx) {
+  // Parse cat and idx from prefix
+  const parts = prefix.split('_');
+  const cat = parts[0];
+  const idx = parseInt(parts[1]);
+
+  collectAllFromDOM();
+  const tw = towerData[cat][idx];
+  tw.abilities.splice(abilIdx, 1);
+
+  const container = document.getElementById(prefix + '_abilities');
+  if (container) {
+    container.innerHTML = renderAbilities(prefix, tw);
+    const inputs = container.querySelectorAll('input, textarea');
+    inputs.forEach(inp => {
+      inp.addEventListener('input', () => { triggerAutoSave(); updateHasContent(inp); });
+      inp.addEventListener('change', () => { triggerAutoSave(); updateHasContent(inp); });
+      updateHasContent(inp);
+    });
+  }
+  triggerAutoSave();
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function escAttr(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function optionList(options, selected) {
+  return options.map(o => `<option value="${escAttr(o)}"${o === selected ? ' selected' : ''}>${escHtml(o)}</option>`).join('');
+}
+
+// ============================================================
+// NOTES
+// ============================================================
+
+function toggleNotes() {
+  const body = document.getElementById('notesBody');
+  const toggle = document.getElementById('notesToggle');
+  if (body.style.display === 'none') {
+    body.style.display = 'block';
+    toggle.innerHTML = '&#9660;';
+  } else {
+    body.style.display = 'none';
+    toggle.innerHTML = '&#9654;';
+  }
+}
+
+function onNotesInput(el) {
+  towerData.notes = el.value;
+  el.classList.toggle('has-content', el.value.trim().length > 0);
+  triggerAutoSave();
+}
+
+function loadNotes() {
+  const el = document.getElementById('designNotes');
+  if (el && towerData.notes) {
+    el.value = towerData.notes;
+    el.classList.toggle('has-content', towerData.notes.trim().length > 0);
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+
+loadData();
+renderAll();
+loadNotes();
+
+</script>
+</body>
+</html>

@@ -289,10 +289,10 @@ func _create_level_card(level_data: Dictionary) -> Control:
 
 	info_hbox.add_child(Control.new())  # Spacer
 
-	var duration := level_data.get("duration_seconds", 0)
+	var duration: int = level_data.get("duration_seconds", 0)
 	var duration_label := Label.new()
 	if duration > 0:
-		var minutes := duration / 60
+		var minutes: int = duration / 60
 		duration_label.text = "%d min" % minutes
 	else:
 		duration_label.text = "Endless"
@@ -366,7 +366,7 @@ func _update_detail_panel(level_data: Dictionary) -> void:
 	var rewards: Dictionary = level_data.get("rewards", {})
 	var reward_parts: Array = []
 	
-	var tech_points := rewards.get("tech_points", 0)
+	var tech_points: int = rewards.get("tech_points", 0)
 	if tech_points > 0:
 		reward_parts.append("🔬 %d Tech Points" % tech_points)
 	
@@ -444,7 +444,7 @@ func _filter_levels() -> void:
 		difficulty_filter = _difficulty_filter.get_item_text(_difficulty_filter.selected).to_lower()
 	
 	for i in range(_level_cards.size()):
-		var card := _level_cards[i]
+		var card: Control = _level_cards[i]
 		if not is_instance_valid(card):
 			continue
 		
@@ -481,7 +481,7 @@ func _get_completion_status(level_id: String) -> String:
 	# Check for progression data if available
 	if has_node("/root/ProgressionTracker"):
 		var tracker = get_node("/root/ProgressionTracker")
-		var stats := tracker.get_level_completion_stats(level_id)
+		var stats: Dictionary = tracker.get_level_completion_stats(level_id)
 		
 		if stats.get("fastest_time", -1.0) > 0:
 			var time: float = stats["fastest_time"]

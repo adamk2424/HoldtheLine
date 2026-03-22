@@ -54,7 +54,7 @@ func initialize_enemy(enemy_id: String, p_data: Dictionary, difficulty_mult: Dic
 	
 	# Apply complete enhanced visuals matching enemy JSON data (Task 1D)
 	if visual_node:
-		var complete_visual := EnemyVisualEnhancedComplete.create_complete_enemy_visual(enemy_id, enemy_data)
+		var complete_visual: Node3D = EnemyVisualEnhancedComplete.create_complete_enemy_visual(enemy_id, enemy_data)
 		if complete_visual:
 			# Replace the basic visual with complete enhanced version
 			visual_node.queue_free()

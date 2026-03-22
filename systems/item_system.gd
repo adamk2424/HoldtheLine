@@ -1,4 +1,3 @@
-class_name ItemSystem
 extends Node
 ## ItemSystem - Manages item unlocks, loadouts, and passive bonuses.
 ## Handles progression-based unlocking, loadout management, and applying
@@ -390,9 +389,18 @@ func load_item_system() -> void:
 		return
 
 	var data: Dictionary = json.data
-	unlocked_items = data.get("unlocked_items", [])
-	owned_items = data.get("owned_items", [])
-	active_loadout = data.get("active_loadout", ["", "", ""])
+	var raw_unlocked: Array = data.get("unlocked_items", [])
+	unlocked_items.clear()
+	for item: String in raw_unlocked:
+		unlocked_items.append(item)
+	var raw_owned: Array = data.get("owned_items", [])
+	owned_items.clear()
+	for item: String in raw_owned:
+		owned_items.append(item)
+	var raw_loadout: Array = data.get("active_loadout", ["", "", ""])
+	active_loadout.clear()
+	for item: String in raw_loadout:
+		active_loadout.append(item)
 	unlock_progress = data.get("unlock_progress", {})
 
 	# Ensure loadout has correct size

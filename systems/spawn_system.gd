@@ -286,8 +286,12 @@ func _get_difficulty_multipliers() -> Dictionary:
 	var effective_hp_minutes: float = _get_accelerated_minutes(minutes_elapsed, hp_scale)
 	var effective_damage_minutes: float = _get_accelerated_minutes(minutes_elapsed, damage_scale)
 
-	# Movement speed bonus: +5% per minute past 15 minutes
+	# Early ramp: +10% HP per minute past 2 minutes (additive)
+	var early_hp_bonus: float = _get_early_ramp_bonus(minutes_elapsed)
+
+	# Movement speed bonus: +5% per minute past 15 minutes + 10% per minute past 2 minutes
 	var speed_bonus: float = _get_late_game_speed_bonus(minutes_elapsed)
+	var early_speed_bonus: float = _get_early_ramp_bonus(minutes_elapsed)
 
 	# Attack range and damage bonus: +5% per minute past 10 minutes
 	var combat_bonus: float = _get_combat_scaling_bonus(minutes_elapsed)
@@ -296,9 +300,9 @@ func _get_difficulty_multipliers() -> Dictionary:
 	var level_multipliers := LevelSystem.get_difficulty_multipliers()
 
 	return {
-		"hp_mult": (1.0 + effective_hp_minutes) * level_multipliers.get("enemy_health_multiplier", 1.0),
+		"hp_mult": (1.0 + effective_hp_minutes + early_hp_bonus) * level_multipliers.get("enemy_health_multiplier", 1.0),
 		"damage_mult": (1.0 + effective_damage_minutes) * (1.0 + combat_bonus) * level_multipliers.get("enemy_damage_multiplier", 1.0),
-		"speed_bonus": speed_bonus,
+		"speed_bonus": speed_bonus + early_speed_bonus,
 		"attack_range_mult": 1.0 + combat_bonus,
 	}
 
@@ -344,6 +348,13 @@ func _get_late_game_speed_bonus(minutes_elapsed: float) -> float:
 		return 0.0
 	var minutes_past_threshold: float = minutes_elapsed - 15.0
 	return 0.05 * minutes_past_threshold
+
+
+## Returns +10% per minute past 2 minutes for early-game HP and speed ramp.
+func _get_early_ramp_bonus(minutes_elapsed: float) -> float:
+	if minutes_elapsed < 2.0:
+		return 0.0
+	return 0.10 * (minutes_elapsed - 2.0)
 
 
 ## Returns +5% per minute past 10 minutes for enemy damage and attack range.

@@ -1,32 +1,32 @@
 {
 	"default": {
 		"model": "inverse_square",
-		"unit_size": 15.0,
-		"max_distance": 120.0,
+		"unit_size": 30.0,
+		"max_distance": 150.0,
 		"filter_cutoff_hz": 10000.0,
 		"filter_db": -18.0,
 		"panning_strength": 0.8
 	},
 	"short": {
 		"model": "inverse_square",
-		"unit_size": 15.0,
-		"max_distance": 120.0,
+		"unit_size": 30.0,
+		"max_distance": 150.0,
 		"filter_cutoff_hz": 10000.0,
 		"filter_db": -18.0,
 		"panning_strength": 0.8
 	},
 	"normal": {
 		"model": "inverse_square",
-		"unit_size": 30.0,
-		"max_distance": 200.0,
+		"unit_size": 60.0,
+		"max_distance": 250.0,
 		"filter_cutoff_hz": 10000.0,
 		"filter_db": -18.0,
 		"panning_strength": 0.8
 	},
 	"long": {
 		"model": "inverse_square",
-		"unit_size": 100.0,
-		"max_distance": 400.0,
+		"unit_size": 200.0,
+		"max_distance": 500.0,
 		"filter_cutoff_hz": 10000.0,
 		"filter_db": -18.0,
 		"panning_strength": 0.8

@@ -109,7 +109,7 @@ static func create_impact_effect(weapon_type: String, position: Vector3, normal:
 # =============================================================================
 
 static func _create_quad_flash(position: Vector3, direction: Vector3, config: Dictionary) -> void:
-	var scene := Engine.get_main_loop().current_scene
+	var scene: Node = Engine.get_main_loop().current_scene
 	if not scene:
 		return
 	
@@ -137,7 +137,7 @@ static func _create_quad_flash(position: Vector3, direction: Vector3, config: Di
 	scene.add_child(flash)
 	
 	# Animate flash
-	var tween := scene.create_tween()
+	var tween: Tween = scene.create_tween()
 	var duration = config.get("duration", 0.08)
 	tween.set_parallel(true)
 	tween.tween_property(flash, "scale", Vector3(size * 1.5, size * 1.5, size * 1.5), duration * 0.3)
@@ -191,12 +191,12 @@ static func _create_particle_trail(
 	parent.add_child(particles)
 	
 	# Move particles along trajectory
-	var tween := parent.create_tween()
+	var tween: Tween = parent.create_tween()
 	tween.tween_property(particles, "position", end_pos, travel_time)
 	tween.tween_callback(particles.queue_free).set_delay(particles.lifetime)
 
 static func _create_particle_flash(position: Vector3, direction: Vector3, config: Dictionary) -> void:
-	var scene := Engine.get_main_loop().current_scene
+	var scene: Node = Engine.get_main_loop().current_scene
 	if not scene:
 		return
 	
@@ -298,12 +298,12 @@ static func _create_line_trail(
 	
 	# Animate line fade
 	var duration = max(travel_time * 0.3, 0.1)  # Line persists briefly
-	var tween := parent.create_tween()
+	var tween: Tween = parent.create_tween()
 	tween.tween_property(line, "modulate:a", 0.0, duration)
 	tween.tween_callback(line.queue_free)
 
 static func _create_line_flash(position: Vector3, direction: Vector3, config: Dictionary) -> void:
-	var scene := Engine.get_main_loop().current_scene
+	var scene: Node = Engine.get_main_loop().current_scene
 	if not scene:
 		return
 	
@@ -334,7 +334,7 @@ static func _create_line_flash(position: Vector3, direction: Vector3, config: Di
 	
 	# Quick flash
 	var duration = config.get("duration", 0.06)
-	var tween := scene.create_tween()
+	var tween: Tween = scene.create_tween()
 	tween.tween_property(line, "modulate:a", 0.0, duration)
 	tween.tween_callback(line.queue_free)
 
@@ -378,7 +378,7 @@ static func _create_sprite_trail(
 		var delay := (travel_time / float(sprite_count)) * float(i)
 		var lifetime := 0.3
 		
-		var tween := parent.create_tween()
+		var tween: Tween = parent.create_tween()
 		tween.tween_delay(delay)
 		tween.set_parallel(true)
 		tween.tween_property(sprite, "position", end_pos, travel_time - delay)
@@ -386,7 +386,7 @@ static func _create_sprite_trail(
 		tween.tween_callback(sprite.queue_free).set_delay(travel_time - delay + lifetime)
 
 static func _create_impact_sprites(position: Vector3, normal: Vector3, config: Dictionary, parent: Node3D) -> void:
-	var spark_count := config.get("sparks", 8)
+	var spark_count: int = config.get("sparks", 8)
 	
 	for i in range(spark_count):
 		var sprite := MeshInstance3D.new()
@@ -420,7 +420,7 @@ static func _create_impact_sprites(position: Vector3, normal: Vector3, config: D
 		var target_pos := position + random_dir * distance
 		
 		# Animate spark arc
-		var tween := parent.create_tween()
+		var tween: Tween = parent.create_tween()
 		tween.set_parallel(true)
 		tween.tween_property(sprite, "position", target_pos, 0.4)
 		tween.tween_property(sprite, "scale", Vector3.ZERO, 0.4)
@@ -437,7 +437,7 @@ static func _create_animated_flash(position: Vector3, direction: Vector3, config
 	_create_quad_flash(position, direction, config)  # Fallback to quad flash
 
 static func _create_impact_animation(position: Vector3, normal: Vector3, config: Dictionary, parent: Node3D) -> void:
-	var sequence := config.get("sequence", "explosion_small")
+	var sequence: String = config.get("sequence", "explosion_small")
 	
 	match sequence:
 		"explosion_small":
@@ -470,7 +470,7 @@ static func _create_explosion_sprites(position: Vector3, normal: Vector3, size: 
 	parent.add_child(explosion)
 	
 	# Animate explosion
-	var tween := parent.create_tween()
+	var tween: Tween = parent.create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(explosion, "scale", Vector3(size, size, size), 0.2)
 	tween.tween_property(explosion, "modulate:a", 0.0, 0.3).set_delay(0.1)
@@ -506,7 +506,7 @@ static func _create_electric_burst_sprites(position: Vector3, normal: Vector3, p
 		parent.add_child(arc)
 		
 		# Quick flash and fade
-		var tween := parent.create_tween()
+		var tween: Tween = parent.create_tween()
 		tween.tween_property(arc, "modulate:a", 0.0, 0.15)
 		tween.tween_callback(arc.queue_free)
 
@@ -531,7 +531,7 @@ static func _create_plasma_explosion_sprites(position: Vector3, normal: Vector3,
 	parent.add_child(plasma_burst)
 	
 	# Plasma expansion and fade
-	var tween := parent.create_tween()
+	var tween: Tween = parent.create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(plasma_burst, "scale", Vector3(0.8, 0.8, 0.8), 0.3)
 	tween.tween_property(plasma_burst, "modulate:a", 0.0, 0.4).set_delay(0.2)
@@ -559,16 +559,18 @@ static func _setup_sprite_materials() -> void:
 	# Pre-create common materials for better performance
 	pass
 
-static func _create_fire_gradient() -> Gradient:
+static func _create_fire_gradient() -> GradientTexture1D:
 	var gradient := Gradient.new()
 	gradient.add_point(0.0, Color(1.0, 0.8, 0.2))
 	gradient.add_point(0.5, Color(1.0, 0.4, 0.1))
 	gradient.add_point(1.0, Color(0.3, 0.1, 0.0))
-	return gradient
+	var tex := GradientTexture1D.new()
+	tex.gradient = gradient
+	return tex
 
 ## Cleanup all active lightweight effects
 static func cleanup_effects() -> void:
-	var scene := Engine.get_main_loop().current_scene
+	var scene: Node = Engine.get_main_loop().current_scene
 	if not scene:
 		return
 	
@@ -579,7 +581,7 @@ static func cleanup_effects() -> void:
 
 ## Get effect count for performance monitoring
 static func get_active_effect_count() -> int:
-	var scene := Engine.get_main_loop().current_scene
+	var scene: Node = Engine.get_main_loop().current_scene
 	if not scene:
 		return 0
 	

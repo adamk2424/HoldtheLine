@@ -1,4 +1,4 @@
-extends Control
+extends CanvasLayer
 ## LevelCompleteScreen - Shows rewards and progression after completing a level.
 ## Displays tech points earned, unlocked content, and level progression.
 
@@ -7,6 +7,7 @@ var _rewards: Dictionary = {}
 var _survival_time: float = 0.0
 
 # UI References
+var _root: Control
 var _title_label: Label
 var _level_name_label: Label
 var _time_label: Label
@@ -19,6 +20,7 @@ signal replay_requested
 
 
 func _ready() -> void:
+	layer = 26
 	_build_ui()
 
 
@@ -32,14 +34,17 @@ func show_level_complete(level_data: Dictionary, rewards: Dictionary, survival_t
 
 func _build_ui() -> void:
 	name = "LevelCompleteScreen"
-	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	visible = false
+
+	_root = Control.new()
+	_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(_root)
 
 	# Semi-transparent background
 	var bg := ColorRect.new()
 	bg.color = Color(0.0, 0.0, 0.0, 0.8)
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(bg)
+	_root.add_child(bg)
 
 	# Main panel
 	var panel := Panel.new()
@@ -48,14 +53,14 @@ func _build_ui() -> void:
 	panel.offset_right = 400
 	panel.offset_top = -300
 	panel.offset_bottom = 300
-	
+
 	var panel_style := StyleBoxFlat.new()
 	panel_style.bg_color = Color(0.1, 0.15, 0.2, 0.95)
 	panel_style.border_color = Color(0.3, 0.6, 0.4, 0.8)
 	panel_style.set_border_width_all(3)
 	panel_style.set_corner_radius_all(10)
 	panel.add_theme_stylebox_override("panel", panel_style)
-	add_child(panel)
+	_root.add_child(panel)
 
 	# Content container
 	var margin := MarginContainer.new()
@@ -137,7 +142,7 @@ func _build_ui() -> void:
 
 func _style_button(button: Button, base_color: Color) -> void:
 	button.add_theme_font_size_override("font_size", 16)
-	
+
 	var normal := StyleBoxFlat.new()
 	normal.bg_color = base_color
 	normal.border_color = base_color.lightened(0.3)
@@ -160,25 +165,25 @@ func _style_button(button: Button, base_color: Color) -> void:
 func _populate_content() -> void:
 	# Update labels
 	_level_name_label.text = _level_data.get("name", "Unknown Level")
-	
+
 	var minutes := int(_survival_time) / 60
 	var seconds := int(_survival_time) % 60
 	_time_label.text = "Time Survived: %02d:%02d" % [minutes, seconds]
-	
+
 	# Clear existing reward items
 	for child in _rewards_container.get_children():
 		child.queue_free()
-	
+
 	# Add reward items
 	var tech_points: int = _rewards.get("tech_points", 0)
 	if tech_points > 0:
 		_add_reward_item("Tech Points", "+%d" % tech_points, Color.YELLOW)
-	
+
 	var unlocks: Array = _rewards.get("unlocks", [])
 	for unlock_id: String in unlocks:
 		var unlock_name := _format_unlock_name(unlock_id)
 		_add_reward_item("Unlocked", unlock_name, Color.LIGHT_GREEN)
-	
+
 	# Show progress summary
 	var progress := LevelSystem.get_level_progress_summary()
 	var progress_text := "Progress: %d/%d levels completed" % [progress["completed_count"], progress["total_levels"]]
@@ -188,13 +193,13 @@ func _populate_content() -> void:
 func _add_reward_item(label_text: String, value_text: String, color: Color) -> void:
 	var hbox := HBoxContainer.new()
 	_rewards_container.add_child(hbox)
-	
+
 	var label := Label.new()
 	label.text = label_text + ":"
 	label.add_theme_color_override("font_color", Color.LIGHT_GRAY)
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hbox.add_child(label)
-	
+
 	var value := Label.new()
 	value.text = value_text
 	value.add_theme_color_override("font_color", color)
@@ -207,7 +212,7 @@ func _format_unlock_name(unlock_id: String) -> String:
 	if unlock_id.begins_with("level_"):
 		var level_name := unlock_id.substr(6).replace("_", " ").capitalize()
 		return level_name + " Level"
-	
+
 	return unlock_id.replace("_", " ").capitalize()
 
 

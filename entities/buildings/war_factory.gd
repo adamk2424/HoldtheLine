@@ -65,7 +65,7 @@ func _create_heavy_exhaust_burst() -> void:
 	for stack_path in exhaust_stacks:
 		var stack_node := visual_node.get_node_or_null(NodePath(stack_path))
 		if stack_node:
-			var exhaust_pos := stack_node.global_position + Vector3(0, 0.3, 0)
+			var exhaust_pos: Vector3 = stack_node.global_position + Vector3(0, 0.3, 0)
 			VisualGenerator.animate_steam_vents(visual_node, [exhaust_pos])
 
 

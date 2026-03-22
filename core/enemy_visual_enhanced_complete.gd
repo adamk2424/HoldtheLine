@@ -126,7 +126,7 @@ static func _create_thrasher_complete(c: Color, data: Dictionary, intensity: flo
 	# Exposed ribcage (shows undernourishment and savagery)
 	for i in range(5):
 		var rib_z := -0.18 + i * 0.09
-		var rib_size := 0.02 + (abs(i - 2) * -0.005)  # Larger in middle
+		var rib_size: float = 0.02 + (abs(i - 2) * -0.005)  # Larger in middle
 		_add_box(r, Vector3(rib_size, 0.08, 0.015), Vector3(0.18, 0.22, rib_z), bone)
 		_add_box(r, Vector3(rib_size, 0.08, 0.015), Vector3(-0.18, 0.22, rib_z), bone)
 	
@@ -164,7 +164,7 @@ static func _create_thrasher_complete(c: Color, data: Dictionary, intensity: flo
 	# Spine ridges with bone protrusions
 	for i in range(4):
 		var spine_z := -0.1 + i * 0.08
-		var spine_height := 0.05 + abs(i - 1.5) * 0.01
+		var spine_height: float = 0.05 + abs(i - 1.5) * 0.01
 		_add_box(r, Vector3(0.04, spine_height, 0.02), Vector3(0, 0.28, spine_z), bone)
 	
 	# Whip-like tail with barbs
@@ -449,7 +449,7 @@ static func _create_gloom_wing_complete(c: Color, data: Dictionary, intensity: f
 	]
 	
 	for i in range(bomb_positions.size()):
-		var pos := bomb_positions[i]
+		var pos: Vector3 = bomb_positions[i]
 		var sac_size := 0.1 + randf_range(-0.02, 0.02)  # Slightly varied sizes
 		
 		var bomb_sac := MeshInstance3D.new()
@@ -505,7 +505,7 @@ static func _create_gloom_wing_complete(c: Color, data: Dictionary, intensity: f
 	var flutter_points := []
 	for wing_side in [-1, 1]:
 		for flutter_i in range(3):
-			var flutter_x := wing_side * (0.8 + flutter_i * 0.3)
+			var flutter_x: float = wing_side * (0.8 + flutter_i * 0.3)
 			var flutter_z := -0.2 + flutter_i * 0.2
 			flutter_points.append(Vector3(flutter_x, 0.28, flutter_z))
 	
@@ -772,7 +772,10 @@ static func _add_emissive_box(parent: Node3D, size: Vector3, pos: Vector3, color
 # Placeholder implementations for remaining enemies (would follow similar detailed patterns)
 static func _create_generic_enemy_complete(enemy_id: String, base_color: Color, enemy_data: Dictionary, intensity: float) -> Node3D:
 	# Fallback to existing system for unimplemented enemies
-	return VisualGenerator.create_entity_visual(enemy_id, base_color) or _create_basic_placeholder(base_color, enemy_data)
+	var visual: Node3D = VisualGenerator.create_entity_visual(enemy_id, base_color)
+	if visual:
+		return visual
+	return _create_basic_placeholder(base_color, enemy_data)
 
 static func _create_basic_placeholder(base_color: Color, enemy_data: Dictionary) -> Node3D:
 	var r := Node3D.new()
@@ -851,3 +854,9 @@ static func _create_omega_destroyer_complete(c: Color, data: Dictionary, intensi
 static func _create_void_wraith_complete(c: Color, data: Dictionary, intensity: float) -> Node3D:
 	# Implementation placeholder
 	return _create_generic_enemy_complete("void_wraith", c, data, intensity)
+
+
+static func setup_complete_animations(visual_node: Node3D, _enemy_id: String, _enemy_data: Dictionary) -> void:
+	# Stub: bio-luminescent animation setup for enhanced enemy visuals
+	if not visual_node:
+		return

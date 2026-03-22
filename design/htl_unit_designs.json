@@ -1,0 +1,246 @@
+{
+  "notes": "Unit balance philosophy:\n- Player units are 2-3x stronger than equivalent enemy types in HP, damage, and range.\n- Units auto-engage and auto-move to the outer wall area by default.\n- 100 unit population cap. Each unit has a pop cost (1-5).\n- Units stay within the 120x120 buildable area.\n- Passive regen: 1% max HP / 5 sec. Repair Drones can also heal.\n- 75% sell-back value. Production queue max 5 or Continuous mode.\n- Movement uses fine sub-grid increments, not locked to the build grid.\n\nDrone Printer (prod_001): utility drones (flying, supportive) -- building field value 'drone'\nMech Bay (prod_002): frontline combat mechs (ranged infantry + heavy assault) -- building field value 'mech'\nWar Factory (prod_003): specialized heavy units (fast attack + siege) -- building field value 'war'",
+  "drone": [
+    {
+      "id": "unit_drone_001",
+      "name": "Repair Drone",
+      "building": "drone",
+      "role": "Repair",
+      "description": "The backbone of base sustainability. Flies to the nearest damaged building or unit and heals it with a focused beam. Fragile but fast -- keep them behind the front line. Having 5-10 of these keeping your barriers and towers topped off is the difference between holding and collapsing.",
+      "visualDescription": "small hovering drone with a rounded body, two thin stabilizer wings, a repair beam emitter on the underside that glows green when active, white and green coloring, gentle hovering bob animation",
+      "hp": 40,
+      "armor": 0,
+      "damage": 0,
+      "attackSpeed": 0,
+      "attackRange": 3,
+      "attackType": "None",
+      "splashRadius": 0,
+      "splashDamagePercent": 0,
+      "moveSpeed": 3.5,
+      "flying": true,
+      "energyCost": 15,
+      "materialsCost": 10,
+      "buildTime": 6,
+      "populationCost": 1,
+      "requiredTechLevel": "None",
+      "defaultBehavior": "Repair Nearest",
+      "behaviorDescription": "Flies to nearest damaged building or unit. Heals with light beam at 5 HP/sec. Stays on one target until fully healed, then moves to next damaged target. Prioritizes buildings below 50% HP, then other damaged buildings, then damaged units. Flees from enemies if targeted.",
+      "abilities": [
+        {
+          "name": "Repair Beam",
+          "description": "Heals target at 5 HP/sec. Range: 3 grid units. Must remain stationary while healing. Beam is visible as a green light connecting drone to target.",
+          "cooldown": 0,
+          "effectValue": 5
+        }
+      ],
+      "collapsed": false
+    },
+    {
+      "id": "unit_drone_002",
+      "name": "Shield Drone",
+      "building": "drone",
+      "role": "Support",
+      "description": "Projects a protective energy shield over a target building or unit, granting bonus armor. Orbits its target slowly while projecting the shield. Fragile like all drones, but the armor bonus it provides can dramatically increase the survivability of key structures. Assign to your most threatened tower or barrier.",
+      "visualDescription": "slightly larger than Repair Drone, flat disc-shaped body with a dome-shaped shield projector on top, emits a visible blue hexagonal shield bubble over its target, blue and white coloring with pulsing energy lines",
+      "hp": 55,
+      "armor": 0,
+      "damage": 0,
+      "attackSpeed": 0,
+      "attackRange": 4,
+      "attackType": "None",
+      "splashRadius": 0,
+      "splashDamagePercent": 0,
+      "moveSpeed": 3.0,
+      "flying": true,
+      "energyCost": 30,
+      "materialsCost": 20,
+      "buildTime": 10,
+      "populationCost": 1,
+      "requiredTechLevel": "Tier 1",
+      "defaultBehavior": "Guard Towers",
+      "behaviorDescription": "Flies to the most threatened building (lowest HP % or under active attack) and orbits it, projecting a shield. Grants +4 armor to its target and all buildings within 2 grids. Stays with its target unless a higher-priority target drops below 30% HP. Will flee from enemies if directly targeted.",
+      "abilities": [
+        {
+          "name": "Shield Projection",
+          "description": "Grants +4 armor to target building and all buildings within 2 grid units. Only one Shield Drone can buff the same target (no stacking). Shield is visible as a blue hexagonal bubble over the protected buildings.",
+          "cooldown": 0,
+          "effectValue": 4
+        }
+      ],
+      "collapsed": false
+    },
+    {
+      "id": "unit_drone_003",
+      "name": "Disruptor Drone",
+      "building": "drone",
+      "role": "Support",
+      "description": "Emits a persistent disruption field that slows and weakens enemies in a radius. Flies over enemy groups approaching the base and debuffs them, making them easier to kill. The combination of slow and armor reduction makes it a powerful force multiplier. Place near chokepoints or incoming surge directions.",
+      "visualDescription": "Larger than the other drones (roughly 1.5x Repair Drone size). Angular diamond-shaped body with four sharp blade-like fins extending outward, giving it an aggressive X-shaped silhouette from above. Central body houses a visible red energy core that pulses rhythmically. Matte black plating with red edge lighting along each fin. The disruption field manifests as concentric red distortion rings expanding downward from the drone in a cone shape, creating a visible area of effect on the ground below. Enemies within the field show red crackling sparks on their body and visibly slow their animations. The drone itself has small red lightning arcs jumping between its fin tips. Hover animation: slight aggressive forward tilt, subtle wobble. Active over enemies: fins extend wider, core pulses faster, distortion rings intensify.",
+      "hp": 70,
+      "armor": 1,
+      "damage": 0,
+      "attackSpeed": 0,
+      "attackRange": 0,
+      "attackType": "None",
+      "splashRadius": 0,
+      "splashDamagePercent": 0,
+      "moveSpeed": 2.5,
+      "flying": true,
+      "energyCost": 50,
+      "materialsCost": 35,
+      "buildTime": 14,
+      "populationCost": 2,
+      "requiredTechLevel": "Tier 2",
+      "defaultBehavior": "Support Allies",
+      "behaviorDescription": "Flies toward the largest cluster of approaching enemies and hovers above them, projecting its disruption field downward. Repositions every few seconds to maximize the number of enemies affected. Stays within the 120x120 base area but positions near the perimeter where enemies are densest.",
+      "abilities": [
+        {
+          "name": "Disruption Field",
+          "description": "Passive aura. All enemies within 5 grid units are slowed by 25% move speed and lose 2 armor (can go below 0 to effectively increase damage taken). Effect persists for 2 seconds after leaving the field. Visible as a red distortion sphere around the drone.",
+          "cooldown": 0,
+          "effectValue": 25
+        }
+      ],
+      "collapsed": false
+    }
+  ],
+  "mech": [
+    {
+      "id": "unit_mech_001",
+      "name": "Sentinel",
+      "building": "mech",
+      "role": "Combat",
+      "description": "Standard frontline combat mech. Well-rounded stats with good range, solid HP, and reliable damage. The workhorse of any defense -- cheap enough to field in numbers, tough enough to hold a position, and ranged enough to contribute from behind barriers. Your first and most versatile combat unit.",
+      "visualDescription": "bipedal humanoid mech roughly 1.5x human size, shoulder-mounted twin pulse rifles that fire rapid blue energy bolts, angular military armor plating, dark grey with blue visor and weapon glow, walks with a heavy mechanical stride",
+      "hp": 450,
+      "armor": 3,
+      "damage": 28,
+      "attackSpeed": 1.5,
+      "attackRange": 8,
+      "attackType": "Projectile",
+      "splashRadius": 0,
+      "splashDamagePercent": 0,
+      "moveSpeed": 1.4,
+      "flying": false,
+      "energyCost": 50,
+      "materialsCost": 40,
+      "buildTime": 12,
+      "populationCost": 2,
+      "requiredTechLevel": "None",
+      "defaultBehavior": "Patrol Walls",
+      "behaviorDescription": "Moves to the nearest outer wall section and positions behind barriers. Automatically engages any enemy within range, prioritizing the closest. If barriers are breached, will move to plug the gap. Will kite backwards if enemies get within melee range and there is room behind.",
+      "abilities": [],
+      "collapsed": false
+    },
+    {
+      "id": "unit_mech_002",
+      "name": "Juggernaut",
+      "building": "mech",
+      "role": "Tank",
+      "description": "Heavy assault mech built to hold the line at close range. Massive HP and armor make it nearly unkillable against small enemies. Slow but devastating in melee with its power fists. Deploy at breach points or in front of critical barriers to absorb damage that would otherwise destroy your structures. The unit enemies break themselves against.",
+      "visualDescription": "huge bipedal mech, 2x human size, bulky rounded armor plates, oversized power fists that crackle with energy on each punch, heavy stomping walk animation, dark iron and red coloring with glowing orange power core visible in chest, ground shakes slightly with each step",
+      "hp": 800,
+      "armor": 6,
+      "damage": 65,
+      "attackSpeed": 0.8,
+      "attackRange": 2,
+      "attackType": "Melee",
+      "splashRadius": 1,
+      "splashDamagePercent": 40,
+      "moveSpeed": 0.9,
+      "flying": false,
+      "energyCost": 90,
+      "materialsCost": 75,
+      "buildTime": 22,
+      "populationCost": 4,
+      "requiredTechLevel": "Tier 1",
+      "defaultBehavior": "Patrol Walls",
+      "behaviorDescription": "Moves to the most damaged or most attacked barrier section and stands in front of it, absorbing hits. Engages any enemy within its short range with devastating melee attacks. Splash damage hits enemies clustered around it. Will not retreat -- holds position until destroyed or manually moved.",
+      "abilities": [
+        {
+          "name": "Fortify",
+          "description": "When stationary for 3+ seconds, gains +3 armor and reduces incoming damage by 15%. Visual: plants feet wide, armor plates lock into reinforced position, orange glow intensifies.",
+          "cooldown": 0,
+          "effectValue": 3
+        }
+      ],
+      "collapsed": false
+    }
+  ],
+  "war": [
+    {
+      "id": "unit_war_001",
+      "name": "Striker",
+      "building": "war",
+      "role": "Combat",
+      "description": "Fast attack vehicle with twin rapid-fire cannons. High mobility lets it respond to threats across the base quickly. Strong sustained DPS at medium range. Best used as a rapid response unit -- send it wherever the pressure is highest. Less tanky than mechs, but much faster and higher DPS per pop cost.",
+      "visualDescription": "low-slung four-wheeled armored vehicle with twin rotary cannons mounted on top, moves fast with visible dust/sparks from wheels, sleek angular profile, military green and black, muzzle flash from both barrels alternating",
+      "hp": 350,
+      "armor": 2,
+      "damage": 20,
+      "attackSpeed": 3,
+      "attackRange": 7,
+      "attackType": "Projectile",
+      "splashRadius": 0,
+      "splashDamagePercent": 0,
+      "moveSpeed": 2.2,
+      "flying": false,
+      "energyCost": 60,
+      "materialsCost": 50,
+      "buildTime": 15,
+      "populationCost": 3,
+      "requiredTechLevel": "None",
+      "defaultBehavior": "Patrol Walls",
+      "behaviorDescription": "Patrols along the inner perimeter of the base walls. Automatically moves toward the wall section with the most enemy activity. Engages targets while moving -- does not need to stop to fire. If a wall is breached, rushes to that location to provide fire support. Can be manually directed to specific areas for focused defense.",
+      "abilities": [
+        {
+          "name": "Overdrive",
+          "description": "Activate to gain +50% move speed and +25% attack speed for 8 seconds. 30 second cooldown. Visual: exhaust flames flare, vehicle surges forward. Great for rushing to breach points.",
+          "cooldown": 30,
+          "effectValue": 50
+        }
+      ],
+      "collapsed": false
+    },
+    {
+      "id": "unit_war_002",
+      "name": "Siege Walker",
+      "building": "war",
+      "role": "Ranged",
+      "description": "Towering long-range artillery platform. Fires devastating plasma shells at extreme range, dealing massive AoE damage. Must deploy (stop moving) to fire. The most powerful per-shot damage of any player unit, but very slow, expensive, and vulnerable up close. Position deep in the base and let it rain fire over your walls onto approaching enemies. A hard counter to Cluggs, Brutes, and boss units.",
+      "visualDescription": "tall four-legged walking artillery platform, massive cannon barrel on top that elevates to fire arcing shots, legs fold and brace when deployed to fire, heavy industrial design, dark steel with orange plasma glow from the cannon chamber, visible recoil animation on each shot",
+      "hp": 600,
+      "armor": 4,
+      "damage": 120,
+      "attackSpeed": 0.3,
+      "attackRange": 18,
+      "attackType": "AoE",
+      "splashRadius": 3,
+      "splashDamagePercent": 50,
+      "moveSpeed": 0.7,
+      "flying": false,
+      "energyCost": 130,
+      "materialsCost": 110,
+      "buildTime": 28,
+      "populationCost": 5,
+      "requiredTechLevel": "Tier 2",
+      "defaultBehavior": "Guard Towers",
+      "behaviorDescription": "Moves to a central position in the base and deploys. Must be stationary for 2 seconds before it can fire (deploy time). Targets the highest-HP enemy within range, prioritizing bosses and huge enemies. Arcing shots fly over walls and friendly structures. If enemies breach the walls and get within 4 grids, undeploys and retreats toward the Central Tower before redeploying.",
+      "abilities": [
+        {
+          "name": "Deploy",
+          "description": "Must stop moving and deploy to fire (2 second deploy time). While deployed, gains +4 range (22 total) and +20% damage. Undeploying takes 1.5 seconds. Cannot move while deployed.",
+          "cooldown": 0,
+          "effectValue": 4
+        },
+        {
+          "name": "Shatter Shell",
+          "description": "Every 4th shot fires a Shatter Shell that deals +50% damage and reduces armor by 2 for 8 seconds on all targets in the splash zone. Visual: projectile glows brighter, impact has a distinct cracking effect.",
+          "cooldown": 0,
+          "effectValue": 50
+        }
+      ],
+      "collapsed": false
+    }
+  ]
+}

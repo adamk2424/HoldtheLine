@@ -334,7 +334,7 @@ static func _create_missile_battery(c: Color) -> Node3D:
 						Vector3(-0.13, 0.175, 0.13), Vector3(0.13, 0.175, 0.13)]
 	
 	for i in range(4):
-		var tube_pos := tube_positions[i]
+		var tube_pos: Vector3 = tube_positions[i]
 		# Tube housing
 		_add_cylinder(launcher_assembly, 0.07, 0.35, tube_pos, dark)
 		
@@ -385,7 +385,7 @@ static func _create_missile_battery(c: Color) -> Node3D:
 	
 	# Exhaust vents for smoke trails
 	for i in range(4):
-		var vent_pos := tube_positions[i] + Vector3(0, 0.4, 0)
+		var vent_pos: Vector3 = tube_positions[i] + Vector3(0, 0.4, 0)
 		_add_cylinder(launcher_assembly, 0.02, 0.05, vent_pos, dark.darkened(0.3))
 	
 	# Animation metadata
@@ -3663,10 +3663,10 @@ static func animate_turret_advanced_tracking(visual_node: Node3D, target_positio
 	if not turret_node:
 		return
 	
-	var turret_pos := turret_node.global_position
-	var target_dir := (target_position - turret_pos).normalized()
-	var target_angle := atan2(target_dir.x, target_dir.z) * 180.0 / PI
-	var current_angle := turret_node.rotation_degrees.y
+	var turret_pos: Vector3 = turret_node.global_position
+	var target_dir: Vector3 = (target_position - turret_pos).normalized()
+	var target_angle: float = atan2(target_dir.x, target_dir.z) * 180.0 / PI
+	var current_angle: float = turret_node.rotation_degrees.y
 	
 	# Smooth angle interpolation
 	var angle_diff := _normalize_angle_difference(target_angle - current_angle)
@@ -3681,8 +3681,8 @@ static func animate_turret_advanced_tracking(visual_node: Node3D, target_positio
 		var barrel_path: String = visual_node.get_meta("barrel_assembly_node")
 		var barrel_node := visual_node.get_node_or_null(NodePath(barrel_path))
 		if barrel_node:
-			var distance := turret_pos.distance_to(target_position)
-			var elevation_angle := atan2(target_position.y - turret_pos.y, distance) * 180.0 / PI
+			var distance: float = turret_pos.distance_to(target_position)
+			var elevation_angle: float = atan2(target_position.y - turret_pos.y, distance) * 180.0 / PI
 			elevation_angle = clamp(elevation_angle, -10.0, 45.0)  # Physical limits
 			
 			var elevation_tween := visual_node.create_tween()
@@ -3727,7 +3727,7 @@ static func animate_turret_enhanced_recoil(visual_node: Node3D, recoil_strength:
 		var barrel_path: String = visual_node.get_meta("barrel_assembly_node")
 		var barrel_node := visual_node.get_node_or_null(NodePath(barrel_path))
 		if barrel_node:
-			var original_pos := barrel_node.position
+			var original_pos: Vector3 = barrel_node.position
 			var recoil_tween := visual_node.create_tween()
 			recoil_tween.set_parallel(true)
 			
@@ -3747,7 +3747,7 @@ static func animate_turret_enhanced_recoil(visual_node: Node3D, recoil_strength:
 		var turret_node := visual_node.get_node_or_null(NodePath(turret_path))
 		if turret_node:
 			var shake_tween := visual_node.create_tween()
-			var original_rot := turret_node.rotation_degrees
+			var original_rot: Vector3 = turret_node.rotation_degrees
 			shake_tween.tween_property(turret_node, "rotation_degrees", 
 				original_rot + Vector3(randf_range(-0.5, 0.5), 0, randf_range(-0.5, 0.5)), 0.08)
 			shake_tween.tween_property(turret_node, "rotation_degrees", original_rot, 0.12)
@@ -3786,7 +3786,7 @@ static func animate_turret_enhanced_idle_scan(visual_node: Node3D, scan_range: f
 	scan_tween.set_loops()
 	
 	# Realistic search pattern: pause, scan, pause, return
-	var current_angle := turret_node.rotation_degrees.y
+	var current_angle: float = turret_node.rotation_degrees.y
 	
 	# Scan to one side
 	scan_tween.tween_property(turret_node, "rotation_degrees:y", 
@@ -3850,98 +3850,6 @@ static func _set_barrel_spin_velocity(spinner_node: Node3D, angular_velocity: fl
 	spinner_node.rotation_degrees.z = fmod(spinner_node.rotation_degrees.z + delta, 360.0)
 
 
-static func _set_barrel_spin_velocity(spinner_node: Node3D, degrees_per_second: float) -> void:
-	if not spinner_node:
-		return
-	# Apply continuous rotation based on current velocity
-	var delta := spinner_node.get_process_delta_time()
-	spinner_node.rotation_degrees.z += degrees_per_second * delta
-
-
-static func _create_autocannon_muzzle_flash(visual_node: Node3D) -> void:
-	# Enhanced muzzle flash with realistic timing and effects
-	if not visual_node.has_meta("barrel_spinner_node"):
-		return
-		
-	var spinner_path: String = visual_node.get_meta("barrel_spinner_node")
-	var spinner_node := visual_node.get_node_or_null(NodePath(spinner_path))
-	if not spinner_node:
-		return
-	
-	# Create bright orange-yellow flash
-	var flash := MeshInstance3D.new()
-	flash.name = "MuzzleFlash"
-	
-	var flash_mesh := SphereMesh.new()
-	flash_mesh.radius = 0.08
-	flash_mesh.height = 0.16
-	
-	var flash_mat := StandardMaterial3D.new()
-	flash_mat.albedo_color = Color(1.0, 0.9, 0.4, 1.0)
-	flash_mat.emission_enabled = true
-	flash_mat.emission = Color(1.0, 0.8, 0.2)
-	flash_mat.emission_energy_multiplier = 8.0
-	flash_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	
-	flash_mesh.material = flash_mat
-	flash.mesh = flash_mesh
-	flash.position = Vector3(0, 0, 0.5)  # At barrel end
-	
-	spinner_node.add_child(flash)
-	
-	# Flash timing: instant bright, quick fade
-	var flash_tween := visual_node.create_tween()
-	flash_tween.tween_property(flash, "modulate:a", 0.0, 0.15)
-	flash_tween.tween_callback(flash.queue_free)
-
-
-static func _create_rail_gun_discharge(visual_node: Node3D) -> void:
-	# Blue-white energy discharge effect
-	if not visual_node.has_meta("barrel_assembly_node"):
-		return
-		
-	var barrel_path: String = visual_node.get_meta("barrel_assembly_node")
-	var barrel_node := visual_node.get_node_or_null(NodePath(barrel_path))
-	if not barrel_node:
-		return
-	
-	# Energy buildup effect
-	var charge := MeshInstance3D.new()
-	charge.name = "RailCharge"
-	
-	var charge_mesh := SphereMesh.new()
-	charge_mesh.radius = 0.05
-	
-	var charge_mat := StandardMaterial3D.new()
-	charge_mat.albedo_color = Color(0.3, 0.6, 1.0, 0.8)
-	charge_mat.emission_enabled = true
-	charge_mat.emission = Color(0.5, 0.8, 1.0)
-	charge_mat.emission_energy_multiplier = 6.0
-	
-	charge_mesh.material = charge_mat
-	charge.mesh = charge_mesh
-	charge.position = Vector3(0, 0, 0.4)
-	
-	barrel_node.add_child(charge)
-	
-	# Charge buildup animation
-	var charge_tween := visual_node.create_tween()
-	charge_tween.set_parallel(true)
-	charge_tween.tween_property(charge, "scale", Vector3(2.0, 2.0, 2.0), 0.8)
-	charge_tween.tween_property(charge, "modulate:a", 0.0, 0.8)
-	charge_tween.tween_callback(charge.queue_free)
-
-
-static func _create_tesla_charge_buildup(visual_node: Node3D, duration: float) -> void:
-	# Tesla coil charging with electrical effects
-	# Create multiple small arcs that grow in intensity
-	for i in range(6):
-		var delay: float = i * (duration / 6.0)
-		visual_node.get_tree().create_timer(delay).timeout.connect(
-			func(): _create_tesla_arc_effect(visual_node, 1.5 + i * 0.5)
-		)
-
-
 static func _create_tesla_arc_effect(visual_node: Node3D, intensity: float) -> void:
 	# Create small electrical arc effect
 	var arc := MeshInstance3D.new()
@@ -3969,79 +3877,6 @@ static func _create_tesla_arc_effect(visual_node: Node3D, intensity: float) -> v
 	var arc_tween := visual_node.create_tween()
 	arc_tween.tween_property(arc, "modulate:a", 0.0, 0.3)
 	arc_tween.tween_callback(arc.queue_free)
-
-
-static func _create_rail_gun_charge_buildup(visual_node: Node3D, duration: float) -> void:
-	# Rail gun magnetic field charging effect
-	if not visual_node.has_meta("barrel_assembly_node"):
-		return
-		
-	var barrel_path: String = visual_node.get_meta("barrel_assembly_node")
-	var barrel_node := visual_node.get_node_or_null(NodePath(barrel_path))
-	if not barrel_node:
-		return
-	
-	# Blue energy coursing through barrel
-	var energy_ring := MeshInstance3D.new()
-	energy_ring.name = "EnergyCharge"
-	
-	var ring_mesh := TorusMesh.new()
-	ring_mesh.inner_radius = 0.03
-	ring_mesh.outer_radius = 0.08
-	
-	var energy_mat := StandardMaterial3D.new()
-	energy_mat.albedo_color = Color(0.2, 0.6, 1.0, 0.8)
-	energy_mat.emission_enabled = true
-	energy_mat.emission = Color(0.4, 0.8, 1.0)
-	energy_mat.emission_energy_multiplier = 4.0
-	
-	ring_mesh.material = energy_mat
-	energy_ring.mesh = ring_mesh
-	energy_ring.position = Vector3(0, 0, 0.1)
-	
-	barrel_node.add_child(energy_ring)
-	
-	# Energy building animation
-	var charge_tween := visual_node.create_tween()
-	charge_tween.set_parallel(true)
-	charge_tween.tween_property(energy_ring, "position", Vector3(0, 0, 0.4), duration)
-	charge_tween.tween_method(
-		func(intensity): energy_mat.emission_energy_multiplier = intensity,
-		1.0, 8.0, duration
-	)
-	charge_tween.tween_callback(energy_ring.queue_free)
-
-
-static func _create_plasma_charge_buildup(visual_node: Node3D, duration: float) -> void:
-	# Plasma weapon charging with heat distortion
-	var plasma_charge := MeshInstance3D.new()
-	plasma_charge.name = "PlasmaCharge"
-	
-	var charge_mesh := SphereMesh.new()
-	charge_mesh.radius = 0.06
-	
-	var plasma_mat := StandardMaterial3D.new()
-	plasma_mat.albedo_color = Color(1.0, 0.4, 0.8, 0.8)
-	plasma_mat.emission_enabled = true
-	plasma_mat.emission = Color(1.0, 0.3, 0.6)
-	plasma_mat.emission_energy_multiplier = 3.0
-	
-	charge_mesh.material = plasma_mat
-	plasma_charge.mesh = charge_mesh
-	plasma_charge.position = Vector3(0, 1.0, 0.3)
-	
-	visual_node.add_child(plasma_charge)
-	
-	# Pulsing charge animation
-	var pulse_tween := visual_node.create_tween()
-	pulse_tween.set_loops(int(duration * 2))  # 2 pulses per second
-	pulse_tween.tween_property(plasma_charge, "scale", Vector3(1.5, 1.5, 1.5), 0.25)
-	pulse_tween.tween_property(plasma_charge, "scale", Vector3(1.0, 1.0, 1.0), 0.25)
-	
-	# Final cleanup
-	visual_node.get_tree().create_timer(duration).timeout.connect(
-		func(): plasma_charge.queue_free()
-	)
 
 
 static func _animate_single_missile_reload(visual_node: Node3D, missile_index: int, duration: float) -> void:
@@ -4125,15 +3960,15 @@ static func animate_turret_tracking(tower_node: Node3D, target_position: Vector3
 		return
 	
 	var turret_body: Node3D = tower_node.get_meta("turret_body")
-	var tower_pos := tower_node.global_position
-	
+	var tower_pos: Vector3 = tower_node.global_position
+
 	# Calculate horizontal rotation (turret body)
-	var to_target := (target_position - tower_pos)
+	var to_target: Vector3 = (target_position - tower_pos)
 	to_target.y = 0  # Flatten for horizontal rotation
-	var target_angle := atan2(to_target.x, to_target.z) * RAD_TO_DEG
-	
+	var target_angle: float = rad_to_deg(atan2(to_target.x, to_target.z))
+
 	# Smooth rotation with realistic constraints
-	var current_angle := turret_body.rotation_degrees.y
+	var current_angle: float = turret_body.rotation_degrees.y
 	var angle_diff := _normalize_angle_difference(target_angle - current_angle)
 	
 	# Limit rotation speed for realism (120 deg/sec max)
@@ -4149,16 +3984,16 @@ static func animate_turret_tracking(tower_node: Node3D, target_position: Vector3
 	# Calculate barrel elevation if supported
 	if tower_node.has_meta("barrel_assembly"):
 		var barrel_assembly: Node3D = tower_node.get_meta("barrel_assembly")
-		var distance := tower_pos.distance_to(target_position)
-		var height_diff := target_position.y - tower_pos.y
-		var elevation_angle := atan2(height_diff, distance) * RAD_TO_DEG
+		var distance: float = tower_pos.distance_to(target_position)
+		var height_diff: float = target_position.y - tower_pos.y
+		var elevation_angle: float = rad_to_deg(atan2(height_diff, distance))
 		
 		# Apply realistic elevation constraints (-10 to +45 degrees)
 		elevation_angle = clamp(elevation_angle, -10.0, 45.0)
 		
 		# Smooth elevation change
-		var current_elevation := barrel_assembly.rotation_degrees.x
-		var elevation_diff := elevation_angle - current_elevation
+		var current_elevation: float = barrel_assembly.rotation_degrees.x
+		var elevation_diff: float = elevation_angle - current_elevation
 		var max_elevation_speed := 60.0  # degrees per second
 		var max_elevation_this_frame := max_elevation_speed * frame_time
 		

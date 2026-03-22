@@ -106,7 +106,6 @@ func _setup_ui() -> void:
 	level_complete_screen = CanvasLayer.new()
 	level_complete_screen.set_script(LevelCompleteScript)
 	level_complete_screen.name = "LevelCompleteScreen"
-	level_complete_screen.layer = 26  # Above game over screen
 	add_child(level_complete_screen)
 
 	# Intro Cinematic
@@ -206,7 +205,11 @@ func _on_build_requested(entity_id: String, grid_pos: Vector2i, size: int) -> vo
 
 
 func _begin_intro() -> void:
-	GameState.reset_state()
+	# Note: GameState.reset_state() is already called in the menu before scene change.
+	# Do NOT reset here - it wipes selected_level_id set by the level select menu.
+	# Clear stale entity references from previous game session.
+	EntityRegistry.clear_all()
+	Projectile._pool.clear()
 	_place_starting_buildings()
 	_place_starting_walls()
 

@@ -165,6 +165,11 @@ func get_current_multipliers() -> Dictionary:
 	var effective_hp: float = _get_accelerated_scaling(minutes_elapsed, hp_scale)
 	var effective_damage: float = _get_accelerated_scaling(minutes_elapsed, damage_scale)
 	var speed_bonus: float = _get_late_game_speed_bonus(minutes_elapsed)
+
+	# Early ramp: +10% per minute past 2 minutes for HP and speed
+	var early_ramp_bonus: float = 0.0
+	if minutes_elapsed >= 2.0:
+		early_ramp_bonus = 0.10 * (minutes_elapsed - 2.0)
 	var accel_phase: String = _get_acceleration_phase_name(minutes_elapsed)
 
 	# Combat scaling: +5% per minute past 10 minutes to damage and attack range
@@ -173,10 +178,10 @@ func get_current_multipliers() -> Dictionary:
 		combat_bonus = 0.05 * (minutes_elapsed - 10.0)
 
 	return {
-		"hp_mult": 1.0 + effective_hp,
+		"hp_mult": 1.0 + effective_hp + early_ramp_bonus,
 		"damage_mult": (1.0 + effective_damage) * (1.0 + combat_bonus),
 		"attack_range_mult": 1.0 + combat_bonus,
-		"speed_bonus": speed_bonus,
+		"speed_bonus": speed_bonus + early_ramp_bonus,
 		"accel_phase": accel_phase,
 		"minutes_elapsed": minutes_elapsed,
 		"surge_count": GameState.surge_count,

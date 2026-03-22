@@ -1,0 +1,93 @@
+{
+  "project": "Hold the Line",
+  "exported": "2026-03-17T05:04:44.770Z",
+  "WARNING": "This file contains original design answers captured during the Q&A phase. Some values have been revised in the actual JSON data files (htl_enemies.json, htl_tower_designs.json, etc.) during balance passes. When there is a conflict, the JSON data files are the source of truth. Key changes: boss spawn moved to ~90s (was 150s), Energy Barrier now costs 20E/10M (was free), Terror Bringer Death Blast reduced to 500dmg/3radius (was 750/4), Drone Printer was called 'Bot Printer' in these answers.",
+  "sections": {
+    "SETTING & THEME": {
+      "What is the faction/setting? (Sci-fi military humans vs aliens? Post-apocalyptic? Fantasy? Something else?) This drives all naming and visual style.": "Sci-fi military humans with advanced technology that is a mixture of mechanical and energy based. Being attacked by aliens that are a mixture of animal like monsters that grow increasingly strong. There can be magical or fantasy elements as well mixed in.",
+      "Are the enemies a single faction (e.g., alien swarm, robot army) or a mix of different factions/types?": "all one faction but the faction is a collection of different monster types.",
+      "What is the general aesthetic tone? (Gritty/realistic, stylized/colorful, dark/horror-tinged?)": "more dark/horror like with grim aesthetic of fighting to the death to survive to the last man as long as possible.",
+      "Is there any lore context for WHY the player is holding this position? (Last colony, strategic chokepoint, protecting civilians, etc.)": "The player is the commander of the forces left behind after the last drop ship has gone, hopeful that if they can hold out long enough, maybe someone will show up to rescue them as well."
+    },
+    "PRODUCTION BUILDINGS": {
+      "Do you envision the 3 production buildings as role-specialized? (e.g., one for units, one for towers/defenses, one for tech/upgrades) Or does each produce a mix?": "role-specialized. Drone Printer, Mech Bay and War Factory.\n\nDrone Printer - units that perform helpful functions. They can fly and move quickly and perform their jobs automatically on spawn without needing to be given orders. There are 3 types of drones, tier 1, 2 and 3 unlocks each. Tier 1 drone is Repair Drone that flies near a damaged building and uses a light beam to repair it at 5hp/sec. It will stay on one building until it's fully healed and then move to another damaged building. Repair drones only have 40hp and die easily. We will want another page specifically to outline each  unit so create a new page for that. Same goes for towers and enemies.",
+      "Can you build multiples of the same production building to speed up production?": "yes. There is only one build menu per building type but building more of them increases production rate. Pressing 1 (hotkey for Bot Printer) and then ordering up 5 repair bots for example, if you have 3 bot printers, it will send the build command to each in order, resulting in each having 2, 2 and 1 in the build queue in that example.",
+      "How many upgrade tiers per building? (2 or 3?)": "Only the central tower has upgrade tiers to unlock the next tech stage, but towers can have between 0 and 5 upgrade levels depending on the tower.",
+      "Is there a tech dependency between buildings? (e.g., must have Building A at tier 2 before you can build Building B?)": "No, except some towers, tower upgrades, and units are locked behind your Central Tower tech level (tier 1, 2 or 3 tech)",
+      "Do production buildings have a build queue? If so, how deep? (e.g., queue 3-5 units at once)": "Yes, max of 5, but they can also be set to Continuous, where they will keep making the selected unit non-stop if they can. If you have several unit types in your production set to Continuous it will rotate through them as money becomes available, rather than just always making the cheapest one as soon as you have the money to pay for it. You must have the full price of a unit at the time of production to start producing it.",
+      "Can production buildings be upgraded while actively training units?": "there are no production building upgrades, but they have upgrades to buy that affect units they produce. Those can be purchased at any time, even while they are training units.",
+      "Does destroying a production building remove access to its units/tech, or is it unlocked permanently once built?": "There is no tech unlock but if there were is is permanent.",
+      "Do you start the game with any production building already built, or must you build everything from scratch?": "Yes, 1 of each of the 3 types."
+    },
+    "CORE ECONOMY & RESOURCES": {
+      "With base rate of 1 Energy + 1 Materials per second, a 50/50 cost unit takes ~50 sec to afford. Is that the pacing you want?": "Increase the rate to 5 and 5 per second. We will scale unit cost appropriately. There will also be buildings you can build to increase production.",
+      "Should there be resource-boosting buildings or upgrades that increase income rate?": "Yes but you need to kill 1 boss before you can upgrade your central tower, which doubles your income rate. You can double it again later after getting 10 boss kills. After the first central tower upgrade, you can build Leach Towers that shoot a ray out at enemies bodies (bodies stick around for ~10seconds after death) and converts them into Material at a conversion rate of 1 material per 10hp the enemy had. Conversion takes .3 seconds per body. There are also Thermal Siphon towers that do the same but for Energy except they leach it off enemies continuously while they are alive, not on bodies, but deal low damage.",
+      "Is there a unit population cap, or is it purely resource-limited?": "Yes, 100 units, no tower limit as space will limit tower total. Player units only, no enemy limit.",
+      "Can buildings/units be sold back for partial resources? If so, what refund percentage? (e.g., 50%)": "Yes, 75%",
+      "Do you gain bonus resources from killing enemies, or is income strictly time-based?": "Only time based.",
+      "Is there a third resource or any special currency (e.g., 'tech points' earned from kills for upgrades)?": "Yes, you get Tech Points for killing bosses but those aren't usable in the run, only post run in the upgrades screen. In game all costs are only in Energy or Materials"
+    },
+    "ENEMIES & WAVES": {
+      "Are enemies wave-based (wave 1, wave 2 with breaks between) or truly continuous with ramping difficulty?": "truly continuous with ramping difficulty, though surges of more or less enemies will hit areas at some times and bosses as well, though both are semi-random within a small time span (rather than exactly at 2, 3, 4 minutes, they will appear +/- 30 seconds on set intervals, that shortens and becomes more frequent the later the game goes.",
+      "If wave-based, is there a break between waves for the player to build? How long?": "no waves but the surges come aprox. every 30 seconds to start, getting faster as you go at a rate of about 10% faster per minute. A surge is a larger group of enemies, sometimes with special enemy types, all spawning at once in a direction in addition to the normal spawn rate.",
+      "What is the lose condition? (A specific 'core' building destroyed? All buildings gone? A certain area breached?)": "The building at the middle of your base, the Central Tower has 1500 hp, when it dies the game is lost.",
+      "Are there flying enemies? If so, can all towers/units target them or only specific ones?": "Yes, some enemies are flying. All attacks can hit both flying and ground units but flying units don't have to path around walls and blocking shields/barriers, they can fly right into the base if they want.",
+      "Do enemies have any formation or group behavior, or do they just rush the base individually?": "Most rush the base individually attacking the first thing they can, but some of the more specialized enemies do other things, like buff their allies, launch ranged attacks at units or towers ignoring walls, or run in to suicide explode on the outer walls.",
+      "Do enemies target buildings, units, or both? Is there priority targeting (e.g., always attack nearest, or prefer production buildings)?": "Most always attack the first thing they can reach, but some special units will target player units and ignore buildings, some will try and attack towers ignoring walls, some will attack from range and some special units will try and attack deep into the base with long range attacks ignoring the front lines. flying units always ignore walls/barriers and fly straight to towers or units to attack them.",
+      "Do any enemies have shields or special defenses?": "Some might, we will design those per unit in the enemy design page.",
+      "Do enemies scale in raw stats over time (HP/damage increase), or does difficulty come only from harder enemy compositions?": "Yes, both. Increase enemy HP and damage by 1% every minute. Add 1 armor point to all large enemies every 5 minutes, 2 armor points to all huge enemies every 5 minutes, and 1 armor point to all small enemies every 10 minutes. We will mark all enemies as being small, large, or huge in the enemy design page.",
+      "Is there a boss or mini-boss mechanic? (e.g., every 10th wave has a boss)": "Yes, a boss unit spawns +/-30seconds at the 2 1/2 minute mark. A boss will spawn every 2 minutes after that, within a 30 second varying window, but spawn 10% sooner each time to increase the rate.",
+      "Do enemies come from all 4 edges equally, or can they focus on one side?": "all 4 equally at first but they surge in one of the 4 directions every so often.",
+      "Should there be a pre-wave warning showing which direction enemies are coming from?": "no waves, so no",
+      "Are there any enemies that can bypass or jump over barriers?": "Yes."
+    },
+    "TOWERS": {
+      "Do towers have individual upgrade levels? (e.g., can you upgrade a specific tower from Lv1 to Lv2/Lv3?)": "Yes, as well as having evolution/type changes with level increases such as turning a cannon turret into a flak turret for AOE damage vs a heavy cannon for more single target damage.",
+      "Can towers be repaired manually or do they only regen passively (1% per 5 sec)?": "Repair bots can repair towers in addition to their passive regen.",
+      "What is the standard grid size for towers? (1x1? 2x2? Mix?)": "1x1 but some will be 2x2 or attach to other towers to sit on top of them(this is special types only)",
+      "Do any towers have support/buff roles (e.g., a tower that boosts nearby towers' damage or range)?": "Yes, many. We will design many special towers that buff/debuff in many ways.",
+      "What is the general range scale in grid units? (e.g., short=3, medium=6, long=10?)": "short = 6, medium = 12, long = 20",
+      "Can towers be placed outside the 120x120 buildable area, or strictly inside it?": "only inside."
+    },
+    "BARRIERS & DEFENSES": {
+      "Can barriers completely block pathing (force enemies to path around), or must enemies always have a route to the base? (maze-building vs. no-maze?)": "Barriers do block enemies but enemies always attack so they won't path around, they will attack the barriers. There are some enemies that ignore barriers to try and attack straight at towers or units, but they must be able to reach a target. If they can't find a target they can reach they will run around the base perimeter trying to get in rage of a valid target.",
+      "Do barriers take damage from all enemies, or only from siege-type enemies?": "all enemies.",
+      "Can barriers be manually repaired?": "yes.",
+      "Do barriers connect visually when placed adjacent to each other (like walls in Age of Empires)?": "yes",
+      "Is there a limit to how many barriers can be placed?": "only by the space they take up",
+      "Can barriers be placed outside the 120x120 buildable area?": "no"
+    },
+    "PLAYER UNITS": {
+      "Can player units be given rally points, patrol routes, or just move-to and attack commands?": "Their production building can be given a rally point to send units to on spawn, and units can be moved around or attack-moved (will engage anything on their way to the target point) but all units by default will move to the outer wall to perform their function (repair, shielding, attacking etc) and not sit idle. In other words, even if the player never issued any orders to their units, they would still do their jobs.",
+      "Do units have a stance system? (Aggressive / Defensive / Hold Position)": "No",
+      "Do units auto-engage nearby enemies, or must the player micro them manually?": "Yes they auto engage",
+      "Can units be healed by a support unit, or only via passive regen?": "Yes, there are repair drones to heal units and buildings, and repair towers that heal in their effect radius",
+      "Is there a unit population cap? If so, what is it?": "yes 100 unit population. We will specify population cost of each unit in their unit design pages.",
+      "Can units go outside the 120x120 buildable area to intercept enemies?": "No, all units must stay inside the 120x120 base walls."
+    },
+    "UI & HUD": {
+      "What should the HUD show at all times? (Resources, wave count, unit count, minimap, etc.)": "Yes, all of that. Resource pool in upper right, current population/max population, minimap showing the base walls that turn red if they become breached, and red dots for enemies to show if one area is concentrated with enemies.  Timer showing how long you've held out and total enemies killed in the top center.",
+      "Should there be a minimap? Where on screen?": "Yes, upper right.",
+      "How does the build menu (Q) work? Grid of icons? Categorized tabs? Radial menu?": "Build menu bar running down the left side that expands out with selection to show build options. Grid of icons.",
+      "Should selected units/buildings show a detailed info panel? Where?": "When a building or unit is selected, show their unit stats in the lower right panel. Should include their name, current HP/max hp, attack damage, range, any special abilities, a list of all their current buffs/debuffs.",
+      "Is there a game speed control (pause, fast-forward)?": "Yes. Default is speed = 1.0, but players can choose game speed .75 for an easier time, or game speed 1.25 for a challenge. Game speed makes everything go slower or faster as if time was sped up or slowed down, including the game clock showing how long you've been alive.",
+      "Should there be a wave/threat indicator showing incoming directions?": "Not by default as enemies are coming in from all sides constantly, but there should be a large alert with a sound and a big banner at the top alerting the player when a surge of powerful enemies is coming in from a certain direction. These surges become more common/frequent the longer the game goes."
+    },
+    "INTRO CINEMATIC": {
+      "How long should the intro cinematic be? (10 sec? 20 sec? 30 sec?)": "~15 seconds",
+      "Should the cinematic be skippable?": "Yes",
+      "How many dropships should be shown leaving?": "1 large ship.",
+      "Should the text 'You are all that is left. You must Survive.' be voice-acted, text-on-screen, or both?": "Text on screen only. It should appear in 2 seconds. 'You are all that is left' first and fade it out, with You Must Survive coming next and fading out.'",
+      "Does the camera pan across the base during the cinematic, or stay in one position?": "Camera starts looking down on the base and slowly zooms out to show the whole base.",
+      "Is there a main menu before the cinematic, or does the game boot straight into it?": "Yes, start on a main menu with 4 buttons. Start Game, Upgrades, Settings and Quit. \n\nSetting should have options for game resolution, full screen/windowed, lock mouse to window, and audio options to adjust master volume, SFX, Music and UI sounds separately. Also hotkey rebinds for the WASD camera moves, enable or disable for edge panning camera controls with mouse, and rebinding the hotkeys (defualt is q = build menu open, E = attack move for selected units, 1 = Bot Printer production window, 2 = Mech Bay production window, 3 = War Factory production window. We will add more hotkeys later for building specific units. \n\nAfter selecting Start Game, there will be another menu showing game options to select modifiers and run options. \n\nUpgrades will have 5 new unit or buildings you can unlock as well as 6 items that be be purchased to take with you on new runs."
+    },
+    "GENERAL GAMEPLAY": {
+      "Is there a scoring system? (Survival time? Kills? Both?)": "Both.",
+      "Is there a high score / leaderboard?": "Yes, local for now, show the top 10 highest runs by time and 10 highest runs by kill.",
+      "Is there any meta-progression between runs (unlock new units permanently), or is every run fresh?": "Yes. Players gain +1 tech points for every boss kill during a run. Tech points can be spent unlocking upgrades between runs.",
+      "Is there a difficulty selection, or is it always the same?": "Always the same for now, we will add this later.",
+      "Is there any pause menu with options (volume, controls, quit)?": "yes all of that, if you quit you can resume the previous game later, or start a new run. Use the same settings screen as the one from the main menu.",
+      "Should the game have a tutorial or tips system for first-time players?": "no"
+    }
+  }
+}

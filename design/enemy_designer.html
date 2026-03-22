@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hold the Line - Enemy Designer</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0a0e17;
+    color: #c8d6e5;
+    padding: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  h1 {
+    color: #00e5ff;
+    text-align: center;
+    font-size: 2em;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #576574;
+    margin-bottom: 20px;
+    font-size: 0.9em;
+  }
+
+  /* Save Bar */
+  .save-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #0a0e17ee;
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid #1e2a3a;
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .save-bar .left-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .save-bar .status {
+    font-size: 0.85em;
+    color: #576574;
+  }
+  .save-bar .status.saved { color: #00e676; }
+  .save-bar .status.saving { color: #ffa726; }
+
+  /* Buttons */
+  .btn {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85em;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .btn-export { background: #00e5ff; color: #0a0e17; }
+  .btn-export:hover { background: #00b8d4; }
+  .btn-import { background: #576574; color: #fff; }
+  .btn-import:hover { background: #6c7a89; }
+  .btn-clear { background: #e74c3c; color: #fff; font-size: 0.8em; padding: 7px 14px; }
+  .btn-clear:hover { background: #c0392b; }
+  .btn-collapse-all { background: #1e2a3a; color: #c8d6e5; }
+  .btn-collapse-all:hover { background: #2a3a4e; }
+
+  /* Progress Bar */
+  .progress-bar-container {
+    background: #111827;
+    border: 1px solid #1e2a3a;
+    border-radius: 8px;
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .progress-label {
+    font-size: 0.9em;
+    color: #dfe6e9;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .progress-track {
+    flex: 1;
+    height: 8px;
+    background: #0a0e17;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00e5ff, #00e676);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+  .progress-count {
+    font-size: 0.9em;
+    color: #00e5ff;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .progress-count.complete { color: #00e676; }
+
+  /* Game Context Info */
+  .game-context {
+    background: #111827;
+    border: 1px solid #1e2a3a;
+    border-radius: 8px;
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    font-size: 0.8em;
+    color: #576574;
+    line-height: 1.6;
+  }
+  .game-context summary {
+    color: #00e5ff;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+  }
+  .game-context ul { padding-left: 20px; margin-top: 8px; }
+  .game-context li { margin-bottom: 3px; }
+  .game-context strong { color: #c8d6e5; }
+
+  /* Summary Table */
+  .summary-section {
+    background: #111827;
+    border: 1px solid #1e2a3a;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .summary-header {
+    background: #1a2332;
+    padding: 12px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+  }
+  .summary-header:hover { background: #1e2a3a; }
+  .summary-header h2 {
+    color: #00e5ff;
+    font-size: 1em;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .summary-toggle {
+    color: #576574;
+    font-size: 0.85em;
+  }
+  .summary-body { overflow-x: auto; }
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82em;
+  }
+  .summary-table th {
+    background: #0a0e17;
+    color: #576574;
+    text-transform: uppercase;
+    font-size: 0.8em;
+    letter-spacing: 1px;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid #1e2a3a;
+    white-space: nowrap;
+  }
+  .summary-table td {
+    padding: 7px 12px;
+    border-bottom: 1px solid #1a2332;
+    white-space: nowrap;
+  }
+  .summary-table tr {
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .summary-table tr:hover { background: #1a2332; }
+  .summary-table tr.empty-row { color: #374151; }
+  .summary-table tr.empty-row:hover { background: #151c2a; }
+
+  /* Badges */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.75em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-role {
+    background: #1e2a3a;
+    color: #00e5ff;
+  }
+  .badge-size-small { background: #1a2332; color: #81c784; }
+  .badge-size-large { background: #1a2332; color: #ffa726; }
+  .badge-size-huge { background: #1a2332; color: #ef5350; }
+  .badge-boss {
+    background: #4a0e0e;
+    color: #ef5350;
+    border: 1px solid #ef5350;
+  }
+  .badge-flying {
+    background: #0e2a4a;
+    color: #42a5f5;
+    border: 1px solid #42a5f5;
+  }
+
+  /* Enemy Cards */
+  .enemy-card {
+    background: #111827;
+    border: 1px solid #1e2a3a;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .enemy-card.has-name { border-color: #1e3a2a; }
+  .enemy-card.is-boss { border-color: #3a1e1e; }
+
+  .card-header {
+    background: #1a2332;
+    padding: 12px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .card-header:hover { background: #1e2a3a; }
+  .card-number {
+    color: #00e5ff;
+    font-weight: 700;
+    font-size: 1.1em;
+    min-width: 28px;
+  }
+  .card-name {
+    color: #dfe6e9;
+    font-weight: 600;
+    font-size: 1em;
+    flex: 1;
+  }
+  .card-name.unnamed { color: #374151; font-style: italic; }
+  .card-badges {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .card-toggle {
+    color: #576574;
+    font-size: 1.2em;
+    transition: transform 0.2s;
+    margin-left: 8px;
+  }
+  .card-toggle.open { transform: rotate(180deg); }
+
+  .card-body {
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+  .card-body.open {
+    max-height: none;
+    overflow: visible;
+    padding: 20px;
+  }
+
+  /* Field Groups */
+  .field-group {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #1a2332;
+  }
+  .field-group:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .field-group-title {
+    color: #00e5ff;
+    font-size: 0.8em;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    font-weight: 700;
+  }
+  .field-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .field-row-wide {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .field-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+  }
+  .field label {
+    font-size: 0.78em;
+    color: #576574;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .field input[type="text"],
+  .field input[type="number"],
+  .field select,
+  .field textarea {
+    background: #0a0e17;
+    border: 1px solid #1e2a3a;
+    border-radius: 4px;
+    color: #c8d6e5;
+    padding: 8px 10px;
+    font-family: inherit;
+    font-size: 0.88em;
+    transition: border-color 0.2s;
+  }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: #00e5ff;
+  }
+  .field input.has-value,
+  .field select.has-value,
+  .field textarea.has-value {
+    border-color: #1e3a2a;
+  }
+  .field textarea {
+    min-height: 60px;
+    resize: vertical;
+  }
+  .field select {
+    cursor: pointer;
+  }
+  .field input[type="number"] {
+    width: 100%;
+  }
+
+  /* Checkbox fields */
+  .field-checkbox {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+  .field-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #00e5ff;
+    cursor: pointer;
+  }
+  .field-checkbox label {
+    margin-bottom: 0;
+    cursor: pointer;
+  }
+
+  /* Abilities */
+  .abilities-section {
+    margin-top: 4px;
+  }
+  .ability-card {
+    background: #0d1117;
+    border: 1px solid #1e2a3a;
+    border-radius: 6px;
+    padding: 14px;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .ability-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .ability-number {
+    color: #00e5ff;
+    font-size: 0.8em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .btn-remove-ability {
+    background: none;
+    border: 1px solid #3a1e1e;
+    color: #ef5350;
+    padding: 3px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75em;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .btn-remove-ability:hover {
+    background: #3a1e1e;
+    border-color: #ef5350;
+  }
+  .btn-add-ability {
+    background: #1a2332;
+    border: 1px dashed #1e2a3a;
+    color: #576574;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.82em;
+    font-weight: 600;
+    transition: all 0.2s;
+    width: 100%;
+    margin-top: 6px;
+  }
+  .btn-add-ability:hover {
+    border-color: #00e5ff;
+    color: #00e5ff;
+    background: #111827;
+  }
+  .btn-add-ability:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  /* Hidden file input */
+  .hidden-input { display: none; }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #0a0e17; }
+  ::-webkit-scrollbar-thumb { background: #1e2a3a; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #2a3a4e; }
+
+  /* Notes Section */
+  .notes-section {
+    background: #111827;
+    border: 1px solid #1e2a3a;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .notes-header {
+    background: #1a2332;
+    padding: 12px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+  }
+  .notes-header:hover { background: #1e2a3a; }
+  .notes-header h2 {
+    color: #ffa726;
+    font-size: 1.05em;
+    letter-spacing: 1px;
+  }
+  .notes-header .toggle { color: #576574; font-size: 0.9em; }
+  .notes-body { padding: 16px 20px; }
+  .notes-body textarea {
+    width: 100%;
+    min-height: 150px;
+    background: #0a0e17;
+    border: 1px solid #1e2a3a;
+    border-radius: 4px;
+    color: #c8d6e5;
+    padding: 12px;
+    font-family: inherit;
+    font-size: 0.9em;
+    resize: vertical;
+    line-height: 1.6;
+  }
+  .notes-body textarea:focus {
+    outline: none;
+    border-color: #ffa726;
+  }
+  .notes-body textarea.has-content {
+    border-color: #00e676;
+  }
+  .notes-hint {
+    font-size: 0.8em;
+    color: #576574;
+    margin-top: 6px;
+  }
+
+  /* Responsive */
+  @media (max-width: 700px) {
+    .field-row { grid-template-columns: 1fr; }
+    .field-row-2 { grid-template-columns: 1fr; }
+    .save-bar { flex-direction: column; align-items: stretch; }
+    .save-bar .left-group { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Enemy Designer</h1>
+<p class="subtitle">Hold the Line -- 12 Alien Enemy Types</p>
+
+<!-- Save Bar -->
+<div class="save-bar">
+  <div class="left-group">
+    <button class="btn btn-export" onclick="exportJSON()" title="Download as htl_enemies.json">Export JSON</button>
+    <button class="btn btn-import" onclick="document.getElementById('importInput').click()">Import JSON</button>
+    <button class="btn btn-collapse-all" onclick="collapseAll()">Collapse All</button>
+    <button class="btn btn-collapse-all" onclick="expandAll()">Expand All</button>
+    <button class="btn btn-clear" onclick="clearAll()">Clear All</button>
+    <input type="file" id="importInput" class="hidden-input" accept=".json" onchange="importJSON(event)">
+  </div>
+  <span id="saveStatus" class="status saved">Auto-saved</span>
+</div>
+
+<!-- Design Notes -->
+<div class="notes-section">
+  <div class="notes-header" onclick="toggleNotes()">
+    <h2>Design Notes &amp; Details</h2>
+    <span class="toggle" id="notesToggle">&#9660;</span>
+  </div>
+  <div class="notes-body" id="notesBody">
+    <textarea id="designNotes" placeholder="Add general notes about enemy design: themes, balance philosophy, faction lore, open questions, design decisions..." oninput="onNotesInput(this)"></textarea>
+    <div class="notes-hint">Auto-saves with page data. Included in JSON exports.</div>
+  </div>
+</div>
+
+<!-- Progress -->
+<div class="progress-bar-container">
+  <span class="progress-label">Enemies Designed:</span>
+  <div class="progress-track">
+    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+  </div>
+  <span class="progress-count" id="progressCount">0 / 12</span>
+</div>
+
+<!-- Game Context Reference -->
+<details class="game-context">
+  <summary>Game Context Reference (click to expand)</summary>
+  <ul>
+    <li><strong>Spawning:</strong> Continuous (not wave-based), with surges every ~30 seconds</li>
+    <li><strong>Bosses:</strong> First at ~2:30, then every ~2 min (accelerating)</li>
+    <li><strong>Map:</strong> 300x300 grid. Enemies spawn from edges, attack toward 120x120 base</li>
+    <li><strong>Stat Scaling:</strong> +1% HP/damage per minute of game time</li>
+    <li><strong>Armor Scaling:</strong> Small: +1 armor/10min | Large: +1 armor/5min | Huge: +2 armor/5min</li>
+    <li><strong>Targeting:</strong> All attacks can hit both ground and flying units</li>
+    <li><strong>Flying:</strong> Flying enemies bypass barriers</li>
+    <li><strong>AI Options:</strong> Target towers, ignore walls, suicide bomb, buff allies, ranged attacks</li>
+  </ul>
+</details>
+
+<!-- Summary Table -->
+<div class="summary-section">
+  <div class="summary-header" onclick="toggleSummary()">
+    <h2>Summary Table</h2>
+    <span class="summary-toggle" id="summaryToggle">&#9660;</span>
+  </div>
+  <div class="summary-body" id="summaryBody">
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Role</th>
+          <th>Size</th>
+          <th>HP</th>
+          <th>Armor</th>
+          <th>Damage</th>
+          <th>Speed</th>
+          <th>Boss</th>
+          <th>Flying</th>
+        </tr>
+      </thead>
+      <tbody id="summaryTableBody">
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Enemy Cards Container -->
+<div id="enemyCardsContainer"></div>
+
+<script>
+const STORAGE_KEY = 'htl_enemy_designs';
+const TOTAL_ENEMIES = 12;
+const MAX_ABILITIES = 3;
+
+const ROLE_OPTIONS = ['', 'Swarm', 'Bruiser', 'Tank', 'Siege', 'Ranged', 'Flying', 'Support', 'Assassin', 'Boss', 'Special'];
+const SIZE_OPTIONS = ['', 'Small', 'Large', 'Huge'];
+const ATTACK_TYPE_OPTIONS = ['', 'Melee', 'Projectile', 'Beam', 'AoE', 'Special', 'Suicide'];
+const TARGETING_OPTIONS = ['', 'Nearest', 'Buildings', 'Towers', 'Units', 'Central Tower', 'Walls/Barriers'];
+const FREQUENCY_OPTIONS = ['', 'Common', 'Uncommon', 'Rare', 'Boss-only'];
+
+let enemies = [];
+let designNotes = '';
+let autoSaveTimer = null;
+let summaryOpen = true;
+let cardStates = {}; // track open/closed per card
+
+function createDefaultEnemy(index) {
+  return {
+    id: index,
+    name: '',
+    role: '',
+    sizeCategory: '',
+    description: '',
+    visualDescription: '',
+    isBoss: false,
+    flying: false,
+    hp: 0,
+    armor: 0,
+    damage: 0,
+    attackSpeed: 0,
+    attackRange: 1,
+    attackType: '',
+    splashRadius: 0,
+    splashDamagePercent: 0,
+    moveSpeed: 0,
+    targetingPriority: '',
+    ignoresBarriers: false,
+    aiBehavior: '',
+    firstAppearance: 0,
+    spawnFrequency: '',
+    abilities: []
+  };
+}
+
+function createDefaultAbility() {
+  return { name: '', description: '', cooldown: 0, effectValue: 0 };
+}
+
+function init() {
+  loadFromStorage();
+  renderAll();
+  loadNotes();
+}
+
+function loadFromStorage() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // New format: {notes, enemies}
+      if (parsed && !Array.isArray(parsed) && Array.isArray(parsed.enemies)) {
+        enemies = parsed.enemies;
+        designNotes = parsed.notes || '';
+        return;
+      }
+      // Legacy format: plain array
+      if (Array.isArray(parsed) && parsed.length === TOTAL_ENEMIES) {
+        enemies = parsed;
+        designNotes = '';
+        return;
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to load from localStorage:', e);
+  }
+  enemies = [];
+  for (let i = 0; i < TOTAL_ENEMIES; i++) {
+    enemies.push(createDefaultEnemy(i));
+  }
+  designNotes = '';
+}
+
+function saveToStorage() {
+  try {
+    const data = { notes: designNotes, enemies: enemies };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Auto-saved';
+    status.className = 'status saved';
+  } catch (e) {
+    console.warn('Failed to save:', e);
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Save failed';
+    status.className = 'status';
+  }
+}
+
+function scheduleAutoSave() {
+  const status = document.getElementById('saveStatus');
+  status.textContent = 'Unsaved changes...';
+  status.className = 'status saving';
+  if (autoSaveTimer) clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    saveToStorage();
+    updateSummaryTable();
+    updateProgress();
+  }, 2000);
+}
+
+function onFieldChange(enemyIndex, field, value) {
+  enemies[enemyIndex][field] = value;
+  updateCardHeader(enemyIndex);
+  scheduleAutoSave();
+}
+
+function onCheckboxChange(enemyIndex, field, checked) {
+  enemies[enemyIndex][field] = checked;
+  updateCardHeader(enemyIndex);
+  scheduleAutoSave();
+}
+
+function onAbilityChange(enemyIndex, abilityIndex, field, value) {
+  if (!enemies[enemyIndex].abilities[abilityIndex]) return;
+  enemies[enemyIndex].abilities[abilityIndex][field] = value;
+  scheduleAutoSave();
+}
+
+function addAbility(enemyIndex) {
+  if (enemies[enemyIndex].abilities.length >= MAX_ABILITIES) return;
+  enemies[enemyIndex].abilities.push(createDefaultAbility());
+  renderCardBody(enemyIndex);
+  scheduleAutoSave();
+}
+
+function removeAbility(enemyIndex, abilityIndex) {
+  enemies[enemyIndex].abilities.splice(abilityIndex, 1);
+  renderCardBody(enemyIndex);
+  scheduleAutoSave();
+}
+
+function updateCardHeader(index) {
+  const e = enemies[index];
+  const nameEl = document.getElementById(`card-name-${index}`);
+  const badgesEl = document.getElementById(`card-badges-${index}`);
+  const cardEl = document.getElementById(`enemy-card-${index}`);
+
+  if (nameEl) {
+    if (e.name) {
+      nameEl.textContent = e.name;
+      nameEl.className = 'card-name';
+    } else {
+      nameEl.textContent = '(unnamed)';
+      nameEl.className = 'card-name unnamed';
+    }
+  }
+
+  if (badgesEl) {
+    let html = '';
+    if (e.role) html += `<span class="badge badge-role">${esc(e.role)}</span>`;
+    if (e.sizeCategory) {
+      const sc = e.sizeCategory.toLowerCase();
+      html += `<span class="badge badge-size-${sc}">${esc(e.sizeCategory)}</span>`;
+    }
+    if (e.isBoss) html += `<span class="badge badge-boss">Boss</span>`;
+    if (e.flying) html += `<span class="badge badge-flying">Flying</span>`;
+    badgesEl.innerHTML = html;
+  }
+
+  if (cardEl) {
+    cardEl.className = 'enemy-card' + (e.name ? ' has-name' : '') + (e.isBoss ? ' is-boss' : '');
+  }
+}
+
+function toggleCard(index) {
+  const body = document.getElementById(`card-body-${index}`);
+  const toggle = document.getElementById(`card-toggle-${index}`);
+  if (body.classList.contains('open')) {
+    body.classList.remove('open');
+    toggle.classList.remove('open');
+    cardStates[index] = false;
+  } else {
+    body.classList.add('open');
+    toggle.classList.add('open');
+    cardStates[index] = true;
+  }
+}
+
+function collapseAll() {
+  for (let i = 0; i < TOTAL_ENEMIES; i++) {
+    const body = document.getElementById(`card-body-${i}`);
+    const toggle = document.getElementById(`card-toggle-${i}`);
+    if (body) { body.classList.remove('open'); toggle.classList.remove('open'); cardStates[i] = false; }
+  }
+}
+
+function expandAll() {
+  for (let i = 0; i < TOTAL_ENEMIES; i++) {
+    const body = document.getElementById(`card-body-${i}`);
+    const toggle = document.getElementById(`card-toggle-${i}`);
+    if (body) { body.classList.add('open'); toggle.classList.add('open'); cardStates[i] = true; }
+  }
+}
+
+function toggleSummary() {
+  const body = document.getElementById('summaryBody');
+  const toggle = document.getElementById('summaryToggle');
+  summaryOpen = !summaryOpen;
+  body.style.display = summaryOpen ? '' : 'none';
+  toggle.innerHTML = summaryOpen ? '&#9660;' : '&#9654;';
+}
+
+function scrollToCard(index) {
+  const card = document.getElementById(`enemy-card-${index}`);
+  if (card) {
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Open the card if closed
+    const body = document.getElementById(`card-body-${index}`);
+    const toggle = document.getElementById(`card-toggle-${index}`);
+    if (!body.classList.contains('open')) {
+      body.classList.add('open');
+      toggle.classList.add('open');
+      cardStates[index] = true;
+    }
+  }
+}
+
+function updateProgress() {
+  const named = enemies.filter(e => e.name && e.name.trim()).length;
+  const pct = (named / TOTAL_ENEMIES) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  const countEl = document.getElementById('progressCount');
+  countEl.textContent = `${named} / ${TOTAL_ENEMIES}`;
+  countEl.className = named === TOTAL_ENEMIES ? 'progress-count complete' : 'progress-count';
+}
+
+function updateSummaryTable() {
+  const tbody = document.getElementById('summaryTableBody');
+  let html = '';
+  for (let i = 0; i < TOTAL_ENEMIES; i++) {
+    const e = enemies[i];
+    const isEmpty = !e.name;
+    const rowClass = isEmpty ? 'empty-row' : '';
+    html += `<tr class="${rowClass}" onclick="scrollToCard(${i})">`;
+    html += `<td style="color:#00e5ff;font-weight:700">${i + 1}</td>`;
+    html += `<td>${e.name ? esc(e.name) : '<span style="color:#374151;font-style:italic">unnamed</span>'}</td>`;
+    html += `<td>${e.role ? `<span class="badge badge-role">${esc(e.role)}</span>` : '--'}</td>`;
+    if (e.sizeCategory) {
+      const sc = e.sizeCategory.toLowerCase();
+      html += `<td><span class="badge badge-size-${sc}">${esc(e.sizeCategory)}</span></td>`;
+    } else {
+      html += `<td>--</td>`;
+    }
+    html += `<td>${e.hp || '--'}</td>`;
+    html += `<td>${e.armor || '--'}</td>`;
+    html += `<td>${e.damage || '--'}</td>`;
+    html += `<td>${e.moveSpeed || '--'}</td>`;
+    html += `<td>${e.isBoss ? '<span class="badge badge-boss">Yes</span>' : '--'}</td>`;
+    html += `<td>${e.flying ? '<span class="badge badge-flying">Yes</span>' : '--'}</td>`;
+    html += `</tr>`;
+  }
+  tbody.innerHTML = html;
+}
+
+function renderAll() {
+  const container = document.getElementById('enemyCardsContainer');
+  let html = '';
+  for (let i = 0; i < TOTAL_ENEMIES; i++) {
+    html += renderCard(i);
+  }
+  container.innerHTML = html;
+
+  // Open first card by default
+  if (cardStates[0] === undefined) cardStates[0] = true;
+
+  for (let i = 0; i < TOTAL_ENEMIES; i++) {
+    if (cardStates[i]) {
+      const body = document.getElementById(`card-body-${i}`);
+      const toggle = document.getElementById(`card-toggle-${i}`);
+      if (body) { body.classList.add('open'); toggle.classList.add('open'); }
+    }
+    populateCardFields(i);
+  }
+
+  updateSummaryTable();
+  updateProgress();
+}
+
+function renderCard(index) {
+  const e = enemies[index];
+  const hasName = e.name && e.name.trim();
+  let badgesHtml = '';
+  if (e.role) badgesHtml += `<span class="badge badge-role">${esc(e.role)}</span>`;
+  if (e.sizeCategory) {
+    const sc = e.sizeCategory.toLowerCase();
+    badgesHtml += `<span class="badge badge-size-${sc}">${esc(e.sizeCategory)}</span>`;
+  }
+  if (e.isBoss) badgesHtml += `<span class="badge badge-boss">Boss</span>`;
+  if (e.flying) badgesHtml += `<span class="badge badge-flying">Flying</span>`;
+
+  return `
+    <div class="enemy-card${hasName ? ' has-name' : ''}${e.isBoss ? ' is-boss' : ''}" id="enemy-card-${index}">
+      <div class="card-header" onclick="toggleCard(${index})">
+        <span class="card-number">#${index + 1}</span>
+        <span class="card-name${hasName ? '' : ' unnamed'}" id="card-name-${index}">${hasName ? esc(e.name) : '(unnamed)'}</span>
+        <span class="card-badges" id="card-badges-${index}">${badgesHtml}</span>
+        <span class="card-toggle" id="card-toggle-${index}">&#9660;</span>
+      </div>
+      <div class="card-body" id="card-body-${index}">
+        ${renderCardBodyHTML(index)}
+      </div>
+    </div>
+  `;
+}
+
+function renderCardBody(index) {
+  const body = document.getElementById(`card-body-${index}`);
+  const wasOpen = body.classList.contains('open');
+  body.innerHTML = renderCardBodyHTML(index);
+  populateCardFields(index);
+  if (wasOpen) {
+    body.classList.add('open');
+  }
+}
+
+function renderCardBodyHTML(index) {
+  const e = enemies[index];
+  const idx = index;
+
+  let abilitiesHtml = '';
+  if (e.abilities && e.abilities.length > 0) {
+    e.abilities.forEach((ab, ai) => {
+      abilitiesHtml += `
+        <div class="ability-card">
+          <div class="ability-header">
+            <span class="ability-number">Ability ${ai + 1}</span>
+            <button class="btn-remove-ability" onclick="event.stopPropagation();removeAbility(${idx},${ai})">Remove</button>
+          </div>
+          <div class="field-row-2">
+            <div class="field">
+              <label>Name</label>
+              <input type="text" data-enemy="${idx}" data-ability="${ai}" data-afield="name" placeholder="Ability name">
+            </div>
+            <div class="field-row-2" style="display:contents">
+              <div class="field">
+                <label>Cooldown (sec)</label>
+                <input type="number" data-enemy="${idx}" data-ability="${ai}" data-afield="cooldown" min="0" step="0.1" placeholder="0">
+              </div>
+              <div class="field">
+                <label>Effect Value</label>
+                <input type="number" data-enemy="${idx}" data-ability="${ai}" data-afield="effectValue" min="0" step="1" placeholder="0">
+              </div>
+            </div>
+          </div>
+          <div class="field-row-wide">
+            <div class="field">
+              <label>Description</label>
+              <textarea data-enemy="${idx}" data-ability="${ai}" data-afield="description" placeholder="What does this ability do?" rows="2"></textarea>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  const canAdd = (!e.abilities || e.abilities.length < MAX_ABILITIES);
+
+  return `
+    <!-- IDENTITY -->
+    <div class="field-group">
+      <div class="field-group-title">Identity</div>
+      <div class="field-row">
+        <div class="field">
+          <label>Name</label>
+          <input type="text" data-enemy="${idx}" data-field="name" placeholder="Enemy name">
+        </div>
+        <div class="field">
+          <label>Role</label>
+          <select data-enemy="${idx}" data-field="role">
+            ${ROLE_OPTIONS.map(r => `<option value="${r}">${r || '-- Select --'}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field">
+          <label>Size Category</label>
+          <select data-enemy="${idx}" data-field="sizeCategory">
+            ${SIZE_OPTIONS.map(s => `<option value="${s}">${s || '-- Select --'}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="field-row-wide">
+        <div class="field">
+          <label>Description</label>
+          <textarea data-enemy="${idx}" data-field="description" placeholder="What is this enemy? How does it fit in the alien swarm?" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="field-row-wide">
+        <div class="field">
+          <label>Visual Description (for placeholder geometry)</label>
+          <textarea data-enemy="${idx}" data-field="visualDescription" placeholder="Color, shape, size, distinguishing features for code-generated placeholder..." rows="2"></textarea>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field field-checkbox">
+          <input type="checkbox" data-enemy="${idx}" data-field="isBoss" id="boss-${idx}">
+          <label for="boss-${idx}">Is Boss</label>
+        </div>
+        <div class="field field-checkbox">
+          <input type="checkbox" data-enemy="${idx}" data-field="flying" id="flying-${idx}">
+          <label for="flying-${idx}">Flying</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMBAT STATS -->
+    <div class="field-group">
+      <div class="field-group-title">Combat Stats</div>
+      <div class="field-row">
+        <div class="field">
+          <label>HP</label>
+          <input type="number" data-enemy="${idx}" data-field="hp" min="0" step="1" placeholder="0">
+        </div>
+        <div class="field">
+          <label>Armor (base)</label>
+          <input type="number" data-enemy="${idx}" data-field="armor" min="0" step="1" placeholder="0">
+        </div>
+        <div class="field">
+          <label>Damage</label>
+          <input type="number" data-enemy="${idx}" data-field="damage" min="0" step="1" placeholder="0">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Attack Speed (atk/sec)</label>
+          <input type="number" data-enemy="${idx}" data-field="attackSpeed" min="0" step="0.1" placeholder="0">
+        </div>
+        <div class="field">
+          <label>Attack Range (grid units)</label>
+          <input type="number" data-enemy="${idx}" data-field="attackRange" min="0" step="0.5" placeholder="1">
+        </div>
+        <div class="field">
+          <label>Attack Type</label>
+          <select data-enemy="${idx}" data-field="attackType">
+            ${ATTACK_TYPE_OPTIONS.map(a => `<option value="${a}">${a || '-- Select --'}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Splash Radius (0 = none)</label>
+          <input type="number" data-enemy="${idx}" data-field="splashRadius" min="0" step="0.5" placeholder="0">
+        </div>
+        <div class="field">
+          <label>Splash Damage %</label>
+          <input type="number" data-enemy="${idx}" data-field="splashDamagePercent" min="0" max="100" step="1" placeholder="0">
+        </div>
+      </div>
+    </div>
+
+    <!-- MOVEMENT -->
+    <div class="field-group">
+      <div class="field-group-title">Movement</div>
+      <div class="field-row">
+        <div class="field">
+          <label>Move Speed (grid units/sec)</label>
+          <input type="number" data-enemy="${idx}" data-field="moveSpeed" min="0" step="0.1" placeholder="0">
+        </div>
+      </div>
+    </div>
+
+    <!-- BEHAVIOR -->
+    <div class="field-group">
+      <div class="field-group-title">Behavior</div>
+      <div class="field-row">
+        <div class="field">
+          <label>Targeting Priority</label>
+          <select data-enemy="${idx}" data-field="targetingPriority">
+            ${TARGETING_OPTIONS.map(t => `<option value="${t}">${t || '-- Select --'}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field field-checkbox" style="align-self:end;padding-bottom:8px">
+          <input type="checkbox" data-enemy="${idx}" data-field="ignoresBarriers" id="barriers-${idx}">
+          <label for="barriers-${idx}">Ignores Barriers</label>
+        </div>
+      </div>
+      <div class="field-row-wide">
+        <div class="field">
+          <label>AI Behavior Description</label>
+          <textarea data-enemy="${idx}" data-field="aiBehavior" placeholder="Describe pathfinding, aggro behavior, special movement patterns..." rows="2"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- SPAWN TIMING -->
+    <div class="field-group">
+      <div class="field-group-title">Spawn Timing</div>
+      <div class="field-row">
+        <div class="field">
+          <label>First Appearance (seconds)</label>
+          <input type="number" data-enemy="${idx}" data-field="firstAppearance" min="0" step="1" placeholder="0">
+        </div>
+        <div class="field">
+          <label>Spawn Frequency</label>
+          <select data-enemy="${idx}" data-field="spawnFrequency">
+            ${FREQUENCY_OPTIONS.map(f => `<option value="${f}">${f || '-- Select --'}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABILITIES -->
+    <div class="field-group">
+      <div class="field-group-title">Abilities (up to 3)</div>
+      <div class="abilities-section">
+        ${abilitiesHtml}
+        <button class="btn-add-ability" onclick="event.stopPropagation();addAbility(${idx})" ${canAdd ? '' : 'disabled'}>
+          + Add Ability${!canAdd ? ' (max 3)' : ''}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function populateCardFields(index) {
+  const e = enemies[index];
+  const body = document.getElementById(`card-body-${index}`);
+  if (!body) return;
+
+  // Populate standard fields
+  body.querySelectorAll('[data-enemy][data-field]').forEach(el => {
+    const eIdx = parseInt(el.getAttribute('data-enemy'));
+    if (eIdx !== index) return;
+    const field = el.getAttribute('data-field');
+    const val = e[field];
+
+    if (el.type === 'checkbox') {
+      el.checked = !!val;
+    } else {
+      el.value = val !== undefined && val !== null ? val : '';
+    }
+
+    // Apply has-value styling
+    applyValueStyle(el);
+
+    // Attach listeners
+    if (el.type === 'checkbox') {
+      el.onchange = function() { onCheckboxChange(eIdx, field, this.checked); };
+    } else {
+      el.oninput = function() {
+        let v = this.value;
+        if (this.type === 'number') v = parseFloat(v) || 0;
+        onFieldChange(eIdx, field, v);
+        applyValueStyle(this);
+      };
+      el.onchange = function() {
+        let v = this.value;
+        if (this.type === 'number') v = parseFloat(v) || 0;
+        onFieldChange(eIdx, field, v);
+        applyValueStyle(this);
+      };
+    }
+  });
+
+  // Populate ability fields
+  body.querySelectorAll('[data-enemy][data-ability][data-afield]').forEach(el => {
+    const eIdx = parseInt(el.getAttribute('data-enemy'));
+    if (eIdx !== index) return;
+    const aIdx = parseInt(el.getAttribute('data-ability'));
+    const aField = el.getAttribute('data-afield');
+
+    if (e.abilities && e.abilities[aIdx]) {
+      const val = e.abilities[aIdx][aField];
+      el.value = val !== undefined && val !== null ? val : '';
+    }
+
+    applyValueStyle(el);
+
+    el.oninput = function() {
+      let v = this.value;
+      if (this.type === 'number') v = parseFloat(v) || 0;
+      onAbilityChange(eIdx, aIdx, aField, v);
+      applyValueStyle(this);
+    };
+    el.onchange = function() {
+      let v = this.value;
+      if (this.type === 'number') v = parseFloat(v) || 0;
+      onAbilityChange(eIdx, aIdx, aField, v);
+      applyValueStyle(this);
+    };
+  });
+}
+
+function applyValueStyle(el) {
+  if (el.type === 'checkbox') return;
+  if (el.type === 'number') {
+    el.classList.toggle('has-value', parseFloat(el.value) > 0);
+  } else {
+    el.classList.toggle('has-value', el.value && el.value.trim().length > 0);
+  }
+}
+
+function exportJSON() {
+  const data = { notes: designNotes, enemies: enemies };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'htl_enemies.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      let importedEnemies, importedNotes = '';
+
+      // New format: {notes, enemies}
+      if (data && !Array.isArray(data) && Array.isArray(data.enemies)) {
+        importedEnemies = data.enemies;
+        importedNotes = data.notes || '';
+      }
+      // Legacy format: plain array
+      else if (Array.isArray(data)) {
+        importedEnemies = data;
+      }
+      else {
+        alert('Invalid file format.');
+        return;
+      }
+
+      if (importedEnemies.length !== TOTAL_ENEMIES) {
+        alert('Invalid file: Expected ' + TOTAL_ENEMIES + ' enemies, got ' + importedEnemies.length);
+        return;
+      }
+
+      for (let i = 0; i < TOTAL_ENEMIES; i++) {
+        if (typeof importedEnemies[i] !== 'object') {
+          alert('Invalid file: Entry ' + (i + 1) + ' is not an object.');
+          return;
+        }
+        const def = createDefaultEnemy(i);
+        for (const key of Object.keys(def)) {
+          if (importedEnemies[i][key] === undefined) importedEnemies[i][key] = def[key];
+        }
+        importedEnemies[i].id = i;
+        if (!Array.isArray(importedEnemies[i].abilities)) importedEnemies[i].abilities = [];
+        importedEnemies[i].abilities = importedEnemies[i].abilities.slice(0, MAX_ABILITIES);
+      }
+
+      enemies = importedEnemies;
+      designNotes = importedNotes;
+      saveToStorage();
+      loadNotes();
+      renderAll();
+      alert('Imported successfully!');
+    } catch (e) {
+      alert('Failed to parse JSON file: ' + e.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function clearAll() {
+  if (!confirm('Clear ALL enemy designs? This cannot be undone.')) return;
+  if (!confirm('Are you sure? All data will be lost.')) return;
+  enemies = [];
+  for (let i = 0; i < TOTAL_ENEMIES; i++) {
+    enemies.push(createDefaultEnemy(i));
+  }
+  designNotes = '';
+  const notesEl = document.getElementById('designNotes');
+  if (notesEl) { notesEl.value = ''; notesEl.classList.remove('has-content'); }
+  saveToStorage();
+  cardStates = { 0: true };
+  renderAll();
+}
+
+function esc(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function toggleNotes() {
+  const body = document.getElementById('notesBody');
+  const toggle = document.getElementById('notesToggle');
+  if (body.style.display === 'none') {
+    body.style.display = 'block';
+    toggle.innerHTML = '&#9660;';
+  } else {
+    body.style.display = 'none';
+    toggle.innerHTML = '&#9654;';
+  }
+}
+
+function onNotesInput(el) {
+  designNotes = el.value;
+  el.classList.toggle('has-content', el.value.trim().length > 0);
+  scheduleAutoSave();
+}
+
+function loadNotes() {
+  const el = document.getElementById('designNotes');
+  if (el && designNotes) {
+    el.value = designNotes;
+    el.classList.toggle('has-content', designNotes.trim().length > 0);
+  }
+}
+
+// Initialize
+init();
+</script>
+
+</body>
+</html>

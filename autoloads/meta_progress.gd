@@ -118,7 +118,7 @@ func _calculate_tech_points(survival_time: float, kills: int) -> int:
 	# Boss kill bonus
 	var boss_bonus := GameState.boss_kills * 10
 	
-	var total := max(1, time_points + kill_points + milestone_bonus + boss_bonus)
+	var total: int = max(1, time_points + kill_points + milestone_bonus + boss_bonus)
 	return total
 
 

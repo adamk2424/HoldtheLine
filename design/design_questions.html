@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hold the Line - Design Questions</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0a0e17;
+    color: #c8d6e5;
+    padding: 20px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  h1 {
+    color: #00e5ff;
+    text-align: center;
+    font-size: 2em;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #576574;
+    margin-bottom: 30px;
+    font-size: 0.9em;
+  }
+  .save-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #0a0e17;
+    border-bottom: 1px solid #1e2a3a;
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .save-bar .status {
+    font-size: 0.85em;
+    color: #576574;
+  }
+  .save-bar .status.saved { color: #00e676; }
+  .btn {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.95em;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .btn-save {
+    background: #00e5ff;
+    color: #0a0e17;
+  }
+  .btn-save:hover { background: #00b8d4; }
+  .btn-export {
+    background: #576574;
+    color: #fff;
+    margin-left: 8px;
+  }
+  .btn-export:hover { background: #6c7a89; }
+  .btn-import {
+    background: #576574;
+    color: #fff;
+    margin-left: 8px;
+  }
+  .btn-import:hover { background: #6c7a89; }
+  .btn-clear {
+    background: #e74c3c;
+    color: #fff;
+    margin-left: 8px;
+    font-size: 0.8em;
+    padding: 8px 14px;
+  }
+  .btn-clear:hover { background: #c0392b; }
+  .section {
+    background: #111827;
+    border: 1px solid #1e2a3a;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .section-header {
+    background: #1a2332;
+    padding: 14px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+  }
+  .section-header:hover { background: #1e2a3a; }
+  .section-header h2 {
+    color: #00e5ff;
+    font-size: 1.1em;
+    letter-spacing: 1px;
+  }
+  .section-header .progress {
+    font-size: 0.8em;
+    color: #576574;
+    background: #0a0e17;
+    padding: 3px 10px;
+    border-radius: 12px;
+  }
+  .section-header .progress.complete { color: #00e676; }
+  .section-body { padding: 16px 20px; }
+  .question {
+    margin-bottom: 18px;
+    border-bottom: 1px solid #1a2332;
+    padding-bottom: 16px;
+  }
+  .question:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .question label {
+    display: block;
+    font-weight: 600;
+    color: #dfe6e9;
+    margin-bottom: 6px;
+    font-size: 0.95em;
+    line-height: 1.4;
+  }
+  .question label .qnum {
+    color: #00e5ff;
+    margin-right: 6px;
+  }
+  .question textarea {
+    width: 100%;
+    min-height: 70px;
+    background: #0a0e17;
+    border: 1px solid #1e2a3a;
+    border-radius: 4px;
+    color: #c8d6e5;
+    padding: 10px;
+    font-family: inherit;
+    font-size: 0.9em;
+    resize: vertical;
+    transition: border-color 0.2s;
+  }
+  .question textarea:focus {
+    outline: none;
+    border-color: #00e5ff;
+  }
+  .question textarea.has-content {
+    border-color: #00e676;
+  }
+  .overall-progress {
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .progress-bar-outer {
+    background: #1a2332;
+    border-radius: 10px;
+    height: 12px;
+    margin: 8px 0;
+    overflow: hidden;
+  }
+  .progress-bar-inner {
+    background: linear-gradient(90deg, #00e5ff, #00e676);
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.4s;
+    width: 0%;
+  }
+  .progress-text {
+    font-size: 0.85em;
+    color: #576574;
+  }
+  .hidden-input { display: none; }
+</style>
+</head>
+<body>
+
+<h1>Hold the Line</h1>
+<p class="subtitle">Design Questions Tracker</p>
+
+<div class="overall-progress">
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="overallBar"></div></div>
+  <div class="progress-text" id="overallText">0 / 0 answered</div>
+</div>
+
+<div class="save-bar">
+  <div>
+    <button class="btn btn-save" onclick="saveAll()">Save to LocalStorage</button>
+    <button class="btn btn-export" onclick="exportJSON()">Export JSON</button>
+    <button class="btn btn-import" onclick="document.getElementById('importFile').click()">Import JSON</button>
+    <input type="file" id="importFile" class="hidden-input" accept=".json" onchange="importJSON(event)">
+    <button class="btn btn-clear" onclick="clearAll()">Clear All</button>
+  </div>
+  <div class="status" id="saveStatus">Not yet saved</div>
+</div>
+
+<div id="sections"></div>
+
+<script>
+const DATA = [
+  {
+    title: "SETTING & THEME",
+    questions: [
+      "What is the faction/setting? (Sci-fi military humans vs aliens? Post-apocalyptic? Fantasy? Something else?) This drives all naming and visual style.",
+      "Are the enemies a single faction (e.g., alien swarm, robot army) or a mix of different factions/types?",
+      "What is the general aesthetic tone? (Gritty/realistic, stylized/colorful, dark/horror-tinged?)",
+      "Is there any lore context for WHY the player is holding this position? (Last colony, strategic chokepoint, protecting civilians, etc.)"
+    ]
+  },
+  {
+    title: "PRODUCTION BUILDINGS",
+    questions: [
+      "Do you envision the 3 production buildings as role-specialized? (e.g., one for units, one for towers/defenses, one for tech/upgrades) Or does each produce a mix?",
+      "Can you build multiples of the same production building to speed up production?",
+      "How many upgrade tiers per building? (2 or 3?)",
+      "Is there a tech dependency between buildings? (e.g., must have Building A at tier 2 before you can build Building B?)",
+      "Do production buildings have a build queue? If so, how deep? (e.g., queue 3-5 units at once)",
+      "Can production buildings be upgraded while actively training units?",
+      "Does destroying a production building remove access to its units/tech, or is it unlocked permanently once built?",
+      "Do you start the game with any production building already built, or must you build everything from scratch?"
+    ]
+  },
+  {
+    title: "CORE ECONOMY & RESOURCES",
+    questions: [
+      "With base rate of 1 Energy + 1 Materials per second, a 50/50 cost unit takes ~50 sec to afford. Is that the pacing you want?",
+      "Should there be resource-boosting buildings or upgrades that increase income rate?",
+      "Is there a unit population cap, or is it purely resource-limited?",
+      "Can buildings/units be sold back for partial resources? If so, what refund percentage? (e.g., 50%)",
+      "Do you gain bonus resources from killing enemies, or is income strictly time-based?",
+      "Is there a third resource or any special currency (e.g., 'tech points' earned from kills for upgrades)?"
+    ]
+  },
+  {
+    title: "ENEMIES & WAVES",
+    questions: [
+      "Are enemies wave-based (wave 1, wave 2 with breaks between) or truly continuous with ramping difficulty?",
+      "If wave-based, is there a break between waves for the player to build? How long?",
+      "What is the lose condition? (A specific 'core' building destroyed? All buildings gone? A certain area breached?)",
+      "Are there flying enemies? If so, can all towers/units target them or only specific ones?",
+      "Do enemies have any formation or group behavior, or do they just rush the base individually?",
+      "Do enemies target buildings, units, or both? Is there priority targeting (e.g., always attack nearest, or prefer production buildings)?",
+      "Do any enemies have shields or special defenses?",
+      "Do enemies scale in raw stats over time (HP/damage increase), or does difficulty come only from harder enemy compositions?",
+      "Is there a boss or mini-boss mechanic? (e.g., every 10th wave has a boss)",
+      "Do enemies come from all 4 edges equally, or can they focus on one side?",
+      "Should there be a pre-wave warning showing which direction enemies are coming from?",
+      "Are there any enemies that can bypass or jump over barriers?"
+    ]
+  },
+  {
+    title: "TOWERS",
+    questions: [
+      "Do towers have individual upgrade levels? (e.g., can you upgrade a specific tower from Lv1 to Lv2/Lv3?)",
+      "Can towers be repaired manually or do they only regen passively (1% per 5 sec)?",
+      "What is the standard grid size for towers? (1x1? 2x2? Mix?)",
+      "Do any towers have support/buff roles (e.g., a tower that boosts nearby towers' damage or range)?",
+      "What is the general range scale in grid units? (e.g., short=3, medium=6, long=10?)",
+      "Can towers be placed outside the 120x120 buildable area, or strictly inside it?"
+    ]
+  },
+  {
+    title: "BARRIERS & DEFENSES",
+    questions: [
+      "Can barriers completely block pathing (force enemies to path around), or must enemies always have a route to the base? (maze-building vs. no-maze?)",
+      "Do barriers take damage from all enemies, or only from siege-type enemies?",
+      "Can barriers be manually repaired?",
+      "Do barriers connect visually when placed adjacent to each other (like walls in Age of Empires)?",
+      "Is there a limit to how many barriers can be placed?",
+      "Can barriers be placed outside the 120x120 buildable area?"
+    ]
+  },
+  {
+    title: "PLAYER UNITS",
+    questions: [
+      "Can player units be given rally points, patrol routes, or just move-to and attack commands?",
+      "Do units have a stance system? (Aggressive / Defensive / Hold Position)",
+      "Do units auto-engage nearby enemies, or must the player micro them manually?",
+      "Can units be healed by a support unit, or only via passive regen?",
+      "Is there a unit population cap? If so, what is it?",
+      "Can units go outside the 120x120 buildable area to intercept enemies?"
+    ]
+  },
+  {
+    title: "UI & HUD",
+    questions: [
+      "What should the HUD show at all times? (Resources, wave count, unit count, minimap, etc.)",
+      "Should there be a minimap? Where on screen?",
+      "How does the build menu (Q) work? Grid of icons? Categorized tabs? Radial menu?",
+      "Should selected units/buildings show a detailed info panel? Where?",
+      "Is there a game speed control (pause, fast-forward)?",
+      "Should there be a wave/threat indicator showing incoming directions?"
+    ]
+  },
+  {
+    title: "INTRO CINEMATIC",
+    questions: [
+      "How long should the intro cinematic be? (10 sec? 20 sec? 30 sec?)",
+      "Should the cinematic be skippable?",
+      "How many dropships should be shown leaving?",
+      "Should the text 'You are all that is left. You must Survive.' be voice-acted, text-on-screen, or both?",
+      "Does the camera pan across the base during the cinematic, or stay in one position?",
+      "Is there a main menu before the cinematic, or does the game boot straight into it?"
+    ]
+  },
+  {
+    title: "GENERAL GAMEPLAY",
+    questions: [
+      "Is there a scoring system? (Survival time? Kills? Both?)",
+      "Is there a high score / leaderboard?",
+      "Is there any meta-progression between runs (unlock new units permanently), or is every run fresh?",
+      "Is there a difficulty selection, or is it always the same?",
+      "Is there any pause menu with options (volume, controls, quit)?",
+      "Should the game have a tutorial or tips system for first-time players?"
+    ]
+  }
+];
+
+const STORAGE_KEY = 'htl_design_answers';
+
+function buildSections() {
+  const container = document.getElementById('sections');
+  let globalIdx = 0;
+  DATA.forEach((section, si) => {
+    const sec = document.createElement('div');
+    sec.className = 'section';
+    sec.innerHTML = `
+      <div class="section-header" onclick="toggleSection(${si})">
+        <h2>${section.title}</h2>
+        <span class="progress" id="prog-${si}">0 / ${section.questions.length}</span>
+      </div>
+      <div class="section-body" id="body-${si}">
+        ${section.questions.map((q, qi) => {
+          const id = `q-${si}-${qi}`;
+          globalIdx++;
+          return `
+            <div class="question">
+              <label for="${id}"><span class="qnum">${globalIdx}.</span>${q}</label>
+              <textarea id="${id}" data-section="${si}" data-qi="${qi}" oninput="onInput(this)" placeholder="Type your answer here..."></textarea>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+    container.appendChild(sec);
+  });
+}
+
+function toggleSection(si) {
+  const body = document.getElementById(`body-${si}`);
+  body.style.display = body.style.display === 'none' ? 'block' : 'none';
+}
+
+function onInput(el) {
+  el.classList.toggle('has-content', el.value.trim().length > 0);
+  updateProgress();
+  autoSave();
+}
+
+function updateProgress() {
+  let totalQ = 0, totalA = 0;
+  DATA.forEach((section, si) => {
+    let answered = 0;
+    section.questions.forEach((q, qi) => {
+      totalQ++;
+      const val = document.getElementById(`q-${si}-${qi}`).value.trim();
+      if (val.length > 0) { answered++; totalA++; }
+    });
+    const progEl = document.getElementById(`prog-${si}`);
+    progEl.textContent = `${answered} / ${section.questions.length}`;
+    progEl.className = answered === section.questions.length ? 'progress complete' : 'progress';
+  });
+  const pct = totalQ > 0 ? Math.round((totalA / totalQ) * 100) : 0;
+  document.getElementById('overallBar').style.width = pct + '%';
+  document.getElementById('overallText').textContent = `${totalA} / ${totalQ} answered (${pct}%)`;
+}
+
+function gatherAnswers() {
+  const answers = {};
+  DATA.forEach((section, si) => {
+    section.questions.forEach((q, qi) => {
+      const id = `q-${si}-${qi}`;
+      answers[id] = document.getElementById(id).value;
+    });
+  });
+  return answers;
+}
+
+function loadAnswers(answers) {
+  DATA.forEach((section, si) => {
+    section.questions.forEach((q, qi) => {
+      const id = `q-${si}-${qi}`;
+      const el = document.getElementById(id);
+      if (answers[id]) {
+        el.value = answers[id];
+        el.classList.toggle('has-content', el.value.trim().length > 0);
+      }
+    });
+  });
+  updateProgress();
+}
+
+function saveAll() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(gatherAnswers()));
+  const status = document.getElementById('saveStatus');
+  status.textContent = 'Saved at ' + new Date().toLocaleTimeString();
+  status.className = 'status saved';
+}
+
+let autoSaveTimer = null;
+function autoSave() {
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(saveAll, 2000);
+}
+
+function exportJSON() {
+  const data = {
+    project: 'Hold the Line',
+    exported: new Date().toISOString(),
+    sections: {}
+  };
+  DATA.forEach((section, si) => {
+    data.sections[section.title] = {};
+    section.questions.forEach((q, qi) => {
+      const val = document.getElementById(`q-${si}-${qi}`).value.trim();
+      data.sections[section.title][q] = val;
+    });
+  });
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'htl_design_answers.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.sections) {
+        DATA.forEach((section, si) => {
+          const sectionData = data.sections[section.title];
+          if (!sectionData) return;
+          section.questions.forEach((q, qi) => {
+            const id = `q-${si}-${qi}`;
+            const el = document.getElementById(id);
+            if (sectionData[q] !== undefined) {
+              el.value = sectionData[q];
+              el.classList.toggle('has-content', el.value.trim().length > 0);
+            }
+          });
+        });
+        updateProgress();
+        saveAll();
+      }
+    } catch (err) {
+      alert('Error importing file: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function clearAll() {
+  if (!confirm('Clear ALL answers? This cannot be undone.')) return;
+  DATA.forEach((section, si) => {
+    section.questions.forEach((q, qi) => {
+      const el = document.getElementById(`q-${si}-${qi}`);
+      el.value = '';
+      el.classList.remove('has-content');
+    });
+  });
+  localStorage.removeItem(STORAGE_KEY);
+  updateProgress();
+  document.getElementById('saveStatus').textContent = 'Cleared';
+  document.getElementById('saveStatus').className = 'status';
+}
+
+// Init
+buildSections();
+const saved = localStorage.getItem(STORAGE_KEY);
+if (saved) {
+  try { loadAnswers(JSON.parse(saved)); } catch(e) {}
+  document.getElementById('saveStatus').textContent = 'Loaded from previous session';
+  document.getElementById('saveStatus').className = 'status saved';
+}
+updateProgress();
+</script>
+</body>
+</html>

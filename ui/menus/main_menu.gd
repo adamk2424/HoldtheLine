@@ -168,11 +168,12 @@ func _on_progression() -> void:
 
 
 func _on_level_select() -> void:
-	# Show level select menu
+	print("[MainMenu] _on_level_select called")
 	var LevelSelectScript := preload("res://ui/menus/level_select_menu.gd")
 	_level_select_menu = Control.new()
 	_level_select_menu.set_script(LevelSelectScript)
 	add_child(_level_select_menu)
+	print("[MainMenu] Level select menu added to tree")
 	_level_select_menu.level_selected.connect(_start_level)
 	_level_select_menu.back_pressed.connect(func() -> void:
 		_level_select_menu.queue_free()
@@ -184,10 +185,11 @@ func _on_level_select() -> void:
 	_buttons_vbox.visible = false
 	_title_label.visible = false
 	_subtitle_label.visible = false
+	print("[MainMenu] Level select menu setup complete")
 
 
 func _on_new_game() -> void:
-	# Show pre-game menu (quick game with default settings)
+	print("[MainMenu] _on_new_game called")
 	var PreGameScript := preload("res://ui/menus/pre_game_menu.gd")
 	_pre_game_menu = Control.new()
 	_pre_game_menu.set_script(PreGameScript)
@@ -206,16 +208,34 @@ func _on_new_game() -> void:
 
 
 func _start_level(level_id: String) -> void:
-	# Store selected level in GameState and start the game
 	GameState.reset_state()
 	GameState.selected_level_id = level_id
-	get_tree().change_scene_to_file("res://scenes/main.tscn")
+	_change_to_game_scene()
 
 
 func _start_game() -> void:
+	print("[MainMenu] _start_game called")
 	GameState.reset_state()
-	GameState.selected_level_id = ""  # Empty means default/quick game
-	get_tree().change_scene_to_file("res://scenes/main.tscn")
+	GameState.selected_level_id = ""
+	_change_to_game_scene()
+
+
+func _change_to_game_scene() -> void:
+	var scene_path := "res://scenes/main.tscn"
+	print("[MainMenu] Loading scene: %s" % scene_path)
+
+	# Try loading the scene first to catch errors
+	var scene := load(scene_path) as PackedScene
+	if scene == null:
+		push_error("[MainMenu] FAILED to load %s - check Output for errors" % scene_path)
+		print("[MainMenu] ERROR: Could not load %s" % scene_path)
+		return
+
+	print("[MainMenu] Scene loaded OK, changing scene...")
+	var err := get_tree().change_scene_to_packed(scene)
+	if err != OK:
+		push_error("[MainMenu] Scene change failed with error: %s" % error_string(err))
+		print("[MainMenu] ERROR: change_scene_to_packed returned: %s" % error_string(err))
 
 
 func _on_loadout() -> void:

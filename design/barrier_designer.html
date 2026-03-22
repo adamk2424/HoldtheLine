@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hold the Line - Barrier Designer</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0a0e17;
+    color: #c8d6e5;
+    padding: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  h1 {
+    color: #00e5ff;
+    text-align: center;
+    font-size: 2em;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #576574;
+    margin-bottom: 30px;
+    font-size: 0.9em;
+  }
+
+  /* Save Bar */
+  .save-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #0a0e17ee;
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid #1e2a3a;
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .save-bar .left { display: flex; align-items: center; gap: 12px; }
+  .save-bar .status { font-size: 0.85em; color: #576574; }
+  .save-bar .status.saved { color: #00e676; }
+  .save-bar .status.saving { color: #ffa726; }
+  .progress-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85em;
+    color: #576574;
+  }
+  .progress-bar .dots { display: flex; gap: 4px; }
+  .progress-bar .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #1e2a3a;
+    transition: background 0.3s;
+  }
+  .progress-bar .dot.filled { background: #00e5ff; }
+
+  /* Buttons */
+  .btn {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.95em;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: #00e5ff; color: #0a0e17; }
+  .btn-primary:hover { background: #00b8d4; }
+  .btn-secondary { background: #576574; color: #fff; }
+  .btn-secondary:hover { background: #6c7a89; }
+  .btn-danger { background: #e74c3c; color: #fff; font-size: 0.8em; padding: 8px 14px; }
+  .btn-danger:hover { background: #c0392b; }
+  .btn-add {
+    background: transparent;
+    border: 2px dashed #1e2a3a;
+    color: #576574;
+    padding: 20px 40px;
+    font-size: 1.1em;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: block;
+    margin: 0 auto 30px;
+  }
+  .btn-add:hover { border-color: #00e5ff; color: #00e5ff; }
+  .btn-small {
+    padding: 6px 14px;
+    font-size: 0.8em;
+    border-radius: 3px;
+  }
+  .btn-remove-barrier {
+    background: transparent;
+    border: 1px solid #e74c3c44;
+    color: #e74c3c;
+    font-size: 0.75em;
+    padding: 5px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-remove-barrier:hover { background: #e74c3c22; border-color: #e74c3c; }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Summary Table */
+  .summary-section {
+    background: #111827;
+    border: 1px solid #1e2a3a;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .summary-header {
+    background: #1a2332;
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .summary-header h2 { color: #00e5ff; font-size: 1.1em; letter-spacing: 1px; }
+  .summary-table-wrap { overflow-x: auto; }
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88em;
+  }
+  .summary-table th {
+    background: #1a233288;
+    color: #00e5ff;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    border-bottom: 1px solid #1e2a3a;
+  }
+  .summary-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #1e2a3a22;
+    color: #c8d6e5;
+  }
+  .summary-table tr:hover td { background: #1e2a3a22; }
+  .summary-table .unnamed { color: #576574; font-style: italic; }
+  .summary-table .cost-cell { white-space: nowrap; }
+  .summary-table .cost-energy { color: #00e5ff; }
+  .summary-table .cost-materials { color: #ffa726; }
+
+  /* Barrier Card */
+  .barrier-card {
+    background: #111827;
+    border: 1px solid #1e2a3a;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .barrier-card:hover { border-color: #1e2a3a88; }
+  .barrier-card.has-name { border-left: 3px solid #00e5ff; }
+  .barrier-card-header {
+    background: #1a2332;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .barrier-card-header .header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .barrier-card-header .barrier-number {
+    background: #00e5ff22;
+    color: #00e5ff;
+    font-weight: 700;
+    font-size: 1em;
+    width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+  .barrier-card-header .barrier-title {
+    color: #00e5ff;
+    font-size: 1.15em;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .barrier-card-header .barrier-title .role-badge {
+    font-size: 0.7em;
+    color: #576574;
+    font-weight: 400;
+    margin-left: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .barrier-card-body { padding: 24px; }
+
+  /* Stat Sections within Card */
+  .stat-group {
+    margin-bottom: 28px;
+  }
+  .stat-group:last-child { margin-bottom: 0; }
+  .stat-group-title {
+    color: #00e5ff;
+    font-size: 0.8em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #1e2a3a;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .stat-group-title .icon { font-size: 1em; }
+
+  /* Form Grid */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 24px;
+  }
+  .form-grid .full-width { grid-column: 1 / -1; }
+  .form-grid .third-width {
+    /* used for 3-column layouts */
+  }
+  .form-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px 24px;
+  }
+
+  /* Form Fields */
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label {
+    font-size: 0.8em;
+    color: #576574;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .field input[type="text"],
+  .field input[type="number"],
+  .field textarea,
+  .field select {
+    background: #0a0e17;
+    border: 1px solid #1e2a3a;
+    color: #c8d6e5;
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.95em;
+    transition: border-color 0.2s;
+  }
+  .field input:focus,
+  .field textarea:focus,
+  .field select:focus {
+    outline: none;
+    border-color: #00e5ff;
+  }
+  .field textarea {
+    resize: vertical;
+    min-height: 70px;
+  }
+  .field textarea.tall { min-height: 90px; }
+  .field input[type="number"] { -moz-appearance: textfield; }
+  .field input[type="number"]::-webkit-inner-spin-button { opacity: 1; }
+  .field select {
+    cursor: pointer;
+    appearance: auto;
+  }
+  .field .hint {
+    font-size: 0.72em;
+    color: #576574;
+    margin-top: 2px;
+  }
+  .field-inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .field-inline label {
+    font-size: 0.85em;
+    color: #576574;
+    cursor: pointer;
+  }
+  .field-inline input[type="checkbox"] {
+    accent-color: #00e5ff;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+
+  /* Ability Section */
+  .ability-slot {
+    background: #0a0e1788;
+    border: 1px solid #1e2a3a;
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .ability-slot .ability-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .ability-slot .ability-label {
+    font-size: 0.8em;
+    font-weight: 700;
+    color: #00e5ff88;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .ability-slot .btn-remove-ability {
+    background: transparent;
+    border: 1px solid #e74c3c44;
+    color: #e74c3c;
+    font-size: 0.72em;
+    padding: 3px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .ability-slot .btn-remove-ability:hover { background: #e74c3c22; border-color: #e74c3c; }
+  .btn-add-ability {
+    background: transparent;
+    border: 1px dashed #1e2a3a;
+    color: #576574;
+    padding: 10px 20px;
+    font-size: 0.85em;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+    margin-top: 8px;
+  }
+  .btn-add-ability:hover { border-color: #00e5ff; color: #00e5ff; }
+
+  /* Game context box */
+  .context-box {
+    background: #0a0e17;
+    border: 1px solid #1e2a3a;
+    border-left: 3px solid #00e5ff44;
+    border-radius: 4px;
+    padding: 14px 18px;
+    margin-bottom: 24px;
+    font-size: 0.82em;
+    color: #576574;
+    line-height: 1.6;
+  }
+  .context-box strong { color: #c8d6e5; }
+  .context-box ul { margin-left: 16px; margin-top: 6px; }
+
+  /* Notes Section */
+  .notes-section {
+    background: #111827;
+    border: 1px solid #1e2a3a;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .notes-header {
+    background: #1a2332;
+    padding: 12px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+  }
+  .notes-header:hover { background: #1e2a3a; }
+  .notes-header h2 {
+    color: #ffa726;
+    font-size: 1.05em;
+    letter-spacing: 1px;
+  }
+  .notes-header .toggle { color: #576574; font-size: 0.9em; }
+  .notes-body { padding: 16px 20px; }
+  .notes-body textarea {
+    width: 100%;
+    min-height: 150px;
+    background: #0a0e17;
+    border: 1px solid #1e2a3a;
+    border-radius: 4px;
+    color: #c8d6e5;
+    padding: 12px;
+    font-family: inherit;
+    font-size: 0.9em;
+    resize: vertical;
+    line-height: 1.6;
+  }
+  .notes-body textarea:focus {
+    outline: none;
+    border-color: #ffa726;
+  }
+  .notes-body textarea.has-content {
+    border-color: #00e676;
+  }
+  .notes-hint {
+    font-size: 0.8em;
+    color: #576574;
+    margin-top: 6px;
+  }
+
+  /* File input hidden */
+  .hidden-input { display: none; }
+
+  /* Responsive */
+  @media (max-width: 700px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid-3 { grid-template-columns: 1fr; }
+    .save-bar { flex-direction: column; gap: 10px; }
+    .barrier-card-body { padding: 16px; }
+    body { padding: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Barrier Designer</h1>
+<p class="subtitle">Hold the Line &mdash; Defensive Structures</p>
+
+<!-- Save Bar -->
+<div class="save-bar">
+  <div class="left">
+    <div class="progress-bar">
+      <span id="progressText">0 / 0 named</span>
+      <div class="dots" id="progressDots"></div>
+    </div>
+    <span class="status" id="saveStatus">No changes</span>
+  </div>
+  <div class="toolbar">
+    <button class="btn btn-primary btn-small" onclick="exportJSON()">Export JSON</button>
+    <button class="btn btn-secondary btn-small" onclick="document.getElementById('importInput').click()">Import JSON</button>
+    <button class="btn btn-danger btn-small" onclick="clearAll()">Clear All</button>
+    <input type="file" id="importInput" class="hidden-input" accept=".json" onchange="importJSON(event)">
+  </div>
+</div>
+
+<!-- Design Notes -->
+<div class="notes-section">
+  <div class="notes-header" onclick="toggleNotes()">
+    <h2>Design Notes &amp; Details</h2>
+    <span class="toggle" id="notesToggle">&#9660;</span>
+  </div>
+  <div class="notes-body" id="notesBody">
+    <textarea id="designNotes" placeholder="Add general notes about barrier design: wall layout strategy, enemy interaction with barriers, upgrade ideas, visual connection rules..." oninput="onNotesInput(this)"></textarea>
+    <div class="notes-hint">Auto-saves with page data. Included in JSON exports.</div>
+  </div>
+</div>
+
+<!-- Game Context -->
+<div class="context-box">
+  <strong>Barrier Mechanics Reminder:</strong>
+  <ul>
+    <li>Placed on <strong>120x120 build grid</strong> only</li>
+    <li>Block enemy pathing &mdash; enemies attack barriers to break through (no pathing around)</li>
+    <li>Some special enemies ignore barriers (flying, etc.)</li>
+    <li>Connect visually when placed adjacent (like walls in Age of Empires)</li>
+    <li>Passive regen: <strong>1% max HP / 5 seconds</strong> &bull; Repairable by <strong>Repair Drones</strong></li>
+    <li>Sell for <strong>75% of cost</strong> &bull; No placement limit beyond grid space</li>
+    <li>Resources: <span style="color:#00e5ff">Energy</span> and <span style="color:#ffa726">Materials</span></li>
+  </ul>
+</div>
+
+<!-- Summary Table -->
+<div class="summary-section">
+  <div class="summary-header">
+    <h2>Barrier Overview</h2>
+  </div>
+  <div class="summary-table-wrap">
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Role</th>
+          <th>HP</th>
+          <th>Armor</th>
+          <th>Cost (E / M)</th>
+          <th>Grid Size</th>
+          <th>Special Effect</th>
+        </tr>
+      </thead>
+      <tbody id="summaryBody">
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Barrier Cards Container -->
+<div id="barrierContainer"></div>
+
+<!-- Add Barrier Button -->
+<button class="btn-add" id="addBarrierBtn" onclick="addBarrier()">+ Add Barrier</button>
+
+<!-- Templates & Scripts -->
+<script>
+const STORAGE_KEY = 'htl_barrier_designs';
+const EXPORT_FILENAME = 'htl_barriers.json';
+const ROLE_OPTIONS = ['Wall', 'Slow Field', 'Damage Zone', 'Shield', 'Trap', 'Other'];
+const GRID_SIZE_OPTIONS = ['1x1', '1x2', '2x2'];
+const TECH_LEVEL_OPTIONS = ['None', 'Tier 1', 'Tier 2', 'Tier 3'];
+const HEIGHT_OPTIONS = ['Low', 'Medium', 'High'];
+const EFFECT_TYPE_OPTIONS = ['None', 'Damage Aura', 'Slow Aura', 'Armor Buff to Nearby', 'Reflect Damage', 'Explode on Death', 'Other'];
+
+let barriers = [];
+let designNotes = '';
+let autoSaveTimer = null;
+
+// ─── Default barrier data ───
+function createDefaultBarrier() {
+  return {
+    name: '',
+    role: 'Wall',
+    description: '',
+    visualDescription: '',
+    gridSize: '1x1',
+    hp: 0,
+    armor: 0,
+    damageOnContact: 0,
+    slowEffect: 0,
+    slowRadius: 0,
+    energyCost: 0,
+    materialsCost: 0,
+    buildTime: 0,
+    requiredTechLevel: 'None',
+    connectsToAdjacent: true,
+    height: 'Medium',
+    effectType: 'None',
+    effectValue: 0,
+    effectRadius: 0,
+    effectDescription: '',
+    abilities: []
+  };
+}
+
+function createDefaultAbility() {
+  return { name: '', description: '', cooldown: 0, effectValue: 0 };
+}
+
+// ─── Render ───
+function renderAll() {
+  renderSummary();
+  renderCards();
+  renderProgress();
+}
+
+function renderSummary() {
+  const tbody = document.getElementById('summaryBody');
+  if (barriers.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#576574;padding:18px;">No barriers defined yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = barriers.map((b, i) => {
+    const nameHtml = b.name ? escHtml(b.name) : '<span class="unnamed">Unnamed</span>';
+    const costHtml = `<span class="cost-energy">${b.energyCost || 0}E</span> / <span class="cost-materials">${b.materialsCost || 0}M</span>`;
+    const effectHtml = b.effectType !== 'None' ? escHtml(b.effectType) : '<span style="color:#576574">None</span>';
+    return `<tr>
+      <td>${i + 1}</td>
+      <td>${nameHtml}</td>
+      <td>${escHtml(b.role)}</td>
+      <td>${b.hp}</td>
+      <td>${b.armor}</td>
+      <td class="cost-cell">${costHtml}</td>
+      <td>${escHtml(b.gridSize)}</td>
+      <td>${effectHtml}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderProgress() {
+  const named = barriers.filter(b => b.name.trim() !== '').length;
+  const total = barriers.length;
+  document.getElementById('progressText').textContent = `${named} / ${total} named`;
+  const dots = document.getElementById('progressDots');
+  dots.innerHTML = barriers.map((b, i) =>
+    `<div class="dot ${b.name.trim() ? 'filled' : ''}"></div>`
+  ).join('');
+}
+
+function renderCards() {
+  const container = document.getElementById('barrierContainer');
+  container.innerHTML = barriers.map((b, i) => renderCard(b, i)).join('');
+}
+
+function renderCard(b, index) {
+  const titleName = b.name || 'Unnamed Barrier';
+  const roleBadge = b.role !== 'Wall' ? `<span class="role-badge">${escHtml(b.role)}</span>` : '<span class="role-badge">Wall</span>';
+  const hasName = b.name.trim() !== '';
+
+  return `
+  <div class="barrier-card ${hasName ? 'has-name' : ''}" id="card-${index}">
+    <div class="barrier-card-header">
+      <div class="header-left">
+        <div class="barrier-number">${index + 1}</div>
+        <div class="barrier-title">${escHtml(titleName)}${roleBadge}</div>
+      </div>
+      <button class="btn-remove-barrier" onclick="removeBarrier(${index})" title="Remove this barrier">Remove</button>
+    </div>
+    <div class="barrier-card-body">
+
+      <!-- IDENTITY -->
+      <div class="stat-group">
+        <div class="stat-group-title">Identity</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Name</label>
+            <input type="text" value="${escAttr(b.name)}" onchange="updateField(${index},'name',this.value)" placeholder="e.g., Ferrocrete Barricade">
+          </div>
+          <div class="field">
+            <label>Role</label>
+            <select onchange="updateField(${index},'role',this.value)">
+              ${ROLE_OPTIONS.map(r => `<option value="${r}" ${b.role === r ? 'selected' : ''}>${r}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field">
+            <label>Grid Size</label>
+            <select onchange="updateField(${index},'gridSize',this.value)">
+              ${GRID_SIZE_OPTIONS.map(s => `<option value="${s}" ${b.gridSize === s ? 'selected' : ''}>${s}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field">
+            <label>&nbsp;</label>
+            <div style="font-size:0.78em;color:#576574;padding-top:4px;">Grid: 120x120 build area</div>
+          </div>
+          <div class="field full-width">
+            <label>Description</label>
+            <textarea onchange="updateField(${index},'description',this.value)" placeholder="What is this barrier? What role does it fill in the defense?">${escHtml(b.description)}</textarea>
+          </div>
+          <div class="field full-width">
+            <label>Visual Description</label>
+            <textarea class="tall" onchange="updateField(${index},'visualDescription',this.value)" placeholder="Describe placeholder geometry: shape, color, height, glow effects, animation when connecting to adjacent pieces...">${escHtml(b.visualDescription)}</textarea>
+            <div class="hint">For placeholder geometry &mdash; describe shape, color, emissive/glow, height relative to units</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DEFENSIVE STATS -->
+      <div class="stat-group">
+        <div class="stat-group-title">Defensive Stats</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>HP</label>
+            <input type="number" min="0" value="${b.hp}" onchange="updateField(${index},'hp',+this.value)">
+            <div class="hint">Passive regen: 1% max HP / 5 sec</div>
+          </div>
+          <div class="field">
+            <label>Armor</label>
+            <input type="number" min="0" value="${b.armor}" onchange="updateField(${index},'armor',+this.value)">
+            <div class="hint">Flat damage reduction per hit</div>
+          </div>
+          <div class="field">
+            <label>Damage on Contact</label>
+            <input type="number" min="0" value="${b.damageOnContact}" onchange="updateField(${index},'damageOnContact',+this.value)">
+            <div class="hint">0 if none (e.g., electric fence deals contact damage)</div>
+          </div>
+          <div class="field">
+            <label>Slow Effect %</label>
+            <input type="number" min="0" max="100" value="${b.slowEffect}" onchange="updateField(${index},'slowEffect',+this.value)">
+            <div class="hint">0 if none &mdash; % speed reduction to nearby enemies</div>
+          </div>
+          <div class="field">
+            <label>Slow Radius</label>
+            <input type="number" min="0" step="0.5" value="${b.slowRadius}" onchange="updateField(${index},'slowRadius',+this.value)">
+            <div class="hint">Grid units beyond the barrier itself (0 = contact only)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ECONOMY -->
+      <div class="stat-group">
+        <div class="stat-group-title">Economy</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Energy Cost</label>
+            <input type="number" min="0" value="${b.energyCost}" onchange="updateField(${index},'energyCost',+this.value)">
+          </div>
+          <div class="field">
+            <label>Materials Cost</label>
+            <input type="number" min="0" value="${b.materialsCost}" onchange="updateField(${index},'materialsCost',+this.value)">
+          </div>
+          <div class="field">
+            <label>Build Time (seconds)</label>
+            <input type="number" min="0" step="0.5" value="${b.buildTime}" onchange="updateField(${index},'buildTime',+this.value)">
+          </div>
+          <div class="field">
+            <label>Required Tech Level</label>
+            <select onchange="updateField(${index},'requiredTechLevel',this.value)">
+              ${TECH_LEVEL_OPTIONS.map(t => `<option value="${t}" ${b.requiredTechLevel === t ? 'selected' : ''}>${t}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field full-width" style="padding-top:4px;">
+            <div class="hint">Sell value: 75% of total cost &bull; Repairable by Repair Drones</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISUAL PROPERTIES -->
+      <div class="stat-group">
+        <div class="stat-group-title">Visual Properties</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Height</label>
+            <select onchange="updateField(${index},'height',this.value)">
+              ${HEIGHT_OPTIONS.map(h => `<option value="${h}" ${b.height === h ? 'selected' : ''}>${h}</option>`).join('')}
+            </select>
+            <div class="hint">Affects visual scale and line-of-sight for enemies</div>
+          </div>
+          <div class="field" style="justify-content:center;">
+            <div class="field-inline" style="padding-top:18px;">
+              <input type="checkbox" id="connect-${index}" ${b.connectsToAdjacent ? 'checked' : ''} onchange="updateField(${index},'connectsToAdjacent',this.checked)">
+              <label for="connect-${index}">Connects to Adjacent (visual wall chaining)</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SPECIAL EFFECTS -->
+      <div class="stat-group">
+        <div class="stat-group-title">Special Effects</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Effect Type</label>
+            <select onchange="updateField(${index},'effectType',this.value);renderAll()">
+              ${EFFECT_TYPE_OPTIONS.map(e => `<option value="${e}" ${b.effectType === e ? 'selected' : ''}>${e}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field">
+            <label>Effect Value</label>
+            <input type="number" min="0" value="${b.effectValue}" onchange="updateField(${index},'effectValue',+this.value)" ${b.effectType === 'None' ? 'disabled style="opacity:0.4"' : ''}>
+            <div class="hint">${getEffectValueHint(b.effectType)}</div>
+          </div>
+          <div class="field">
+            <label>Effect Radius</label>
+            <input type="number" min="0" step="0.5" value="${b.effectRadius}" onchange="updateField(${index},'effectRadius',+this.value)" ${b.effectType === 'None' ? 'disabled style="opacity:0.4"' : ''}>
+            <div class="hint">Grid units</div>
+          </div>
+          <div class="field">
+            <label>&nbsp;</label>
+          </div>
+          <div class="field full-width">
+            <label>Effect Description</label>
+            <textarea onchange="updateField(${index},'effectDescription',this.value)" placeholder="Describe how the special effect works in gameplay..." ${b.effectType === 'None' ? 'disabled style="opacity:0.4"' : ''}>${escHtml(b.effectDescription)}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABILITIES -->
+      <div class="stat-group">
+        <div class="stat-group-title">Abilities <span style="font-weight:400;font-size:0.85em;color:#576574;text-transform:none;letter-spacing:0;">(up to 2)</span></div>
+        ${renderAbilities(b, index)}
+      </div>
+
+    </div>
+  </div>`;
+}
+
+function renderAbilities(b, barrierIndex) {
+  let html = '';
+  b.abilities.forEach((a, ai) => {
+    html += `
+    <div class="ability-slot">
+      <div class="ability-header">
+        <div class="ability-label">Ability ${ai + 1}</div>
+        <button class="btn-remove-ability" onclick="removeAbility(${barrierIndex},${ai})">Remove</button>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Name</label>
+          <input type="text" value="${escAttr(a.name)}" onchange="updateAbility(${barrierIndex},${ai},'name',this.value)" placeholder="e.g., Emergency Reinforce">
+        </div>
+        <div class="field">
+          <label>Cooldown (seconds)</label>
+          <input type="number" min="0" step="0.5" value="${a.cooldown}" onchange="updateAbility(${barrierIndex},${ai},'cooldown',+this.value)">
+        </div>
+        <div class="field">
+          <label>Effect Value</label>
+          <input type="number" min="0" value="${a.effectValue}" onchange="updateAbility(${barrierIndex},${ai},'effectValue',+this.value)">
+        </div>
+        <div class="field">
+          <label>&nbsp;</label>
+        </div>
+        <div class="field full-width">
+          <label>Description</label>
+          <textarea onchange="updateAbility(${barrierIndex},${ai},'description',this.value)" placeholder="What does this ability do? Activation conditions, duration, etc.">${escHtml(a.description)}</textarea>
+        </div>
+      </div>
+    </div>`;
+  });
+  if (b.abilities.length < 2) {
+    html += `<button class="btn-add-ability" onclick="addAbility(${barrierIndex})">+ Add Ability</button>`;
+  }
+  return html;
+}
+
+function getEffectValueHint(effectType) {
+  switch (effectType) {
+    case 'Damage Aura': return 'DPS to enemies in radius';
+    case 'Slow Aura': return '% speed reduction';
+    case 'Armor Buff to Nearby': return 'Bonus armor to nearby structures';
+    case 'Reflect Damage': return '% of damage reflected back';
+    case 'Explode on Death': return 'Explosion damage';
+    default: return 'Depends on effect type';
+  }
+}
+
+// ─── Data Updates ───
+function updateField(index, field, value) {
+  barriers[index][field] = value;
+  scheduleAutoSave();
+  // Re-render summary and progress immediately for key fields
+  if (['name', 'role', 'hp', 'armor', 'energyCost', 'materialsCost', 'gridSize', 'effectType'].includes(field)) {
+    renderSummary();
+    renderProgress();
+  }
+  // Re-render card header for name/role changes
+  if (field === 'name' || field === 'role') {
+    renderCards();
+  }
+}
+
+function updateAbility(barrierIndex, abilityIndex, field, value) {
+  barriers[barrierIndex].abilities[abilityIndex][field] = value;
+  scheduleAutoSave();
+}
+
+function addAbility(barrierIndex) {
+  if (barriers[barrierIndex].abilities.length >= 2) return;
+  barriers[barrierIndex].abilities.push(createDefaultAbility());
+  scheduleAutoSave();
+  renderAll();
+}
+
+function removeAbility(barrierIndex, abilityIndex) {
+  barriers[barrierIndex].abilities.splice(abilityIndex, 1);
+  scheduleAutoSave();
+  renderAll();
+}
+
+function addBarrier() {
+  barriers.push(createDefaultBarrier());
+  scheduleAutoSave();
+  renderAll();
+  // Scroll to the new card
+  setTimeout(() => {
+    const card = document.getElementById(`card-${barriers.length - 1}`);
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 50);
+}
+
+function removeBarrier(index) {
+  const name = barriers[index].name || `Barrier ${index + 1}`;
+  if (!confirm(`Remove "${name}"? This cannot be undone.`)) return;
+  barriers.splice(index, 1);
+  scheduleAutoSave();
+  renderAll();
+}
+
+// ─── Auto-Save ───
+function scheduleAutoSave() {
+  const statusEl = document.getElementById('saveStatus');
+  statusEl.textContent = 'Unsaved changes...';
+  statusEl.className = 'status saving';
+
+  if (autoSaveTimer) clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    saveToStorage();
+  }, 2000);
+}
+
+function saveToStorage() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({notes: designNotes, barriers: barriers}));
+    const statusEl = document.getElementById('saveStatus');
+    statusEl.textContent = 'Saved to localStorage';
+    statusEl.className = 'status saved';
+    setTimeout(() => {
+      statusEl.textContent = 'All changes saved';
+      statusEl.className = 'status saved';
+    }, 1500);
+  } catch (e) {
+    const statusEl = document.getElementById('saveStatus');
+    statusEl.textContent = 'Save failed!';
+    statusEl.className = 'status';
+    console.error('Save failed:', e);
+  }
+}
+
+function loadFromStorage() {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    if (data) {
+      const parsed = JSON.parse(data);
+      // New format: {notes, barriers}
+      if (parsed && !Array.isArray(parsed) && Array.isArray(parsed.barriers)) {
+        designNotes = parsed.notes || '';
+        barriers = parsed.barriers.map(b => {
+          const def = createDefaultBarrier();
+          const merged = { ...def, ...b };
+          if (!Array.isArray(merged.abilities)) merged.abilities = [];
+          merged.abilities = merged.abilities.map(a => ({ ...createDefaultAbility(), ...a }));
+          return merged;
+        });
+        return;
+      }
+      // Legacy format: plain array
+      if (Array.isArray(parsed)) {
+        barriers = parsed.map(b => {
+          const def = createDefaultBarrier();
+          const merged = { ...def, ...b };
+          // Ensure abilities array is valid
+          if (!Array.isArray(merged.abilities)) merged.abilities = [];
+          merged.abilities = merged.abilities.map(a => ({ ...createDefaultAbility(), ...a }));
+          return merged;
+        });
+        return;
+      }
+    }
+  } catch (e) {
+    console.error('Load failed:', e);
+  }
+  // Default: 3 empty barriers
+  barriers = [createDefaultBarrier(), createDefaultBarrier(), createDefaultBarrier()];
+}
+
+// ─── Export / Import ───
+function exportJSON() {
+  const blob = new Blob([JSON.stringify({notes: designNotes, barriers: barriers}, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = EXPORT_FILENAME;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      let importedBarriers;
+      // New format: {notes, barriers}
+      if (data && !Array.isArray(data) && Array.isArray(data.barriers)) {
+        designNotes = data.notes || '';
+        importedBarriers = data.barriers;
+      } else if (Array.isArray(data)) {
+        // Legacy format: plain array
+        importedBarriers = data;
+      } else {
+        alert('Invalid file: expected an array of barrier objects or {notes, barriers} object.');
+        return;
+      }
+      barriers = importedBarriers.map(b => {
+        const def = createDefaultBarrier();
+        const merged = { ...def, ...b };
+        if (!Array.isArray(merged.abilities)) merged.abilities = [];
+        merged.abilities = merged.abilities.map(a => ({ ...createDefaultAbility(), ...a }));
+        return merged;
+      });
+      saveToStorage();
+      renderAll();
+      loadNotes();
+      const statusEl = document.getElementById('saveStatus');
+      statusEl.textContent = `Imported ${barriers.length} barrier(s)`;
+      statusEl.className = 'status saved';
+    } catch (err) {
+      alert('Failed to parse JSON file: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  // Reset file input so the same file can be re-imported
+  event.target.value = '';
+}
+
+function clearAll() {
+  if (!confirm('Clear ALL barrier designs? This cannot be undone.')) return;
+  designNotes = '';
+  const notesEl = document.getElementById('designNotes');
+  if (notesEl) { notesEl.value = ''; notesEl.classList.remove('has-content'); }
+  barriers = [createDefaultBarrier(), createDefaultBarrier(), createDefaultBarrier()];
+  saveToStorage();
+  renderAll();
+  const statusEl = document.getElementById('saveStatus');
+  statusEl.textContent = 'Cleared - reset to 3 empty barriers';
+  statusEl.className = 'status';
+}
+
+// ─── Utilities ───
+function escHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function escAttr(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ─── Notes ───
+function toggleNotes() {
+  const body = document.getElementById('notesBody');
+  const toggle = document.getElementById('notesToggle');
+  if (body.style.display === 'none') {
+    body.style.display = 'block';
+    toggle.innerHTML = '&#9660;';
+  } else {
+    body.style.display = 'none';
+    toggle.innerHTML = '&#9654;';
+  }
+}
+
+function onNotesInput(el) {
+  designNotes = el.value;
+  el.classList.toggle('has-content', el.value.trim().length > 0);
+  scheduleAutoSave();
+}
+
+function loadNotes() {
+  const el = document.getElementById('designNotes');
+  if (el && designNotes) {
+    el.value = designNotes;
+    el.classList.toggle('has-content', designNotes.trim().length > 0);
+  }
+}
+
+// ─── Init ───
+loadFromStorage();
+renderAll();
+loadNotes();
+</script>
+
+</body>
+</html>

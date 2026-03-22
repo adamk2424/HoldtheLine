@@ -12,7 +12,7 @@ signal progression_updated(stats: Dictionary)
 func _ready() -> void:
 	GameBus.game_started.connect(_on_game_started)
 	GameBus.game_over.connect(_on_game_over)
-	LevelSystem.level_completed.connect(_on_level_completed)
+	GameBus.level_completed.connect(_on_level_completed)
 	_load_progression_data()
 
 

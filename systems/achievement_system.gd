@@ -20,7 +20,7 @@ func _ready() -> void:
 	# Connect to game events
 	GameBus.game_started.connect(_on_game_started)
 	GameBus.game_over.connect(_on_game_over)
-	LevelSystem.level_completed.connect(_on_level_completed)
+	GameBus.level_completed.connect(_on_level_completed)
 	GameBus.progression_milestone_reached.connect(_on_milestone_reached)
 
 
@@ -352,7 +352,7 @@ func get_achievement_summary() -> Dictionary:
 func _get_recent_unlocks() -> Array:
 	# Return the last 3 unlocked achievements
 	var recent := []
-	var recent_count := min(3, _unlocked_achievements.size())
+	var recent_count: int = min(3, _unlocked_achievements.size())
 	for i in range(recent_count):
 		var achievement_id: String = _unlocked_achievements[_unlocked_achievements.size() - 1 - i]
 		recent.append(get_achievement_data(achievement_id))
@@ -367,4 +367,5 @@ func _get_total_completed_levels() -> int:
 func _get_total_perfect_runs() -> int:
 	# This would need to be tracked more precisely in the progression system
 	# For now, return an estimated count
-	return _session_tracking.get("perfect_runs", 0)
+	var count: int = _session_tracking.get("perfect_runs", 0)
+	return count

@@ -166,8 +166,8 @@ func _configure_3d_player(player: AudioStreamPlayer3D, preset: Dictionary = {}) 
 	if preset.is_empty() and _attenuation_presets.has("default"):
 		preset = _attenuation_presets["default"]
 	player.attenuation_model = _atten_model_from_string(preset.get("model", "inverse_square"))
-	player.unit_size = preset.get("unit_size", 15.0)
-	player.max_distance = preset.get("max_distance", 120.0)
+	player.unit_size = preset.get("unit_size", 30.0)
+	player.max_distance = preset.get("max_distance", 150.0)
 	player.attenuation_filter_cutoff_hz = preset.get("filter_cutoff_hz", 10000.0)
 	player.attenuation_filter_db = preset.get("filter_db", -18.0)
 	player.panning_strength = preset.get("panning_strength", 0.8)
@@ -205,7 +205,7 @@ func apply_volume_settings() -> void:
 		AudioServer.set_bus_volume_db(music_idx, linear_to_db(MetaProgress.music_volume))
 		AudioServer.set_bus_mute(music_idx, MetaProgress.music_volume <= 0.0)
 	if sfx_idx != -1:
-		AudioServer.set_bus_volume_db(sfx_idx, linear_to_db(MetaProgress.sfx_volume))
+		AudioServer.set_bus_volume_db(sfx_idx, linear_to_db(MetaProgress.sfx_volume) - 6.0)
 		AudioServer.set_bus_mute(sfx_idx, MetaProgress.sfx_volume <= 0.0)
 
 
